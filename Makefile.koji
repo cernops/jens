@@ -1,0 +1,17 @@
+SPECFILE = puppet-jens.spec
+PACKAGE=$(shell grep -s '^Name'    $(SPECFILE) | sed -e 's/Name: *//')
+VERSION=$(shell grep -s '^Version' $(SPECFILE) | sed -e 's/Version: *//')
+PKGNAME=$(PACKAGE)-$(VERSION)
+TARFILE=$(PKGNAME).tar.gz
+
+all:
+	mkdir $(PKGNAME)
+	ls | grep -v -E '$(PKGNAME)|\.git' | xargs cp -rt $(PKGNAME)
+	tar cvzf $(TARFILE) $(PKGNAME)
+	rm -r $(PKGNAME)
+
+clean:
+	rm -f $(TARFILE)
+
+rpm: all
+	rpmbuild -ba --define "_sourcedir $(PWD)" $(SPECFILE)

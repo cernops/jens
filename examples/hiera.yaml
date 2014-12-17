@@ -1,0 +1,25 @@
+# Installed with puppet.
+---
+:backends: 
+   - yaml
+
+:yaml:
+   :datadir: /etc/puppet
+
+:hierarchy:
+         - environments/%{::foreman_env}/hieradata/fqdns/%{::encgroup_0}/%{::fqdn}
+         - environments/%{::foreman_env}/hieradata/hostgroups/%{::encgroup_0}/%{::encgroup_0}/%{::encgroup_1}/%{::encgroup_2}/%{::encgroup_3}/%{::encgroup_4}
+         - environments/%{::foreman_env}/hieradata/hostgroups/%{::encgroup_0}/%{::encgroup_0}/%{::encgroup_1}/%{::encgroup_2}/%{::encgroup_3}
+         - environments/%{::foreman_env}/hieradata/hostgroups/%{::encgroup_0}/%{::encgroup_0}/%{::encgroup_1}/%{::encgroup_2}
+         - environments/%{::foreman_env}/hieradata/hostgroups/%{::encgroup_0}/%{::encgroup_0}/%{::encgroup_1}
+         - environments/%{::foreman_env}/hieradata/hostgroups/%{::encgroup_0}/%{::encgroup_0}/operatingsystems/%{::osfamily}/%{::operatingsystemmajorrelease}
+         - environments/%{::foreman_env}/hieradata/hostgroups/%{::encgroup_0}/%{::encgroup_0}
+         - environments/%{::foreman_env}/hieradata/operatingsystems/%{::osfamily}/%{::operatingsystemmajorrelease}
+         - environments/%{::foreman_env}/hieradata/environments/%{::foreman_env}
+         - environments/%{::foreman_env}/hieradata/module_names/%{module_name}/%{module_name}
+         - environments/%{::foreman_env}/hieradata/hardware/vendor/%{::cern_hwvendor}
+
+         - environments/%{::foreman_env}/hieradata/common
+         - hieradata/hostgroups/%{::hostgroup}
+         - hieradata/common
+

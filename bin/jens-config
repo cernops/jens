@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+# Copyright (C) 2014, CERN
+# This software is distributed under the terms of the GNU General Public
+# Licence version 3 (GPL Version 3), copied verbatim in the file "COPYING".
+# In applying this license, CERN does not waive the privileges and immunities
+# granted to it by virtue of its status as Intergovernmental Organization
+# or submit itself to any jurisdiction.
+
+import os
+import sys
+import optparse
+import logging
+
+from jens.settings import Settings
+from jens.errors import JensError, JensConfigError
+
+def parse_cmdline_args():
+    """Parses command line parameters."""
+    parser = optparse.OptionParser()
+    parser.add_option('-c', '--config',
+        help="Configuration file path (defaults to '/etc/jens/main.conf'",
+        default="/etc/jens/main.conf")
+    parser.add_option('-s', '--section',
+        help="Section of the configuration file (defaults to 'main')",
+        default="main")
+    parser.add_option('-k', '--key',
+        help="Key of the configuration file")
+    opts, args = parser.parse_args()
+    if opts.key is None:
+        raise JensConfigError("--key is mandatory")
+    return opts
+
+def get_config(settings, section, key):
+    raw_config = settings.config
+    if section in raw_config:
+        if key in raw_config[section]:
+            return raw_config[section][key]
+    raise JensError("%s:%s not found in the configuration file" % \
+        (section, key))
+
+def main():
+    """Application entrypoint."""
+    try:
+        opts = parse_cmdline_args()
+    except JensError, error:
+        logging.error("Wrong command line args (%s)\n" % error)
+        return 1
+
+    settings = Settings()
+    try:
+        settings.parse_config(opts.config)
+    except JensConfigError, error:
+        logging.error(error)
+        return 2
+
+    try:
+        value = get_config(settings, opts.section, opts.key)
+    except JensError, error:
+        logging.error(str(error) + "\n")
+        return 3
+
+    print value
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())

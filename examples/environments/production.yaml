@@ -1,0 +1,3 @@
+---
+default: master
+notifications: admins@example.org

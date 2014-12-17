@@ -1,0 +1,3 @@
+---
+puppet_runinterval: 2600
+puppet_splay_limit: 900

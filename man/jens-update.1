@@ -1,0 +1,57 @@
+.TH JENS-UPDATE "1" "July 2013" "PUPPET-JENS" "User Commands"
+.SH NAME
+jens-update \- updates local environments and repositories
+.SH SYNOPSIS
+.B jens-update
+[\fIOPTION\fR]...
+.SH DESCRIPTION
+.\" Add any additional description here
+.PP
+This is the core tool of Jens. It basically refreshes the metadata
+about available modules/hostgroups, the bare clones, the clones
+of all the necessary branches and the generated environments.
+.PP
+This tool logs into /var/log/jens/jens-update.log by default.
+.TP
+\fB\-c\fR, \fB\-\-config\fR
+Path to Jens' configuration file (defaults to /etc/jens/main.conf)
+.TP
+\fB\-\-help\fR
+display this help and exit
+.SS "Exit status:"
+.TP
+0
+if OK,
+.TP
+2
+if there's any problem with the configuration file,
+.TP
+3
+if default directories validation fails,
+.TP
+20
+if the metadata (repositories or environments) couldn't be refreshed,
+.TP
+30
+if the bare and clone repositories couldn't be refreshed,
+.TP
+40
+if the environments couldn't be refreshed,
+.TP
+50
+if there's another instance of jens-update running.
+.TP
+51
+if the locking process utterly failed.
+.SH AUTHOR
+Written by Nacho Barrientos <nacho.barrientos@cern.ch>
+.SH "REPORTING BUGS"
+Report bugs directly on Github.
+.SH COPYRIGHT
+Copyright \(co 2013 CERN.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH "SEE ALSO"
+jens-stats (1), jens-reset (1), jens-gc (1)

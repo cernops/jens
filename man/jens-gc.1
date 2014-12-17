@@ -1,0 +1,62 @@
+.TH JENS-GC "1" "July 2013" "PUPPET-JENS" "User Commands"
+.SH NAME
+jens-gc \- does garbage collection operations on local Git repositories
+.SH SYNOPSIS
+.B jens-gc
+[\fIOPTION\fR]...
+.SH DESCRIPTION
+.PP
+This is a maintenance tool to basically run git-gc on the bare clones
+and on all the branch clones. If there's a lock file present because
+jens-update is running, instead of dying jens-gc will try a limited
+amount of times to gain to lock and do the clean up.
+.PP
+It's probably a good idea to run it once a day out of office hours.
+.TP
+\fB\-c\fR, \fB\-\-config\fR
+Path to Jens' configuration file (defaults to /etc/jens/main.conf)
+.TP
+\fB\-a\fR, \fB\-\-all\fR
+Cleans everything
+.TP
+\fB\-g\fR, \fB\-\-aggressive\fR
+Runs git-gc with --aggressive
+.TP
+\fB\-b\fR, \fB\-\-bare\fR
+Cleans bare repositories
+.TP
+\fB\-l\fR, \fB\-\-clones\fR
+Cleans all the clones where the branches are checked out.
+.TP
+\fB\-\-help\fR
+display this help and exit
+.SS "Exit status:"
+.TP
+0
+if OK,
+.TP
+2
+if there's any problem with the configuration file,
+.TP
+3
+if default directories validation fails,
+.TP
+50
+if it was not possible to gain the lock after all the attempts.
+.SH EXAMPLES
+.TP
+jens-gc -g --all
+.TP
+jens-gc -b
+.SH AUTHOR
+Written by Nacho Barrientos <nacho.barrientos@cern.ch>
+.SH "REPORTING BUGS"
+Report bugs directly on Github.
+.SH COPYRIGHT
+Copyright \(co 2013 CERN.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH "SEE ALSO"
+jens-update (1), jens-reset (1)

@@ -1,0 +1,57 @@
+.TH JENS-STATS "1" "July 2013" "PUPPET-JENS" "User Commands"
+.SH NAME
+jens-stats \- shows statistics about the local Jens instance
+.SH SYNOPSIS
+.B jens-stats
+[\fIOPTION\fR]...
+.SH DESCRIPTION
+.\" Add any additional description here
+.PP
+Prints to standard output several statistics about the repositories
+that are registered (along with branches and sizes) and the declared
+and synced environments.
+.TP
+\fB\-c\fR, \fB\-\-config\fR
+Path to Jens' configuration file (defaults to /etc/jens/main.conf)
+.TP
+\fB\-a\fR, \fB\-\-all\fR
+Show all available statistics
+.TP
+\fB\-r\fR, \fB\-\-repositories\fR
+Show information about bare repositories and their clones
+.TP
+\fB\-e\fR, \fB\-\-environments\fR
+Show information about environments
+.TP
+\fB\-i\fR, \fB\-\-inventory\fR
+Dump the current inventory
+.TP
+\fB\-\-help\fR
+display this help and exit
+.SS "Exit status:"
+.TP
+0
+if OK,
+.TP
+2
+if there's any problem with the configuration file,
+.TP
+3
+if default directories validation fails.
+.SH EXAMPLES
+.TP
+jens-stats --all
+.TP
+jens-stats -b -r
+.SH AUTHOR
+Written by Nacho Barrientos <nacho.barrientos@cern.ch>
+.SH "REPORTING BUGS"
+Report bugs directly on Github.
+.SH COPYRIGHT
+Copyright \(co 2013 CERN.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH "SEE ALSO"
+jens-update (1), jens-reset (1), jens-gc (1)

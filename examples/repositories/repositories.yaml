@@ -1,0 +1,8 @@
+repositories:
+  common:
+    hieradata: file:///tmp/example-repositories/common-hieradata
+    site: file:///tmp/example-repositories/site
+  hostgroups:
+    myapp: file:///tmp/example-repositories/hostgroup-myapp
+  modules:
+    dummy: file:///tmp/example-repositories/module-dummy

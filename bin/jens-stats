@@ -1,0 +1,140 @@
+#!/usr/bin/env python
+# Copyright (C) 2014, CERN
+# This software is distributed under the terms of the GNU General Public
+# Licence version 3 (GPL Version 3), copied verbatim in the file "COPYING".
+# In applying this license, CERN does not waive the privileges and immunities
+# granted to it by virtue of its status as Intergovernmental Organization
+# or submit itself to any jurisdiction.
+
+import os
+import sys
+import optparse
+import re
+import logging
+import pprint
+
+from jens.settings import Settings
+from jens.errors import JensConfigError
+from jens.errors import JensError
+from jens.maintenance import validate_directories
+from jens.reposinventory import get_inventory
+
+def parse_cmdline_args():
+    """Parses command line parameters."""
+    parser = optparse.OptionParser()
+    parser.add_option('-c', '--config',
+        help="Configuration file path (defaults to '/etc/jens/main.conf'",
+        default="/etc/jens/main.conf")
+    parser.add_option('-r', '--repositories',
+        action="store_true",
+        help="Shows stats about repositories")
+    parser.add_option('-e', '--environment',
+        action="store_true",
+        help="Shows stats about environments")
+    parser.add_option('-i', '--inventory',
+        action="store_true",
+        help="Shows inventory")
+    parser.add_option('-a', '--all',
+        action="store_true",
+        help="Shows everything")
+    opts, args = parser.parse_args()
+    return opts
+
+def get_bare_repositories(settings):
+    result = {}
+    result['modules'] = [attach_information(settings, "modules", element) \
+        for element in sorted(os.listdir(settings.BAREDIR + "/modules"))]
+    result['hostgroups'] = [attach_information(settings, "hostgroups", element) \
+        for element in sorted(os.listdir(settings.BAREDIR + "/hostgroups"))]
+    result['common'] = [attach_information(settings, "common", element) \
+        for element in os.listdir(settings.BAREDIR + "/common")]
+    return result
+
+def attach_information(settings, partition, element):
+    branches = get_branches(settings, partition, element)
+    master_size = get_size(settings, partition, element, "master")
+    return "%s (%s) [%s]" % (element, branches, master_size)
+
+def get_branches(settings, partition, element):
+    path = "%s/%s/%s" % (settings.CLONEDIR, partition, element)
+    branches = os.listdir(path)
+    return "%s" % ",".join(sorted(branches))
+
+def get_size(settings, partition, element, branch):
+    path = "%s/%s/%s/%s" % \
+        (settings.CLONEDIR, partition, element, branch)
+    size = 0
+    for path, dirs, files in os.walk(path):
+        for file in files:
+            fullpath = os.path.join(path, file)
+            if os.path.isfile(fullpath):
+                size +=  os.path.getsize(fullpath)
+    return fmt_bytes(size)
+
+# http://stackoverflow.com/questions/1094841/
+# reusable-library-to-get-human-readable-version-of-file-size
+def fmt_bytes(num):
+    for x in ['B','KiB','MiB','GiB']:
+        if num < 1024.0:
+            return "%3.1f%s" % (num, x)
+        num /= 1024.0
+    return "%3.1f%s" % (num, 'TB')
+    
+def get_puppet_environments(settings):
+    return os.listdir(settings.ENVIRONMENTSDIR)
+
+def get_environments_in_cache(settings):
+    return os.listdir(settings.CACHEDIR + "/environments")
+
+def get_environments_in_metadata(settings):
+    return __listdir_nohidden(settings.ENV_METADATADIR)
+
+def __listdir_nohidden(dir):
+    return filter(lambda x: not x.startswith("."), os.listdir(dir))
+
+def main():
+    """Application entrypoint."""
+    opts = parse_cmdline_args()
+
+    settings = Settings()
+    try:
+        settings.parse_config(opts.config)
+    except JensConfigError, error:
+        logging.error(error)
+        return 2
+
+    try:
+        validate_directories(settings)
+    except JensError, error:
+        logging.error("Failed to validate directories (%s)" % error)
+        return 3
+
+    if opts.repositories or opts.all:
+        bares = get_bare_repositories(settings)
+        logging.info("There are %d modules:" % len(bares['modules']))
+        for module in bares['modules']:
+            logging.info( "\t- %s" % module)
+        logging.info("There are %d hostgroups:" % len(bares['hostgroups']))
+        for hostgroup in bares['hostgroups']:
+            logging.info( "\t- %s" % hostgroup)
+
+    if opts.environment or opts.all:
+        environments = {}
+        environments['synchronized'] = get_puppet_environments(settings)
+        environments['declared'] = get_environments_in_metadata(settings)
+        environments['cached'] = get_environments_in_cache(settings)
+    
+        for type, list in environments.iteritems():
+            logging.info("There are %d %s environments" % (len(list), type))
+            for environment in sorted(list):
+                logging.info("\t - %s " % environment)
+
+    if opts.inventory or opts.all:
+        inventory = get_inventory(settings)
+        pp = pprint.PrettyPrinter()
+        pp.pprint(inventory)
+
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())

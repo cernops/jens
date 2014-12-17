@@ -1,0 +1,51 @@
+.TH JENS-RESET "1" "July 2013" "PUPPET-JENS" "User Commands"
+.SH NAME
+jens-reset \- deletes all Jens-generated data
+.SH SYNOPSIS
+.B jens-reset
+[\fIOPTION\fR]...
+.SH DESCRIPTION
+.PP
+This program removes: bare repositories, all clones branches
+of bare repositories and all generated environments (data and
+caches)
+.PP
+It might be useful to start a generation process from the beginning
+in case of emergency or data corruption. \fBUse carefully\fR.
+.TP
+\fB\-c\fR, \fB\-\-config\fR
+Path to Jens' configuration file (defaults to /etc/jens/main.conf)
+.TP
+\fB\-y\fR, \fB\-\-yes\fR
+Flag to confirm the operation. Won't do anything if not specified.
+.TP
+\fB\-\-help\fR
+display this help and exit
+.SS "Exit status:"
+.TP
+0
+if OK,
+.TP
+2
+if there's any problem with the configuration file,
+.TP
+3
+if default directories validation fails,
+.TP
+10
+if -y/--yes is not passed,
+.TP
+50
+if jens-update or jens-gc is running (lock file exists).
+.SH AUTHOR
+Written by Nacho Barrientos <nacho.barrientos@cern.ch>
+.SH "REPORTING BUGS"
+Report bugs directly on Github.
+.SH COPYRIGHT
+Copyright \(co 2013 CERN.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH "SEE ALSO"
+jens-stats (1), jens-update (1), jens-gc (1)

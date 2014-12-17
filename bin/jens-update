@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+# Copyright (C) 2014, CERN
+# This software is distributed under the terms of the GNU General Public
+# Licence version 3 (GPL Version 3), copied verbatim in the file "COPYING".
+# In applying this license, CERN does not waive the privileges and immunities
+# granted to it by virtue of its status as Intergovernmental Organization
+# or submit itself to any jurisdiction.
+
+import sys
+import logging
+import optparse
+
+from jens.errors import JensError, JensLockError
+from jens.errors import JensConfigError, JensRepositoriesError
+from jens.errors import JensLockExistsError
+from jens.settings import Settings
+from jens.repos import refresh_repositories
+from jens.maintenance import refresh_metadata
+from jens.maintenance import validate_directories
+from jens.locks import JensLockFactory
+from jens.environments import refresh_environments
+
+def parse_cmdline_args():
+    """Parses command line parameters."""
+    parser = optparse.OptionParser()
+    parser.add_option('-c', '--config',
+        help="Configuration file path (defaults to '/etc/jens/main.conf'",
+        default="/etc/jens/main.conf")
+    opts, args = parser.parse_args()
+    return opts
+
+def main():
+    """Application entrypoint."""
+    opts = parse_cmdline_args()
+
+    settings = Settings("jens-update")
+    try:
+        settings.parse_config(opts.config)
+    except JensConfigError, error:
+        logging.error(error)
+        return 2
+
+    try:
+        validate_directories(settings)
+    except JensError, error:
+        logging.error("Failed to validate directories (%s)" % error)
+        return 3
+
+    try:
+        with JensLockFactory.makeLock(settings) as lock:
+            # Update metadata
+            logging.info("Refreshing metadata...")
+            try:
+                refresh_metadata(settings, lock)
+            except JensError, error:
+                logging.error(error)
+                return 20
+
+            # Update repositories
+            logging.info("Refreshing repositories...")
+            try:
+                repositories_deltas, inventory = \
+                    refresh_repositories(settings, lock)
+            except JensRepositoriesError, error:
+                logging.error("Failed (%s)" % error)
+                return 30
+
+            # Update environments
+            logging.info("Refreshing environments...")
+            try:
+                refresh_environments(settings, lock,
+                    repositories_deltas, inventory)
+            except JensRepositoriesError, error:
+                logging.error("Failed (%s)" % error)
+                return 40
+    except JensLockExistsError, error:
+        logging.info("Locking failed (%s)" % error)
+        return 50
+    except JensLockError, error:
+        logging.error("Locking failed (%s)" % error)
+        return 51
+
+    logging.info("Done")
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
