@@ -1,0 +1,85 @@
+#!/usr/bin/env python
+# Copyright (C) 2015, CERN
+# This software is distributed under the terms of the GNU General Public
+# Licence version 3 (GPL Version 3), copied verbatim in the file "COPYING".
+# In applying this license, CERN does not waive the privileges and immunities
+# granted to it by virtue of its status as Intergovernmental Organization
+# or submit itself to any jurisdiction.
+
+import re
+import os
+import sys
+import optparse
+import logging
+import pyinotify
+
+from jens.settings import Settings
+from jens.errors import JensError, JensConfigError
+
+# Inspired by:
+# http://stackoverflow.com/questions/28348503/python-monitor-a-log-file-non-blocking
+
+class NewEnvironmentHandler(pyinotify.ProcessEvent):
+    def __init__(self, file_path, *args, **kwargs):
+        super(NewEnvironmentHandler, self).__init__(*args, **kwargs)
+        self.file_path = file_path
+        # Ignore existing lines
+        self._last_position = os.path.getsize(self.file_path)
+        logpats = r'New environments: set\(\[(.*?)\]\)'
+        self._logpat = re.compile(logpats)
+
+    def process_IN_MODIFY(self, event):
+        with open(self.file_path) as f:
+            f.seek(self._last_position)
+            loglines = f.readlines()
+            self._last_position = f.tell()
+            match_objects = (self._logpat.search(line.strip()) for line in loglines)
+            for match_object in match_objects:
+                if match_object:
+                    for environment in match_object.group(1).split(','):
+                        environment = environment.strip()[1:-1]
+                        if environment:
+                            self.create_foreman_environment(environment)
+
+    def create_foreman_environment(self, environment):
+        # Use ForemanClient here
+        logging.info("Creating Foreman environment %s ...", environment)
+
+def parse_cmdline_args():
+    """Parses command line parameters."""
+    parser = optparse.OptionParser()
+    parser.add_option('-c', '--config',
+        help="Configuration file path (defaults to '/etc/jens/main.conf'",
+        default="/etc/jens/main.conf")
+    opts, args = parser.parse_args()
+    return opts
+
+def main():
+    """Application entrypoint."""
+    try:
+        opts = parse_cmdline_args()
+    except JensError, error:
+        logging.error("Wrong command line args (%s)\n" % error)
+        return 1
+
+    settings = Settings()
+    try:
+        settings.parse_config(opts.config)
+    except JensConfigError, error:
+        logging.error(error)
+        return 2
+
+    manager = pyinotify.WatchManager()
+    handler = NewEnvironmentHandler("%s/jens-update.log" % settings.LOGDIR)
+    manager.add_watch(handler.file_path, pyinotify.IN_MODIFY)        
+
+    notifier = pyinotify.Notifier(manager, handler)
+    try:
+        notifier.loop()
+    except pyinotify.NotifierError, err:
+        logging.error(err)
+
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())
