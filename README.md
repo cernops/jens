@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/cernops/jens.svg?branch=master)]
+(https://travis-ci.org/cernops/jens)
+
 ## What's Jens?
 
 Jens is the Puppet modules/hostgroups librarian used by the [CERN IT
