@@ -119,8 +119,9 @@ it-puppet-site/
 
 OTOH, the common hieradata is a special repository that hosts different types
 of Hiera data to fill the gaps that can't be defined at hostgroup or module
-level (operating system, hardware vendor and environment dependent keys). The
-following is an example of how the hierarchy in there should look like.
+level (operating system, hardware vendor, datacentre location and environment
+dependent keys). The following is an example of how the hierarchy in there
+should look like.
 
 ```
 it-puppet-common-hieradata/
@@ -129,6 +130,10 @@ it-puppet-common-hieradata/
 │   ├── environments
 │   │   ├── production.yaml
 │   │   └── qa.yaml
+│   ├── datacentres
+│   │   ├── europe.yaml
+│   │   ├── usa.yaml
+│   │   └── ...
 │   ├── hardware
 │   │   └── vendor
 │   │       ├── foovendor.yaml
@@ -143,7 +148,7 @@ it-puppet-common-hieradata/
 
 common.yaml is the most generic Hiera data YAML file of all the hierarchy as
 it's visible for all nodes regardless of their hostgroup, environment, hardware
-type and operatingsystem. It's useful to define very top-level keys.
+type, operatingsystem and datacentre. It's useful to define very top-level keys.
 
 Working examples of both repositories (used during the installation tutorial
 later on) can be found in the following locations
