@@ -146,7 +146,8 @@ class JensTestCase(unittest.TestCase):
     def assertEnvironmentLinks(self, environment):
         base_path = "%s/%s" % (self.settings.ENVIRONMENTSDIR, environment)
         hieradata_keys = set(self.settings.HIERADATA_KEYS)
-        hieradata_keys.remove('common.yaml')
+        if 'common.yaml' in hieradata_keys:
+            hieradata_keys.remove('common.yaml')
         if not os.path.isdir(base_path):
             raise AssertionError("Environment '%s' not present" % environment)
         for path, dirs, files in os.walk(base_path):

@@ -73,6 +73,18 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentLinks("qa")
         self.assertEnvironmentLinks("production")
 
+    def test_base_empty_common_hieradata(self):
+        self.settings.HIERADATA_KEYS = []
+        self._jens_update()
+
+        self.assertBare('common/site')
+        self.assertBare('common/hieradata')
+        for branch in MANDATORY_BRANCHES:
+            self.assertClone('common/site/%s' % branch)
+            self.assertClone('common/hieradata/%s' % branch)
+        self.assertEnvironmentLinks("qa")
+        self.assertEnvironmentLinks("production")
+
     def test_base_with_directory_environments(self):
         self.settings.DIRECTORY_ENVIRONMENTS = True
         self._jens_update()
