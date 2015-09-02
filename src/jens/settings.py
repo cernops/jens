@@ -54,6 +54,7 @@ class Settings():
         self.ENV_METADATADIR = config["main"]["environmentsmetadatadir"]
         self.HASHPREFIX = config["main"]["hashprefix"]
         self.DIRECTORY_ENVIRONMENTS = config["main"]["directory_environments"]
+        self.HIERADATA_KEYS = config["main"]["hieradata_keys"]
 
         # [lock]
         self.LOCK_TYPE = config["lock"]["type"]

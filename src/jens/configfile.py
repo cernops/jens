@@ -19,6 +19,7 @@ repositorymetadata = string(default='/var/lib/jens/metadata/repository/repositor
 cachedir = string(default='/var/lib/jens/cache')
 hashprefix = string(default='commit/')
 directory_environments = boolean(default=False)
+hieradata_keys = list(default=list())
 [lock]
 type = option('DISABLED', 'FILE', 'ETCD', default='FILE')
 name = string(default='jens')

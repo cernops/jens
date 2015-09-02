@@ -105,6 +105,7 @@ def create_fake_repository(settings, base, branches=[]):
     os.mkdir("%s/data/fqdns" % repo_path)
     os.mkdir("%s/data/hostgroup" % repo_path)
     os.mkdir("%s/data/operatingsystems" % repo_path)
+    os.mkdir("%s/data/datacentres" % repo_path)
     os.mkdir("%s/data/hardware" % repo_path)
     os.mkdir("%s/data/environments" % repo_path)
     shutil.copy("%s/dummy" % repo_path, "%s/code" % repo_path)
@@ -112,6 +113,7 @@ def create_fake_repository(settings, base, branches=[]):
     shutil.copy("%s/dummy" % repo_path, "%s/data/fqdns" % repo_path)
     shutil.copy("%s/dummy" % repo_path, "%s/data/common.yaml" % repo_path)
     shutil.copy("%s/dummy" % repo_path, "%s/data/operatingsystems" % repo_path)
+    shutil.copy("%s/dummy" % repo_path, "%s/data/datacentres" % repo_path)
     shutil.copy("%s/dummy" % repo_path, "%s/data/hardware" % repo_path)
     shutil.copy("%s/dummy" % repo_path, "%s/data/environments" % repo_path)
     gitdir = "%s/.git" % repo_path

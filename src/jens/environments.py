@@ -450,8 +450,7 @@ def _link_common_hieradata(settings, environment, definition):
     base_target = settings.CLONEDIR + "/common/hieradata/%s/data" % branch
     base_link_name = settings.ENVIRONMENTSDIR + "/%s/hieradata" % environment
 
-    for element in ("environments", "hardware",
-            "operatingsystems", "common.yaml"):
+    for element in settings.HIERADATA_KEYS:
         target = base_target + "/%s" % element
         link_name = base_link_name + "/%s" % element
         target = os.path.relpath(target, \

@@ -35,6 +35,7 @@ environmentsmetadatadir = $sandbox/lib/metadata/environments
 repositorymetadatadir = $sandbox/lib/metadata/repositories
 repositorymetadata = $sandbox/lib/metadata/repositories/repositories.yaml
 hashprefix = $hashprefix
+hieradata_keys = environments, hardware, operatingsystems, datacentres, common.yaml
 
 [lock]
 type = DISABLED
@@ -144,9 +145,13 @@ class JensTestCase(unittest.TestCase):
 
     def assertEnvironmentLinks(self, environment):
         base_path = "%s/%s" % (self.settings.ENVIRONMENTSDIR, environment)
+        hieradata_keys = set(self.settings.HIERADATA_KEYS)
+        hieradata_keys.remove('common.yaml')
         if not os.path.isdir(base_path):
             raise AssertionError("Environment '%s' not present" % environment)
         for path, dirs, files in os.walk(base_path):
+            if path.endswith('hieradata'):
+                self.assertTrue(hieradata_keys.issubset(set(dirs)))
             for file in files + dirs:
                 file_apath = "%s/%s" % (path, file)
                 if os.path.islink(file_apath):
