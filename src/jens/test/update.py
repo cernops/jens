@@ -77,11 +77,6 @@ class UpdateTest(JensTestCase):
         self.settings.COMMON_HIERADATA_ITEMS = []
         self._jens_update()
 
-        self.assertBare('common/site')
-        self.assertBare('common/hieradata')
-        for branch in MANDATORY_BRANCHES:
-            self.assertClone('common/site/%s' % branch)
-            self.assertClone('common/hieradata/%s' % branch)
         self.assertEnvironmentLinks("qa")
         self.assertEnvironmentLinks("production")
 
