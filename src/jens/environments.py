@@ -444,7 +444,7 @@ def _link_site(settings, environment, definition):
 def _link_common_hieradata(settings, environment, definition):
     # Global scoped (aka, 'common') Hiera data
     # LINK_NAME: $environment/hieradata/
-    # {environments, hardware, operatingsystems, datacentres, common.yaml}
+    # {settings.COMMON_HIERADATA_ITEMS}
     # TARGET: $clonedir/common/hieradata/$branch/data/{ditto}
     branch, overridden = _resolve_branch(settings, 'common', 'hieradata', definition)
     base_target = settings.CLONEDIR + "/common/hieradata/%s/data" % branch
