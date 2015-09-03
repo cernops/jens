@@ -120,8 +120,9 @@ it-puppet-site/
 OTOH, the common hieradata is a special repository that hosts different types
 of Hiera data to fill the gaps that can't be defined at hostgroup or module
 level (operating system, hardware vendor, datacentre location and environment
-dependent keys). The following is an example of how the hierarchy in there
-should look like.
+dependent keys). The list of these items is configurable and can be set by using
+the configuration key `common_hieradata_items`. The following is an example of
+how the hierarchy in there should look like.
 
 ```
 it-puppet-common-hieradata/
