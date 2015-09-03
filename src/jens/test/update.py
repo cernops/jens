@@ -74,7 +74,7 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentLinks("production")
 
     def test_base_empty_common_hieradata(self):
-        self.settings.HIERADATA_KEYS = []
+        self.settings.COMMON_HIERADATA_ITEMS = []
         self._jens_update()
 
         self.assertBare('common/site')
