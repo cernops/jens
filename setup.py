@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='jens',
-      version='0.10',
+      version='0.11',
       description='Jens is a Puppet modules/hostgroups librarian',
       author='Nacho Barrientos',
       author_email='nacho.barrientos@cern.ch',

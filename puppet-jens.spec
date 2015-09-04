@@ -1,6 +1,6 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
-Version: 0.10
+Version: 0.11
 Release: 1%{?dist}
 
 License: GPL
@@ -60,6 +60,9 @@ mkdir -m 750 -p %{buildroot}/var/lock/jens/
 %config %{_sysconfdir}/jens/main.conf
 
 %changelog
+* Fri Sep 03 2015 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.11-1
+- Support variable number of elements in common hieradata.
+
 * Wed Nov 19 2014 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.10-1
 - Add support for directory environments
 - Add tons of user documentation (README, ENVIRONMENTS, INSTALL)
