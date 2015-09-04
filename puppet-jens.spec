@@ -1,7 +1,7 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
 Version: 0.11
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 License: GPL
 Group: Applications/System
@@ -57,9 +57,12 @@ mkdir -m 750 -p %{buildroot}/var/lock/jens/
 %attr(750, jens, jens) /var/lib/jens/*
 %attr(750, jens, jens) /var/log/jens
 %attr(750, jens, jens) /var/lock/jens
-%config %{_sysconfdir}/jens/main.conf
+%config(noreplace) %{_sysconfdir}/jens/main.conf
 
 %changelog
+* Fri Sep 03 2015 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.11-2
+- Prevent RPM from replacing the configuration file.
+
 * Fri Sep 03 2015 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.11-1
 - Support variable number of elements in common hieradata.
 
