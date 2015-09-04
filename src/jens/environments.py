@@ -444,14 +444,13 @@ def _link_site(settings, environment, definition):
 def _link_common_hieradata(settings, environment, definition):
     # Global scoped (aka, 'common') Hiera data
     # LINK_NAME: $environment/hieradata/
-    # {environments, hardware, operatingsystems, common.yaml}
-    # TARGET: $clonedir/common/hieradata/$branch/code/{ditto}
+    # {settings.COMMON_HIERADATA_ITEMS}
+    # TARGET: $clonedir/common/hieradata/$branch/data/{ditto}
     branch, overridden = _resolve_branch(settings, 'common', 'hieradata', definition)
     base_target = settings.CLONEDIR + "/common/hieradata/%s/data" % branch
     base_link_name = settings.ENVIRONMENTSDIR + "/%s/hieradata" % environment
 
-    for element in ("environments", "hardware",
-            "operatingsystems", "common.yaml"):
+    for element in settings.COMMON_HIERADATA_ITEMS:
         target = base_target + "/%s" % element
         link_name = base_link_name + "/%s" % element
         target = os.path.relpath(target, \

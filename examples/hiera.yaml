@@ -14,6 +14,7 @@
          - environments/%{::foreman_env}/hieradata/hostgroups/%{::encgroup_0}/%{::encgroup_0}/%{::encgroup_1}
          - environments/%{::foreman_env}/hieradata/hostgroups/%{::encgroup_0}/%{::encgroup_0}/operatingsystems/%{::osfamily}/%{::operatingsystemmajorrelease}
          - environments/%{::foreman_env}/hieradata/hostgroups/%{::encgroup_0}/%{::encgroup_0}
+         - environments/%{::foreman_env}/hieradata/datacentres/%{::datacentre}
          - environments/%{::foreman_env}/hieradata/operatingsystems/%{::osfamily}/%{::operatingsystemmajorrelease}
          - environments/%{::foreman_env}/hieradata/environments/%{::foreman_env}
          - environments/%{::foreman_env}/hieradata/module_names/%{module_name}/%{module_name}

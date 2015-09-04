@@ -73,6 +73,20 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentLinks("qa")
         self.assertEnvironmentLinks("production")
 
+    def test_empty_common_hieradata(self):
+        self.settings.COMMON_HIERADATA_ITEMS = []
+        self._jens_update()
+
+        self.assertEnvironmentLinks("qa")
+        self.assertEnvironmentLinks("production")
+
+    def test_missing_common_hieradata_item(self):
+        self.settings.COMMON_HIERADATA_ITEMS = ["missing"]
+        self._jens_update()
+
+        self.assertEnvironmentBrokenLinks("qa")
+        self.assertEnvironmentBrokenLinks("production")
+
     def test_base_with_directory_environments(self):
         self.settings.DIRECTORY_ENVIRONMENTS = True
         self._jens_update()
