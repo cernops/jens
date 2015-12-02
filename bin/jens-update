@@ -28,6 +28,9 @@ def parse_cmdline_args():
     parser.add_option('-c', '--config',
         help="Configuration file path (defaults to '/etc/jens/main.conf'",
         default="/etc/jens/main.conf")
+    parser.add_option('-p', '--poll',
+        help="Force POLL mode, regardless of what's in the config file",
+        action='store_true')
     opts, args = parser.parse_args()
     return opts
 
@@ -47,6 +50,9 @@ def main():
     except JensError, error:
         logging.error("Failed to validate directories (%s)" % error)
         return 3
+
+    if opts.poll:
+        settings.MODE = 'POLL'
 
     try:
         with JensLockFactory.makeLock(settings) as lock:
