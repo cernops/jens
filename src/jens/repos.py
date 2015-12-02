@@ -24,7 +24,7 @@ from jens.tools import refname_to_dirname
 from jens.git import GIT_CLONE_TIMEOUT, GIT_FETCH_TIMEOUT
 
 @timed
-def refresh_repositories(settings, lock, constraints=None):
+def refresh_repositories(settings, lock, hints=None):
     try:
         logging.debug("Reading metadata from %s" % settings.REPO_METADATA)
         definition = yaml.load(open(settings.REPO_METADATA, 'r'))
@@ -57,13 +57,13 @@ def refresh_repositories(settings, lock, constraints=None):
         delta['new'] = _create_new_repositories(settings, delta['new'],
             partition, definition, inventory[partition], desired[partition])
 
-        # If there are constraints defined, only fetch (and therefore
-        # trigger updates on the clones) if the the item being refreshed
-        # is in the job list.
+        # If there are hints on what to refresh available, only fetch (and
+        # therefore trigger updates on the clones) if the item being refreshed
+        # is in the list of things that changed :)
         existing = delta['existing']
-        if constraints:
-            if partition in constraints:
-                existing = delta['existing'].intersection(constraints[partition])
+        if hints:
+            if partition in hints:
+                existing = delta['existing'].intersection(hints[partition])
             else:
                 existing = set()
 

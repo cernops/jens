@@ -51,9 +51,9 @@ class UpdateTest(JensTestCase):
         add_repository(self.settings, 'hostgroups', hostgroup, bare)
         return user
 
-    def _jens_update(self, errorsExpected=False, errorRegexp=None, constraints=None):
+    def _jens_update(self, errorsExpected=False, errorRegexp=None, hints=None):
         repositories_deltas, inventory = \
-            refresh_repositories(self.settings, self.lock, constraints=constraints)
+            refresh_repositories(self.settings, self.lock, hints=hints)
         refresh_environments(self.settings, self.lock, repositories_deltas, inventory)
         if errorsExpected:
             self.assertLogErrors(errorRegexp)
@@ -949,7 +949,7 @@ class UpdateTest(JensTestCase):
 
         self.assertEnvironmentDoesntExist("test")
 
-    def test_clones_not_refreshed_if_bare_not_in_constraints(self):
+    def test_clones_not_refreshed_if_bare_not_in_hints(self):
         self.settings.MODE = "MESSAGE"
         murdock_path = self._create_fake_hostgroup('murdock', ['qa'])
         old_qa = get_refs(murdock_path + '/.git')['qa']
@@ -963,17 +963,17 @@ class UpdateTest(JensTestCase):
 
         new_qa = add_commit_to_branch(self.settings, murdock_path, 'qa')
 
-        self._jens_update(constraints={'hostgroups': ['other']})
+        self._jens_update(hints={'hostgroups': ['other']})
 
         self.assertClone('hostgroups/murdock/qa', pointsto=old_qa)
         self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', 'qa')
 
-        self._jens_update(constraints=None)
+        self._jens_update(hints=None)
 
         self.assertClone('hostgroups/murdock/qa', pointsto=new_qa)
         self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', 'qa')
 
-    def test_clones_refreshed_if_bare_in_constraints(self):
+    def test_clones_refreshed_if_bare_in_hints(self):
         self.settings.MODE = "MESSAGE"
         murdock_path = self._create_fake_module('murdock', ['qa'])
         old_qa = get_refs(murdock_path + '/.git')['qa']
@@ -987,12 +987,12 @@ class UpdateTest(JensTestCase):
 
         new_qa = add_commit_to_branch(self.settings, murdock_path, 'qa')
 
-        self._jens_update(constraints={'hostgroups': ['foo']})
+        self._jens_update(hints={'hostgroups': ['foo']})
 
         self.assertClone('modules/murdock/qa', pointsto=old_qa)
         self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
 
-        self._jens_update(constraints={'modules': ['murdock'], 'hostgroups': ['foo']})
+        self._jens_update(hints={'modules': ['murdock'], 'hostgroups': ['foo']})
 
         self.assertClone('modules/murdock/qa', pointsto=new_qa)
         self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
@@ -1012,18 +1012,18 @@ class UpdateTest(JensTestCase):
 
         new_qa = add_commit_to_branch(self.settings, murdock_path, 'qa')
 
-        self._jens_update(constraints={'hostgroups': ['foo']})
+        self._jens_update(hints={'hostgroups': ['foo']})
 
         self.assertClone('modules/murdock/qa', pointsto=old_qa)
 
-    def test_created_if_new_and_removed_if_gone_regardless_of_constraints(self):
+    def test_created_if_new_and_removed_if_gone_regardless_of_hints(self):
         self.settings.MODE = "MESSAGE"
         murdock_path = self._create_fake_module('murdock', ['qa'])
         old_qa = get_refs(murdock_path + '/.git')['qa']
         ensure_environment(self.settings, 'test', 'master',
             modules=["murdock:qa"])
 
-        self._jens_update(constraints={'hostgroups': ['foo']})
+        self._jens_update(hints={'hostgroups': ['foo']})
 
         self.assertBare('modules/murdock')
         self.assertClone('modules/murdock/master')
@@ -1034,7 +1034,7 @@ class UpdateTest(JensTestCase):
 
         del_repository(self.settings, 'modules', 'murdock')
 
-        repositories_deltas = self._jens_update(constraints={'hostgroups': ['foo']})
+        repositories_deltas = self._jens_update(hints={'hostgroups': ['foo']})
 
         self.assertTrue('murdock' in repositories_deltas['modules']['deleted'])
         self.assertEnvironmentLinks("test")

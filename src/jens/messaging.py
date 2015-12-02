@@ -12,15 +12,17 @@ from jens.errors import JensMessagingError
 from jens.decorators import timed
 
 @timed
-def get_events_from_queue(settings, lock):
-    constraints = {}
+def fetch_update_hints(settings, lock):
+    hints = {}
+    logging.info("Getting and processing hints...")
     try:
         messages = _fetch_all_messages(settings)
     except Exception, error: # FIXME
         raise JensMessagingError("Could not retrieve messages")
 
-    constraints = _merge_messages(messages)
-    return constraints
+    logging.info("%d update hints found" % len(messages))
+    hints = _merge_messages(messages)
+    return hints
 
 def _fetch_all_messages(settings):
     # TODO:
@@ -29,14 +31,14 @@ def _fetch_all_messages(settings):
     pass
 
 def _merge_messages(messages):
-    constraints = {'modules': [], 'hostgroups': [], 'common': []}
+    hints = {'modules': [], 'hostgroups': [], 'common': []}
     def _merger(acc, element):
         if 'data' not in element or type(element['data']) != dict:
             return acc
         for k,v in element['data'].iteritems():
-            if k not in constraints:
+            if k not in hints:
                 continue
             for item in v:
                 acc[k].append(item)
         return acc
-    return reduce(_merger, messages, constraints)
+    return reduce(_merger, messages, hints)

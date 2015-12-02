@@ -20,7 +20,7 @@ from jens.maintenance import refresh_metadata
 from jens.maintenance import validate_directories
 from jens.locks import JensLockFactory
 from jens.environments import refresh_environments
-from jens.messaging import get_events_from_queue
+from jens.messaging import fetch_update_hints
 
 def parse_cmdline_args():
     """Parses command line parameters."""
@@ -67,7 +67,7 @@ def main():
             # Query what changed if not in POLLing mode
             if settings.MODE == 'MESSAGE':
                 try:
-                    updates = get_events_from_queue(settings, lock)
+                    hints = get_events_from_queue(settings, lock)
                 except JensMessagingError, error:
                     logging.error(error)
                 return 25
@@ -78,7 +78,7 @@ def main():
             logging.info("Refreshing repositories...")
             try:
                 repositories_deltas, inventory = \
-                    refresh_repositories(settings, lock, constraints=updates)
+                    refresh_repositories(settings, lock, hints)
             except JensRepositoriesError, error:
                 logging.error("Failed (%s)" % error)
                 return 30
