@@ -20,6 +20,7 @@ def get_events_from_queue(settings, lock):
         raise JensMessagingError("Could not retrieve messages")
 
     constraints = _merge_messages(messages)
+    return constraints
 
 def _fetch_all_messages(settings):
     pass
