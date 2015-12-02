@@ -23,6 +23,9 @@ def get_events_from_queue(settings, lock):
     return constraints
 
 def _fetch_all_messages(settings):
+    # TODO:
+    # New setting for dirq's path
+    # Get messages from the queue
     pass
 
 def _merge_messages(messages):
