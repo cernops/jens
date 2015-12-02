@@ -55,6 +55,7 @@ class Settings():
         self.HASHPREFIX = config["main"]["hashprefix"]
         self.DIRECTORY_ENVIRONMENTS = config["main"]["directory_environments"]
         self.COMMON_HIERADATA_ITEMS = config["main"]["common_hieradata_items"]
+        self.MODE = config["main"]["mode"]
 
         # [lock]
         self.LOCK_TYPE = config["lock"]["type"]
