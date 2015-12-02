@@ -11,6 +11,9 @@ class JensError(Exception):
 class JensConfigError(JensError):
     pass
 
+class JensMessagingError(JensError):
+    pass
+
 class JensRepositoriesError(JensError):
     pass
 
