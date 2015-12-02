@@ -148,7 +148,11 @@ def _refresh_repository(data):
     inventory = data['inventory']
     inventory_lock = data['inventory_lock']
     desired = data['desired']
-    logging.debug("Expanding %s/%s..." % (partition, repository))
+    if settings.MODE == "POLL":
+        logging.debug("Expanding bare and clones of %s/%s..." % (partition, repository))
+    else:
+        logging.info("Expanding bare and clones of %s/%s upon demand..."
+            % (partition, repository))
     bare_path = _compose_bare_repository_path(settings,
         repository, partition)
     try:
