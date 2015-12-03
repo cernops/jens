@@ -206,17 +206,17 @@ def add_msg_to_queue(settings, msg):
     queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
     queue.enqueue(msg)
 
-def notify_module(settings, module):
+def create_module_event(settings, module):
     msg = {'time': datetime.now().isoformat(),
         'data': pickle.dumps({'modules': [module]})}
     add_msg_to_queue(settings, msg)
 
-def notify_hostgroup(settings, hostgroup):
+def create_hostgroup_event(settings, hostgroup):
     msg = {'time': datetime.now().isoformat(),
         'data': pickle.dumps({'hostgroups': [hostgroup]})}
     add_msg_to_queue(settings, msg)
 
-def notify_common(settings, element):
+def create_common_event(settings, element):
     msg = {'time': datetime.now().isoformat(),
         'data': pickle.dumps({'common': [element]})}
     add_msg_to_queue(settings, msg)

@@ -17,8 +17,8 @@ from jens.errors import JensMessagingError
 from jens.test.tools import init_repositories
 from jens.test.tools import add_repository, del_repository
 from jens.test.tools import add_msg_to_queue
-from jens.test.tools import notify_hostgroup, notify_module
-from jens.test.tools import notify_common
+from jens.test.tools import create_hostgroup_event, create_module_event
+from jens.test.tools import create_common_event
 
 from jens.test.testcases import JensTestCase
 
@@ -34,9 +34,9 @@ class MessagingTest(JensTestCase):
         modules = ['foo', 'bar', 'baz1', 'baz2', 'm1', 'm2']
         hgs = ['hg0', 'hg1', 'hg2', 'hg3', 'hg4']
         for module in modules:
-            notify_module(self.settings, module)
+            create_module_event(self.settings, module)
         for hg in hgs:
-            notify_hostgroup(self.settings, hg)
+            create_hostgroup_event(self.settings, hg)
         hints = fetch_update_hints(self.settings, self.lock)
         for m in modules:
             self.assertTrue(m in hints['modules'])
@@ -44,8 +44,8 @@ class MessagingTest(JensTestCase):
             self.assertTrue(h in hints['hostgroups'])
         self.assertTrue('common' in hints)
         self.assertEquals(0, len(hints['common']))
-        notify_module(self.settings, 'm1')
-        notify_common(self.settings, 'baz')
+        create_module_event(self.settings, 'm1')
+        create_common_event(self.settings, 'baz')
         hints = fetch_update_hints(self.settings, self.lock)
         self.assertTrue('hostgroups' in hints)
         self.assertEquals(0, len(hints['hostgroups']))
@@ -54,8 +54,8 @@ class MessagingTest(JensTestCase):
         self.assertTrue('m1' in hints['modules'])
 
     def test_update_hints_no_dups(self):
-        notify_module(self.settings, 'foo')
-        notify_module(self.settings, 'foo')
+        create_module_event(self.settings, 'foo')
+        create_module_event(self.settings, 'foo')
         hints = fetch_update_hints(self.settings, self.lock)
         self.assertEquals(1, len(hints['modules']))
 
@@ -69,8 +69,8 @@ class MessagingTest(JensTestCase):
         self.assertEquals(0, len(hints['common']))
 
     def test_fetch_all_messages_noerrors(self):
-        notify_module(self.settings, 'foo')
-        notify_hostgroup(self.settings, 'bar')
+        create_module_event(self.settings, 'foo')
+        create_hostgroup_event(self.settings, 'bar')
         msgs = _fetch_all_messages(self.settings)
         self.assertEquals(2, len(msgs))
 
@@ -87,7 +87,7 @@ class MessagingTest(JensTestCase):
         self.assertRaises(JensMessagingError, _fetch_all_messages, self.settings)
 
     def test_fetch_all_messages_ununpickable(self):
-        notify_hostgroup(self.settings, 'bar')
+        create_hostgroup_event(self.settings, 'bar')
         broken = {'time': datetime.now().isoformat(),
             'data': '))'}
         add_msg_to_queue(self.settings, broken)
@@ -96,14 +96,14 @@ class MessagingTest(JensTestCase):
 
     @patch.object(Queue, 'dequeue', side_effect=QueueLockError)
     def test_fetch_all_messages_locked_item(self, mock_queue):
-        notify_module(self.settings, 'foo')
+        create_module_event(self.settings, 'foo')
         msgs = _fetch_all_messages(self.settings)
         self.assertEquals(0, len(msgs))
         mock_queue.assert_called_once()
 
     @patch.object(Queue, 'dequeue', side_effect=OSError)
     def test_fetch_all_messages_ioerror_when_dequeuing(self, mock_queue):
-        notify_module(self.settings, 'foo')
+        create_module_event(self.settings, 'foo')
         msgs = _fetch_all_messages(self.settings)
         self.assertLogErrors()
         mock_queue.assert_called_once()
