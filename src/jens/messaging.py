@@ -55,7 +55,7 @@ def _fetch_all_messages(settings):
     return msgs
 
 def _merge_messages(messages):
-    hints = {'modules': [], 'hostgroups': [], 'common': []}
+    hints = {'modules': set(), 'hostgroups': set(), 'common': set()}
     def _merger(acc, element):
         if 'data' not in element or type(element['data']) != dict:
             return acc
@@ -63,6 +63,6 @@ def _merge_messages(messages):
             if k not in hints:
                 continue
             for item in v:
-                acc[k].append(item)
+                acc[k].add(item)
         return acc
     return reduce(_merger, messages, hints)

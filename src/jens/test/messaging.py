@@ -53,6 +53,12 @@ class MessagingTest(JensTestCase):
         self.assertEquals(1, len(hints['modules']))
         self.assertTrue('m1' in hints['modules'])
 
+    def test_update_hints_no_dups(self):
+        notify_module(self.settings, 'foo')
+        notify_module(self.settings, 'foo')
+        hints = fetch_update_hints(self.settings, self.lock)
+        self.assertEquals(1, len(hints['modules']))
+
     def test_update_hints_no_messages(self):
         hints = fetch_update_hints(self.settings, self.lock)
         self.assertTrue('modules' in hints)
