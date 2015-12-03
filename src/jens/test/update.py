@@ -950,7 +950,7 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentDoesntExist("test")
 
     def test_clones_not_refreshed_if_bare_not_in_hints(self):
-        self.settings.MODE = "MESSAGE"
+        self.settings.MODE = "ONDEMAND"
         murdock_path = self._create_fake_hostgroup('murdock', ['qa'])
         old_qa = get_refs(murdock_path + '/.git')['qa']
         ensure_environment(self.settings, 'test', 'master',
@@ -974,7 +974,7 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', 'qa')
 
     def test_clones_refreshed_if_bare_in_hints(self):
-        self.settings.MODE = "MESSAGE"
+        self.settings.MODE = "ONDEMAND"
         murdock_path = self._create_fake_module('murdock', ['qa'])
         old_qa = get_refs(murdock_path + '/.git')['qa']
         ensure_environment(self.settings, 'test', 'master',
@@ -998,7 +998,7 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
 
     def test_clones_not_refreshed_if_constaints_enabled_but_no_partition_declared(self):
-        self.settings.MODE = "MESSAGE"
+        self.settings.MODE = "ONDEMAND"
         murdock_path = self._create_fake_module('murdock', ['qa'])
         old_qa = get_refs(murdock_path + '/.git')['qa']
         ensure_environment(self.settings, 'test', 'master',
@@ -1017,7 +1017,7 @@ class UpdateTest(JensTestCase):
         self.assertClone('modules/murdock/qa', pointsto=old_qa)
 
     def test_created_if_new_and_removed_if_gone_regardless_of_hints(self):
-        self.settings.MODE = "MESSAGE"
+        self.settings.MODE = "ONDEMAND"
         murdock_path = self._create_fake_module('murdock', ['qa'])
         old_qa = get_refs(murdock_path + '/.git')['qa']
         ensure_environment(self.settings, 'test', 'master',

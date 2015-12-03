@@ -64,8 +64,7 @@ def main():
                 logging.error(error)
                 return 20
 
-            # Query what changed if not in POLLing mode
-            if settings.MODE == 'MESSAGE':
+            if settings.MODE == 'ONDEMAND':
                 try:
                     hints = get_events_from_queue(settings, lock)
                 except JensMessagingError, error:
