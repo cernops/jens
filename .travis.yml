@@ -11,6 +11,7 @@ install:
   - pip install pyyaml
   - pip install urllib3
   - pip install configobj
+  - pip install dirq
 before_script:
   - git config --global user.email "noreply@cern.ch"
   - git config --global user.name "Travis CI"
