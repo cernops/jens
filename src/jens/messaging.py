@@ -30,7 +30,6 @@ def fetch_update_hints(settings, lock):
     return hints
 
 def _fetch_all_messages(settings):
-    print settings.MESSAGING_QUEUEDIR
     try:
         queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
     except OSError, error:
