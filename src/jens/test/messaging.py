@@ -18,6 +18,7 @@ from jens.test.tools import init_repositories
 from jens.test.tools import add_repository, del_repository
 from jens.test.tools import add_msg_to_queue
 from jens.test.tools import notify_hostgroup, notify_module
+from jens.test.tools import notify_common
 
 from jens.test.testcases import JensTestCase
 
@@ -41,6 +42,23 @@ class MessagingTest(JensTestCase):
             self.assertTrue(m in hints['modules'])
         for h in hgs:
             self.assertTrue(h in hints['hostgroups'])
+        self.assertTrue('common' in hints)
+        self.assertEquals(0, len(hints['common']))
+        notify_module(self.settings, 'm1')
+        notify_common(self.settings, 'baz')
+        hints = fetch_update_hints(self.settings, self.lock)
+        self.assertTrue('hostgroups' in hints)
+        self.assertEquals(0, len(hints['hostgroups']))
+        self.assertTrue('baz' in hints['common'])
+        self.assertEquals(1, len(hints['modules']))
+        self.assertTrue('m1' in hints['modules'])
+
+    def test_update_hints_no_messages(self):
+        hints = fetch_update_hints(self.settings, self.lock)
+        self.assertTrue('modules' in hints)
+        self.assertEquals(0, len(hints['hostgroups']))
+        self.assertTrue('hostgroups' in hints)
+        self.assertEquals(0, len(hints['hostgroups']))
         self.assertTrue('common' in hints)
         self.assertEquals(0, len(hints['common']))
 

@@ -215,3 +215,8 @@ def notify_hostgroup(settings, hostgroup):
     msg = {'time': datetime.now().isoformat(),
         'data': pickle.dumps({'hostgroups': [hostgroup]})}
     add_msg_to_queue(settings, msg)
+
+def notify_common(settings, element):
+    msg = {'time': datetime.now().isoformat(),
+        'data': pickle.dumps({'common': [element]})}
+    add_msg_to_queue(settings, msg)
