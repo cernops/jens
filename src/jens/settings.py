@@ -69,6 +69,9 @@ class Settings():
         self.ETCD_ACQTIMEOUT = config["etcd"]["acqtimeout"]
         self.ETCD_INITIALTTL = config["etcd"]["initialttl"]
 
+        # [messaging]
+        self.MESSAGING_QUEUEDIR = config["messaging"]["queuedir"]
+
         if self.logfile:
             logging.basicConfig(
                 level = getattr(logging, self.DEBUG_LEVEL),

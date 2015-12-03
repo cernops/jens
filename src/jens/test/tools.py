@@ -27,6 +27,7 @@ def init_sandbox(path):
         "%s/lib/metadata/repositories" % path,
         "%s/log" % path,
         "%s/etc" % path,
+        "%s/spool" % path,
         "%s/repos/user" % path,
         "%s/repos/bare" % path]
     map(os.makedirs, dirs)

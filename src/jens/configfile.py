@@ -30,4 +30,6 @@ lockdir = string(default='/var/lock/jens')
 servers = list(default=list("127.0.0.1:4001"))
 acqtimeout = integer(default=1)
 initialttl = integer(default=60)
+[messaging]
+queuedir = string(default='/var/spool/jens-update')
 """

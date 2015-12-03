@@ -39,6 +39,9 @@ common_hieradata_items = environments, hardware, operatingsystems, datacentres, 
 
 [lock]
 type = DISABLED
+
+[messaging]
+type = $sandbox/spool
 """)
 
 class JensTestCase(unittest.TestCase):
