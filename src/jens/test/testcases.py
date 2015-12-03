@@ -41,7 +41,7 @@ common_hieradata_items = environments, hardware, operatingsystems, datacentres, 
 type = DISABLED
 
 [messaging]
-type = $sandbox/spool
+queuedir = $sandbox/spool
 """)
 
 class JensTestCase(unittest.TestCase):
