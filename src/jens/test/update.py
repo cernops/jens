@@ -993,7 +993,8 @@ class UpdateTest(JensTestCase):
         new_site_qa = add_commit_to_branch(self.settings, self.site_user, 'qa')
         new_hieradata_qa = add_commit_to_branch(self.settings, self.hieradata_user, 'qa')
 
-        self._jens_update(hints={'hostgroups': ['foo']})
+        # Test that it actually intersects existing and hints
+        self._jens_update(hints={'modules': ['foo']})
 
         self.assertClone('modules/murdock/qa', pointsto=old_qa)
         self.assertClone('common/site/qa', pointsto=old_site_qa)
@@ -1001,7 +1002,7 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
 
         self._jens_update(hints=
-            {'modules': ['murdock'], 'hostgroups': ['foo'], 'common': ['site']})
+            {'modules': ['murdock', 'foo'], 'hostgroups': ['foo'], 'common': ['site']})
 
         self.assertClone('modules/murdock/qa', pointsto=new_qa)
         self.assertClone('common/site/qa', pointsto=new_site_qa)
