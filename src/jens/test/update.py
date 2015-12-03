@@ -36,8 +36,10 @@ class UpdateTest(JensTestCase):
         init_repositories(self.settings)
         (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
         add_repository(self.settings, 'common', 'site', bare)
+        self.site_user = user
         (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
         add_repository(self.settings, 'common', 'hieradata', bare)
+        self.hieradata_user = user
 
         self.lock = JensLockFactory.makeLock(self.settings)
 
@@ -977,6 +979,8 @@ class UpdateTest(JensTestCase):
         self.settings.MODE = "ONDEMAND"
         murdock_path = self._create_fake_module('murdock', ['qa'])
         old_qa = get_refs(murdock_path + '/.git')['qa']
+        old_site_qa = get_refs(self.site_user + '/.git')['qa']
+        old_hieradata_qa = get_refs(self.hieradata_user + '/.git')['qa']
         ensure_environment(self.settings, 'test', 'master',
             modules=["murdock:qa"])
 
@@ -986,16 +990,26 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
 
         new_qa = add_commit_to_branch(self.settings, murdock_path, 'qa')
+        new_site_qa = add_commit_to_branch(self.settings, self.site_user, 'qa')
+        new_hieradata_qa = add_commit_to_branch(self.settings, self.hieradata_user, 'qa')
 
         self._jens_update(hints={'hostgroups': ['foo']})
 
         self.assertClone('modules/murdock/qa', pointsto=old_qa)
+        self.assertClone('common/site/qa', pointsto=old_site_qa)
+        self.assertClone('common/hieradata/qa', pointsto=old_hieradata_qa)
         self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
 
-        self._jens_update(hints={'modules': ['murdock'], 'hostgroups': ['foo']})
+        self._jens_update(hints=
+            {'modules': ['murdock'], 'hostgroups': ['foo'], 'common': ['site']})
 
         self.assertClone('modules/murdock/qa', pointsto=new_qa)
+        self.assertClone('common/site/qa', pointsto=new_site_qa)
+        self.assertClone('common/hieradata/qa', pointsto=old_hieradata_qa)
         self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
+
+        self._jens_update(hints= {'common': ['hieradata']})
+        self.assertClone('common/hieradata/qa', pointsto=new_hieradata_qa)
 
     def test_clones_not_refreshed_if_constaints_enabled_but_no_partition_declared(self):
         self.settings.MODE = "ONDEMAND"
