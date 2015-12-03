@@ -71,7 +71,7 @@ def main():
                     logging.error(error)
                 return 25
             else:
-                updates = None
+                hints = None
 
             # Update repositories
             logging.info("Refreshing repositories...")
