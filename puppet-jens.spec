@@ -10,7 +10,7 @@ Source: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 
-Requires: python-configobj, python-argparse, git, PyYAML
+Requires: python-configobj, python-argparse, git, PyYAML, python-dirq
 Requires(pre): shadow-utils
 
 %description

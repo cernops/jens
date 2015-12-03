@@ -10,8 +10,13 @@ import yaml
 import tempfile
 import shutil
 import time
+import pickle
+from datetime import datetime
+
+from dirq.queue import Queue, QueueError, QueueLockError
 
 from jens.git import _git
+from jens.messaging import MSG_SCHEMA
 
 def init_sandbox(path):
     dirs = [
@@ -194,3 +199,19 @@ def reset_branch_to(settings, repo_path, branch, commit_id):
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
     args = ["reset", "--hard", commit_id]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
+
+## Messaging
+
+def add_msg_to_queue(settings, msg):
+    queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
+    queue.enqueue(msg)
+
+def notify_module(settings, module):
+    msg = {'time': datetime.now().isoformat(),
+        'data': pickle.dumps({'modules': [module]})}
+    add_msg_to_queue(settings, msg)
+
+def notify_hostgroup(settings, hostgroup):
+    msg = {'time': datetime.now().isoformat(),
+        'data': pickle.dumps({'hostgroups': [hostgroup]})}
+    add_msg_to_queue(settings, msg)

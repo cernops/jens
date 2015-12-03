@@ -7,9 +7,14 @@
 
 import yaml
 import logging
+import pickle
+
+from dirq.queue import Queue, QueueLockError
 
 from jens.errors import JensMessagingError
 from jens.decorators import timed
+
+MSG_SCHEMA = {'time': 'string', 'data': 'string'}
 
 @timed
 def fetch_update_hints(settings, lock):
@@ -17,18 +22,34 @@ def fetch_update_hints(settings, lock):
     logging.info("Getting and processing hints...")
     try:
         messages = _fetch_all_messages(settings)
-    except Exception, error: # FIXME
-        raise JensMessagingError("Could not retrieve messages")
+    except Exception, error:
+        raise JensMessagingError("Could not retrieve messages (%s)" % error)
 
     logging.info("%d update hints found" % len(messages))
     hints = _merge_messages(messages)
     return hints
 
 def _fetch_all_messages(settings):
-    # TODO:
-    # New setting for dirq's path
-    # Get messages from the queue
-    pass
+    queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
+    msgs = []
+    for i, name in enumerate(queue):
+        try:
+            item = queue.dequeue(name)
+        except QueueLockError, error:
+            logging.warn("Element %s was locked when dequeuing" % name)
+            continue
+        except OSError, error:
+            logging.error("I/O error when getting item %s" % name)
+            continue
+        try:
+            item['data'] = pickle.loads(item['data'])
+        except (pickle.PickleError, EOFError), error:
+            logging.debug("Couldn't unpickle item %s. Will be ignored." % name)
+            continue
+        logging.debug("Message %s extracted and unpickled" % name)
+        msgs.append(item)
+
+    return msgs
 
 def _merge_messages(messages):
     hints = {'modules': [], 'hostgroups': [], 'common': []}
