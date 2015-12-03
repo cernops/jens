@@ -14,7 +14,7 @@ from dirq.queue import Queue, QueueLockError
 from jens.errors import JensMessagingError
 from jens.decorators import timed
 
-MSG_SCHEMA = {'time': 'string', 'data': 'string'}
+MSG_SCHEMA = {'time': 'string', 'data': 'binary'}
 
 @timed
 def fetch_update_hints(settings, lock):
