@@ -5,6 +5,8 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+import os
+
 from datetime import datetime
 
 from dirq.queue import Queue, QueueLockError
@@ -47,6 +49,18 @@ class MessagingTest(JensTestCase):
         notify_hostgroup(self.settings, 'bar')
         msgs = _fetch_all_messages(self.settings)
         self.assertEquals(2, len(msgs))
+
+    def test_fetch_all_messages_no_queuedir_is_created(self):
+        self.settings.MESSAGING_QUEUEDIR = "%s/notthere" % \
+            self.settings.MESSAGING_QUEUEDIR
+        self.assertFalse(os.path.isdir(self.settings.MESSAGING_QUEUEDIR))
+        msgs = _fetch_all_messages(self.settings)
+        self.assertTrue(os.path.isdir(self.settings.MESSAGING_QUEUEDIR))
+        self.assertEquals(0, len(msgs))
+
+    def test_fetch_all_messages_queuedir_cannot_be_created(self):
+        self.settings.MESSAGING_QUEUEDIR = "/oops"
+        self.assertRaises(JensMessagingError, _fetch_all_messages, self.settings)
 
     def test_fetch_all_messages_ununpickable(self):
         notify_hostgroup(self.settings, 'bar')
@@ -95,7 +109,9 @@ class MessagingTest(JensTestCase):
                 'modules': ['m1']}},
             {'time': datetime.now().isoformat(),
                 'data': {'crap': ['hg3', 'hg4'],
-                'modules': ['m2']}}
+                'modules': ['m2']}},
+            {'time': datetime.now().isoformat(),
+                'data': {'common': ['site']}},
         ]
 
         modules = ['foo', 'bar', 'baz1', 'baz2', 'm1', 'm2']
@@ -105,9 +121,11 @@ class MessagingTest(JensTestCase):
 
         self.assertTrue('modules' in result)
         self.assertTrue('hostgroups' in result)
+        self.assertTrue('common' in result)
         self.assertEqual(len(modules), len(result['modules']))
         self.assertEqual(len(hgs), len(result['hostgroups']))
         for m in modules:
             self.assertTrue(m in result['modules'])
         for h in hgs:
             self.assertTrue(h in result['hostgroups'])
+        self.assertTrue('site' in result['common'])

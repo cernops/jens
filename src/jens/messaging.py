@@ -30,7 +30,11 @@ def fetch_update_hints(settings, lock):
     return hints
 
 def _fetch_all_messages(settings):
-    queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
+    print settings.MESSAGING_QUEUEDIR
+    try:
+        queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
+    except OSError, error:
+        raise JensMessagingError("Failed to create Queue object (%s)" % error)
     msgs = []
     for i, name in enumerate(queue):
         try:
