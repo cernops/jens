@@ -26,7 +26,7 @@ def fetch_update_hints(settings, lock):
         raise JensMessagingError("Could not retrieve messages (%s)" % error)
 
     logging.info("%d update hints found" % len(messages))
-    hints = _merge_messages(messages)
+    hints = _validate_and_merge_messages(messages)
     return hints
 
 def _fetch_all_messages(settings):
@@ -54,7 +54,7 @@ def _fetch_all_messages(settings):
 
     return msgs
 
-def _merge_messages(messages):
+def _validate_and_merge_messages(messages):
     hints = {'modules': set(), 'hostgroups': set(), 'common': set()}
     def _merger(acc, element):
         if 'data' not in element or type(element['data']) != dict:

@@ -11,7 +11,7 @@ from datetime import datetime
 
 from dirq.queue import Queue, QueueLockError
 
-from jens.messaging import _merge_messages, _fetch_all_messages
+from jens.messaging import _validate_and_merge_messages, _fetch_all_messages
 from jens.messaging import fetch_update_hints
 from jens.errors import JensMessagingError
 from jens.test.tools import init_repositories
@@ -111,7 +111,8 @@ class MessagingTest(JensTestCase):
 
     # TODO: Test that other messages are fetched if one is locked/broken
 
-    def test_merge_messages(self):
+    def test_validate_and_merge_messages(self):
+        self.keep_sandbox = True
         messages = [
             {'time': datetime.now().isoformat()}, # Bad
             {'time': datetime.now().isoformat(),
@@ -143,7 +144,7 @@ class MessagingTest(JensTestCase):
         modules = ['foo', 'bar', 'baz1', 'baz2', 'm1', 'm2']
         hgs = ['hg0', 'hg1', 'hg2', 'hg3', 'hg4']
 
-        result = _merge_messages(messages)
+        result = _validate_and_merge_messages(messages)
 
         self.assertTrue('modules' in result)
         self.assertTrue('hostgroups' in result)
