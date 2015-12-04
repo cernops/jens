@@ -124,7 +124,7 @@ class MessagingTest(JensTestCase):
             {'time': datetime.now().isoformat(),
                 'data': {'modules': 'foo'}}, # Bad
             {'time': datetime.now().isoformat(),
-                'data': {'modules': ['foo', []]}}, # Bad
+                'data': {'modules': ['fizz', []]}}, # Bad
             {'time': datetime.now().isoformat(),
                 'data': {'modules': ['foo']}},
             {'time': datetime.now().isoformat(),
@@ -145,7 +145,7 @@ class MessagingTest(JensTestCase):
                 'data': {'common': ['site']}},
         ]
 
-        modules = ['foo', 'bar', 'baz1', 'baz2', 'm1', 'm2']
+        modules = ['foo', 'bar', 'baz1', 'baz2', 'm1', 'm2', 'fizz']
         hgs = ['hg0', 'hg1', 'hg2', 'hg3', 'hg4']
 
         result = _validate_and_merge_messages(messages)
