@@ -58,6 +58,7 @@ mkdir -m 750 -p %{buildroot}/var/spool/jens-update/
 %attr(750, jens, jens) /var/lib/jens/*
 %attr(750, jens, jens) /var/log/jens
 %attr(750, jens, jens) /var/lock/jens
+%attr(750, jens, jens) /var/spool/jens-update
 %config(noreplace) %{_sysconfdir}/jens/main.conf
 
 %changelog
