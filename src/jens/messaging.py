@@ -72,8 +72,12 @@ def _validate_and_merge_messages(messages):
                 logging.warn("Discarding message (%s): Value '%s' is not a list" % (time, v))
                 continue
             for item in v:
-                logging.debug("Accepted message %s:%s created at %s" % \
-                    (k, v, element['time']))
-                acc[k].add(item)
+                if type(item) == str:
+                    logging.debug("Accepted message %s:%s created at %s" % \
+                        (k, v, element['time']))
+                    acc[k].add(item)
+                else:
+                    logging.warn("Discarding item '%s' in (%s - %s:%s): not a str"
+                        "not a str" % (item, time, k, v))
         return acc
     return reduce(_merger, messages, hints)

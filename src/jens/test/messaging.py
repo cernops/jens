@@ -124,6 +124,8 @@ class MessagingTest(JensTestCase):
             {'time': datetime.now().isoformat(),
                 'data': {'modules': 'foo'}}, # Bad
             {'time': datetime.now().isoformat(),
+                'data': {'modules': ['foo', []]}}, # Bad
+            {'time': datetime.now().isoformat(),
                 'data': {'modules': ['foo']}},
             {'time': datetime.now().isoformat(),
                 'data': {'modules': ['bar']}},
