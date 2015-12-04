@@ -113,11 +113,13 @@ class MessagingTest(JensTestCase):
 
     def test_merge_messages(self):
         messages = [
-            {'time': datetime.now().isoformat()},
+            {'time': datetime.now().isoformat()}, # Bad
             {'time': datetime.now().isoformat(),
-                'data': ''},
+                'data': ''}, # Bad
             {'time': datetime.now().isoformat(),
-                'data': {}},
+                'data': {}}, # Bad
+            {'time': datetime.now().isoformat(),
+                'data': {'modules': 'foo'}}, # Bad
             {'time': datetime.now().isoformat(),
                 'data': {'modules': ['foo']}},
             {'time': datetime.now().isoformat(),

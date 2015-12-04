@@ -62,6 +62,8 @@ def _merge_messages(messages):
         for k,v in element['data'].iteritems():
             if k not in hints:
                 continue
+            if type(v) != list:
+                continue
             for item in v:
                 acc[k].add(item)
         return acc
