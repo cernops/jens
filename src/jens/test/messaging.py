@@ -114,6 +114,8 @@ class MessagingTest(JensTestCase):
     def test_validate_and_merge_messages(self):
         self.keep_sandbox = True
         messages = [
+            {}, # Bad
+            {'data': {'modules': ['foo']}}, # Bad
             {'time': datetime.now().isoformat()}, # Bad
             {'time': datetime.now().isoformat(),
                 'data': ''}, # Bad

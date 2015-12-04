@@ -57,14 +57,23 @@ def _fetch_all_messages(settings):
 def _validate_and_merge_messages(messages):
     hints = {'modules': set(), 'hostgroups': set(), 'common': set()}
     def _merger(acc, element):
+        if 'time' not in element:
+            logging.warn("Discarding message: No timestamp")
+            return acc
+        time = element['time']
         if 'data' not in element or type(element['data']) != dict:
+            logging.warn("Discarding message (%s): Bad data section" % time)
             return acc
         for k,v in element['data'].iteritems():
             if k not in hints:
+                logging.warn("Discarding message (%s): Unknown partition '%s'" % (time, k))
                 continue
             if type(v) != list:
+                logging.warn("Discarding message (%s): Value '%s' is not a list" % (time, v))
                 continue
             for item in v:
+                logging.debug("Accepted message %s:%s created at %s" % \
+                    (k, v, element['time']))
                 acc[k].add(item)
         return acc
     return reduce(_merger, messages, hints)
