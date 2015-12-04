@@ -9,9 +9,11 @@ import os
 import logging
 
 import jens.git as git
+from jens.decorators import timed
 from jens.errors import JensError, JensGitError
 from jens.git import GIT_CLONE_TIMEOUT, GIT_FETCH_TIMEOUT
 
+@timed
 def refresh_metadata(settings, lock):
     lock.renew(2 * GIT_FETCH_TIMEOUT)
     _refresh_environments(settings)
