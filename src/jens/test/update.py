@@ -1057,28 +1057,28 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentNumberOf("test", "hostgroups", 0)
         self.assertEnvironmentOverrideDoesntExist("test", 'modules/murdock')
 
-    def test_environments_are_created_regardless_of_update_hints(self):
+    def test_environments_are_created_and_known_branches_expanded_regardless_of_update_hints(self):
         self.settings.MODE = "ONDEMAND"
         h1_path = self._create_fake_hostgroup('h1', ['qa', 'boom'])
+        old_h1_qa = get_refs(h1_path + '/.git')['qa']
         m1_path = self._create_fake_module('m1', ['qa', 'boom'])
 
         self._jens_update()
 
         ensure_environment(self.settings, 'test', 'master',
             hostgroups=['h1:boom'], modules=['m1:boom'])
+        new_h1_qa = add_commit_to_branch(self.settings, h1_path, 'qa')
 
         self._jens_update(hints={'hostgroups': ['other']})
 
-        self.assertEnvironmentBrokenLinks("test")
-        # This is a bug: The branch is already available in the bare clone
-        # however it's not expanded as there was no notification received
-        # Fix: Don't fetch if the repo is not in the hint list but do the
-        # rest anyway. (pass the hints dict further down?)
+        self.assertClone('hostgroups/h1/qa', pointsto=old_h1_qa)
+        self.assertEnvironmentLinks("test")
         self.assertEnvironmentOverride("test", 'modules/m1', 'boom')
         self.assertEnvironmentOverride("test", 'hostgroups/hg_h1', 'boom')
 
         self._jens_update(hints={'modules': ['m1'], 'hostgroups': ['h1']})
 
+        self.assertClone('hostgroups/h1/qa', pointsto=new_h1_qa)
         self.assertEnvironmentLinks("test")
         self.assertEnvironmentOverride("test", 'modules/m1', 'boom')
         self.assertEnvironmentOverride("test", 'hostgroups/hg_h1', 'boom')

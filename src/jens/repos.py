@@ -57,19 +57,15 @@ def refresh_repositories(settings, lock, hints=None):
         delta['new'] = _create_new_repositories(settings, delta['new'],
             partition, definition, inventory[partition], desired[partition])
 
-        # If there are hints on what to refresh available, only fetch (and
-        # therefore trigger updates on the clones) if the item being refreshed
-        # is in the list of things that changed :)
-        existing = delta['existing']
-        if hints:
-            if partition in hints:
-                existing = delta['existing'].intersection(hints[partition])
-            else:
-                existing = set()
+        # If hints are passed but there's nothing explicitly declared
+        # for a given partition, we make it explicit here.
+        if hints and not partition in hints:
+            hints[partition] = set()
 
         logging.info("Expanding EXISTING bare repositories...")
-        _refresh_repositories(settings, existing, partition,
-            inventory[partition], desired[partition])
+        _refresh_repositories(settings, delta['existing'], partition,
+            inventory[partition], desired[partition],
+            hints[partition] if hints else None)
 
         logging.info("Purging REMOVED bare repositories...")
         _purge_repositories(settings, delta['deleted'], partition,
@@ -123,7 +119,8 @@ def _create_new_repositories(settings, new_repositories, partition,
 
 # This is the most common operation Jens has to do, git-fetch
 # over all bare repos and the expansion of clones.
-def _refresh_repositories(settings, existing_repositories, partition, inventory, desired):
+def _refresh_repositories(settings, existing_repositories, partition,
+        inventory, desired, hints):
     if not existing_repositories:
         return # Seems that passing [] to pool.map makes .join never return
     manager = Manager()
@@ -133,7 +130,8 @@ def _refresh_repositories(settings, existing_repositories, partition, inventory,
     inventory_lock = manager.Lock()
     data = [{'settings': settings, 'partition': partition,
         'repository': repository, 'inventory': inventory_proxy,
-        'inventory_lock': inventory_lock, 'desired': desired}
+        'inventory_lock': inventory_lock, 'desired': desired,
+        'hints': hints}
         for repository in existing_repositories]
     pool = Pool(processes=int(math.ceil(cpu_count()*1.5)))
     pool.map(_refresh_repository, data)
@@ -148,23 +146,27 @@ def _refresh_repository(data):
     inventory = data['inventory']
     inventory_lock = data['inventory_lock']
     desired = data['desired']
-    if settings.MODE == "POLL":
-        logging.debug("Expanding bare and clones of %s/%s..." % (partition, repository))
-    else:
-        logging.info("Expanding bare and clones of %s/%s upon demand..."
-            % (partition, repository))
+    hints = data['hints']
+    logging.debug("Expanding bare and clones of %s/%s..." % (partition, repository))
     bare_path = _compose_bare_repository_path(settings,
         repository, partition)
+
     try:
         old_refs = git.get_refs(bare_path)
     except JensGitError, error:
         logging.error("Unable to get old refs of '%s' (%s)" % (repository, error))
         return
-    try:
-        git.fetch(bare_path, prune=True, bare=True)
-    except JensGitError, error:
-        logging.error("Unable to fetch '%s' from remote (%s)" % (repository, error))
-        return
+
+    # If we know nothing or we know that we have to fetch
+    if hints is None or repository in hints:
+        try:
+            if settings.MODE == "ONDEMAND":
+                logging.info("Fetching bare and clones of %s/%s upon demand..."
+                    % (partition, repository))
+            git.fetch(bare_path, prune=True, bare=True)
+        except JensGitError, error:
+            logging.error("Unable to fetch '%s' from remote (%s)" % (repository, error))
+            return
     try:
         # TODO: Found a corner case where git fetch wiped all
         # all the branches in the bare repository. That led 
