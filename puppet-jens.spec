@@ -40,6 +40,7 @@ mkdir -m 750 -p %{buildroot}/var/lib/jens/environments
 mkdir -m 750 -p %{buildroot}/var/lib/jens/metadata
 mkdir -m 750 -p %{buildroot}/var/log/jens/
 mkdir -m 750 -p %{buildroot}/var/lock/jens/
+mkdir -m 750 -p %{buildroot}/var/spool/jens-update/
 
 %clean
 %{__rm} -rf %{buildroot}
