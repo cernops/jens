@@ -69,7 +69,7 @@ def main():
                     hints = fetch_update_hints(settings, lock)
                 except JensMessagingError, error:
                     logging.error(error)
-                return 25
+                    return 25
             else:
                 hints = None
 
