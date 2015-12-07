@@ -112,7 +112,6 @@ class MessagingTest(JensTestCase):
     # TODO: Test that other messages are fetched if one is locked/broken
 
     def test_validate_and_merge_messages(self):
-        self.keep_sandbox = True
         messages = [
             {}, # Bad
             {'data': {'modules': ['foo']}}, # Bad
