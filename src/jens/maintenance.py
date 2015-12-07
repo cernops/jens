@@ -78,13 +78,17 @@ def _refresh_repositories(settings):
         # is guaranteed. Of course, the reader will have to implement the same
         # protocol on the other end.
         try:
+            logging.info("Trying to acquire a lock to refresh the metadata...")
             fcntl.flock(metadata, fcntl.LOCK_EX)
+            logging.debug("Lock acquired")
         except IOError, error:
             metadata.close()
             raise JensError("Could not lock '%s'" % settings.REPO_METADATA)
         git.reset(path, "origin/master", hard=True)
         try:
+            logging.debug("Trying to release the lock used to refresh the metadata...")
             fcntl.flock(metadata, fcntl.LOCK_UN)
+            logging.debug("Lock released")
         except IOError, error:
             raise JensError("Could not unlock '%s'" % settings.REPO_METADATA)
         finally:
