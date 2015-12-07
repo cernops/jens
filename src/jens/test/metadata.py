@@ -6,6 +6,9 @@
 # or submit itself to any jurisdiction.
 
 import shutil
+import fcntl
+
+from mock import Mock, patch
 
 from jens.maintenance import refresh_metadata
 from jens.git import clone
@@ -136,3 +139,7 @@ class MetadataTest(JensTestCase):
         # Should be the same if it did a reset
         self.assertEquals(get_repository_head(self.settings,\
             self.settings.ENV_METADATADIR), new_commit)
+
+    @patch.object(fcntl, 'flock', side_effect=IOError)
+    def test_fails_if_lock_cannot_be_acquired(self, mock):
+        self.assertRaises(JensError, self._jens_refresh_metadata)

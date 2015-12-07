@@ -122,10 +122,11 @@ def create_fake_repository(settings, base, branches=[]):
     shutil.copy("%s/dummy" % repo_path, "%s/data/datacentres" % repo_path)
     shutil.copy("%s/dummy" % repo_path, "%s/data/hardware" % repo_path)
     shutil.copy("%s/dummy" % repo_path, "%s/data/environments" % repo_path)
+    shutil.copy("%s/dummy" % repo_path, "%s/repositories.yaml" % repo_path)
     gitdir = "%s/.git" % repo_path
     args = ["init"]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
-    args = ["add", "dummy", "code", "data"]
+    args = ["add", "dummy", "code", "data", "repositories.yaml"]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
     args = ["commit", "-m", "init"]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)

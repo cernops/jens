@@ -7,6 +7,7 @@
 
 import os
 import logging
+import fcntl
 
 import jens.git as git
 from jens.decorators import timed
@@ -67,6 +68,26 @@ def _refresh_repositories(settings):
     path = settings.REPO_METADATADIR
     try:
         git.fetch(path)
+        try:
+            metadata = open(settings.REPO_METADATA, 'r')
+        except IOError, error:
+            raise JensError("Could not open '%s' to put a lock on it" % \
+                settings.REPO_METADATA)
+        # jens-gitlab-producer collaborates with jens-update asynchronously
+        # so have to make sure that exclusive access to the file when writing
+        # is guaranteed. Of course, the reader will have to implement the same
+        # protocol on the other end.
+        try:
+            fcntl.flock(metadata, fcntl.LOCK_EX)
+        except IOError, error:
+            metadata.close()
+            raise JensError("Could not lock '%s'" % settings.REPO_METADATA)
         git.reset(path, "origin/master", hard=True)
+        try:
+            fcntl.flock(metadata, fcntl.LOCK_UN)
+        except IOError, error:
+            raise JensError("Could not unlock '%s'" % settings.REPO_METADATA)
+        finally:
+            metadata.close()
     except JensGitError, error:
         raise JensError("Couldn't refresh repositories metadata (%s)" % error)
