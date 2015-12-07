@@ -15,9 +15,10 @@ import pprint
 
 from jens.settings import Settings
 from jens.errors import JensConfigError
-from jens.errors import JensError
+from jens.errors import JensError, JensMessagingError
 from jens.maintenance import validate_directories
 from jens.reposinventory import get_inventory
+from jens.messaging import count_pending_hints
 
 def parse_cmdline_args():
     """Parses command line parameters."""
@@ -34,6 +35,9 @@ def parse_cmdline_args():
     parser.add_option('-i', '--inventory',
         action="store_true",
         help="Shows inventory")
+    parser.add_option('-q', '--queues',
+        action="store_true",
+        help="Shows stats about queues")
     parser.add_option('-a', '--all',
         action="store_true",
         help="Shows everything")
@@ -133,6 +137,13 @@ def main():
         inventory = get_inventory(settings)
         pp = pprint.PrettyPrinter()
         pp.pprint(inventory)
+
+    if opts.queues or opts.all:
+        try:
+            count = count_pending_hints(settings)
+            logging.info("There are '%d' messages in the hints queue" % count)
+        except JensMessagingError, error:
+            logging.error(error)
 
     return 0
 

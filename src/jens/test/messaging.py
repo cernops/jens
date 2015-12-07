@@ -12,7 +12,7 @@ from datetime import datetime
 from dirq.queue import Queue, QueueLockError
 
 from jens.messaging import _validate_and_merge_messages, _fetch_all_messages
-from jens.messaging import fetch_update_hints
+from jens.messaging import fetch_update_hints, count_pending_hints
 from jens.errors import JensMessagingError
 from jens.test.tools import init_repositories
 from jens.test.tools import add_repository, del_repository
@@ -108,6 +108,22 @@ class MessagingTest(JensTestCase):
         self.assertLogErrors()
         mock_queue.assert_called_once()
         self.assertEquals(0, len(msgs))
+
+    def test_count_no_messages(self):
+        count = count_pending_hints(self.settings)
+        self.assertEquals(0, count)
+
+    def test_count_some_messages(self):
+        create_hostgroup_event(self.settings, 'bar')
+        create_module_event(self.settings, 'foo')
+        count = count_pending_hints(self.settings)
+        self.assertEquals(2, count)
+
+    @patch.object(Queue, 'count', side_effect=OSError)
+    def test_count_some_messages_queue_error(self, mock_queue):
+        create_hostgroup_event(self.settings, 'bar')
+        create_module_event(self.settings, 'foo')
+        self.assertRaises(JensMessagingError, count_pending_hints, self.settings)
 
     # TODO: Test that other messages are fetched if one is locked/broken
 

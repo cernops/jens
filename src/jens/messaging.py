@@ -29,6 +29,13 @@ def fetch_update_hints(settings, lock):
     hints = _validate_and_merge_messages(messages)
     return hints
 
+def count_pending_hints(settings):
+    try:
+        queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
+        return queue.count()
+    except OSError, error:
+        raise JensMessagingError("Failed to create Queue object (%s)" % error)
+
 def _fetch_all_messages(settings):
     try:
         queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
