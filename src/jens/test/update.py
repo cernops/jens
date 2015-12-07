@@ -1034,6 +1034,7 @@ class UpdateTest(JensTestCase):
     def test_created_if_new_and_removed_if_gone_regardless_of_hints(self):
         self.settings.MODE = "ONDEMAND"
         murdock_path = self._create_fake_module('murdock', ['qa'])
+        steve_path = self._create_fake_hostgroup('steve', ['qa'])
         old_qa = get_refs(murdock_path + '/.git')['qa']
         ensure_environment(self.settings, 'test', 'master',
             modules=["murdock:qa"])
@@ -1041,11 +1042,15 @@ class UpdateTest(JensTestCase):
         self._jens_update(hints={'hostgroups': ['foo']})
 
         self.assertBare('modules/murdock')
+        self.assertBare('hostgroups/steve')
         self.assertClone('modules/murdock/master')
         self.assertClone('modules/murdock/qa', pointsto=old_qa)
+        self.assertClone('hostgroups/steve/qa')
+        self.assertClone('hostgroups/steve/master')
         self.assertEnvironmentNumberOf("test", "modules", 1)
-        self.assertEnvironmentNumberOf("test", "hostgroups", 0)
+        self.assertEnvironmentNumberOf("test", "hostgroups", 1)
         self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
+        self.assertEnvironmentOverride("test", 'hostgroups/hg_steve', 'master')
 
         del_repository(self.settings, 'modules', 'murdock')
 
@@ -1054,8 +1059,9 @@ class UpdateTest(JensTestCase):
         self.assertTrue('murdock' in repositories_deltas['modules']['deleted'])
         self.assertEnvironmentLinks("test")
         self.assertEnvironmentNumberOf("test", "modules", 0)
-        self.assertEnvironmentNumberOf("test", "hostgroups", 0)
+        self.assertEnvironmentNumberOf("test", "hostgroups", 1)
         self.assertEnvironmentOverrideDoesntExist("test", 'modules/murdock')
+        self.assertEnvironmentOverride("test", 'hostgroups/hg_steve', 'master')
 
     def test_environments_are_created_and_known_branches_expanded_regardless_of_update_hints(self):
         self.settings.MODE = "ONDEMAND"
