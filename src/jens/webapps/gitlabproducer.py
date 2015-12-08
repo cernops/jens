@@ -45,17 +45,17 @@ def hello_gitlab():
             'time' : datetime.now().isoformat(),
             'data' : pickle.dumps({partition : [name]})
         }
-        name = dirq.add(response)
-        logging.info("%s - %s-%s added to the queue"
-                     "" % (response['time'], partition, name))
+        result = dirq.add(response)
+        logging.info("%s - %s-%s - '%s' added to the queue"
+                     "" % (response['time'], partition, name, result))
         return 'OK'
 
     except KeyError as error:
-        logging.error("Failed (%s)" % error)
+        logging.error("Malformed request (Expected key %s not in payload)" % str(error))
         return 'Malformed request', 400
     except NameError as error:
-        logging.error("Failed (%s)" % error)
+        logging.error("'%s' couldn't be found in repositories" % (url))
         return 'Repository not found', 404
     except Exception as error:
-        logging.error("Failed (%s)" % error)
+        logging.error("Unexpected error (%s)" % repr(error))
         return 'Internal Server Error!', 500
