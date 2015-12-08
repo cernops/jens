@@ -32,7 +32,7 @@ def hello_gitlab():
                 fcntl.flock(metadata, fcntl.LOCK_SH)
                 repositories = yaml.load(metadata)['repositories']
                 fcntl.flock(metadata, fcntl.LOCK_UN)
-        except IOError as error:
+        except Exception as error:
             raise JensError("Could not read '%s' ('%s')"
                             "" % (settings.REPO_METADATA, error))
 
