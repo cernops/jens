@@ -7,7 +7,7 @@ import yaml
 
 from datetime import datetime
 from flask import Flask, request, current_app
-from dirq.QueueSimple import Queue
+from dirq.queue import Queue, QueueLockError
 
 from jens.errors import JensConfigError, JensError
 from jens.settings import Settings
