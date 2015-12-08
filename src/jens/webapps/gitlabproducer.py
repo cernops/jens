@@ -18,10 +18,15 @@ app = Flask(__name__)
 @app.route('/gitlab', methods=['POST'])
 def hello_gitlab():
     try:
-        settings = current_app.config['settings']
-        dirq = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
-        url = request.json['repository']['git_ssh_url']
+        payload = request.get_json(silent=True) or {}
+        url = payload['repository']['git_ssh_url']
 
+        settings = current_app.config['settings']
+        try:
+            dirq = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
+        except Exception as error:
+            logging.error("Problem initializing the queue ('%s')" % repr(error))
+            raise
         try:
             with open(settings.REPO_METADATA, 'r') as metadata:
                 fcntl.flock(metadata, fcntl.LOCK_SH)
