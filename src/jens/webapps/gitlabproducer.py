@@ -15,7 +15,6 @@ from jens.messaging import MSG_SCHEMA
 
 app = Flask(__name__)
 
-
 @app.route('/gitlab', methods=['POST'])
 def hello_gitlab():
     try:
@@ -55,30 +54,3 @@ def hello_gitlab():
     except Exception as error:
         logging.error("Failed (%s)" % error)
         return 'Internal Server Error!', 500
-
-def parse_cmdline_args():
-    """Parses command line parameters."""
-    parser = optparse.OptionParser()
-    parser.add_option('-c', '--config',
-        help="Configuration file path (defaults to '/etc/jens/main.conf'",
-        default="/etc/jens/main.conf")
-    opts, args = parser.parse_args()
-    return opts
-
-def main():
-    """Application entrypoint."""
-    opts = parse_cmdline_args()
-
-    settings = Settings("jens-gitlab-producer")
-    try:
-        settings.parse_config(opts.config)
-    except JensConfigError, error:
-        logging.error(error)
-        return 2
-
-    app.config['settings'] = settings
-    app.run(host='0.0.0.0', port=8000)
-    return 0
-
-if __name__ == '__main__':
-    sys.exit(main())
