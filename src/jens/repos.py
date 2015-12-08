@@ -161,7 +161,7 @@ def _refresh_repository(data):
     if hints is None or repository in hints:
         try:
             if settings.MODE == "ONDEMAND":
-                logging.info("Fetching bare and clones of %s/%s upon demand..."
+                logging.info("Fetching %s/%s upon demand..."
                     % (partition, repository))
             git.fetch(bare_path, prune=True, bare=True)
         except JensGitError, error:
