@@ -53,7 +53,7 @@ def hello_gitlab():
             'data' : pickle.dumps({partition : [name]})
         }
         result = dirq.add(response)
-        logging.info("%s - %s-%s - '%s' added to the queue"
+        logging.info("%s - %s/%s - '%s' added to the queue"
                      "" % (response['time'], partition, name, result))
         return 'OK'
 
