@@ -24,7 +24,7 @@ app = Flask(__name__)
 @app.route('/gitlab', methods=['POST'])
 def hello_gitlab():
     try:
-        settings = Settings('jens-gitlab-producer-runner')
+        settings = Settings('jens-gitlab-producer')
         settings.parse_config(current_app.config['config_file'])
 
         payload = request.get_json(silent=True) or {}
