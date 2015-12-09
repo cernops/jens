@@ -58,7 +58,8 @@ def hello_gitlab():
         return 'OK'
 
     except KeyError as error:
-        logging.error("Malformed request (Expected key %s not in payload (%s))" % (str(error), str(payload)))
+        logging.error("Malformed request (Expected key %s not in payload "
+            "(%s))" % (str(error), str(payload)))
         return 'Malformed request', 400
     except NameError as error:
         logging.error("'%s' couldn't be found in repositories" % (url))
