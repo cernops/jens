@@ -25,7 +25,7 @@ def fetch_update_hints(settings, lock):
     except Exception, error:
         raise JensMessagingError("Could not retrieve messages (%s)" % error)
 
-    logging.info("%d update hints found" % len(messages))
+    logging.info("%d messages found" % len(messages))
     hints = _validate_and_merge_messages(messages)
     return hints
 
