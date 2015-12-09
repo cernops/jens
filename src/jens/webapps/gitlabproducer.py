@@ -27,6 +27,8 @@ app = Flask(__name__)
 def hello_gitlab():
     try:
         payload = request.get_json(silent=True) or {}
+        if payload:
+            logging.debug('Incoming request with payload: %s' % str(payload))
         url = payload['repository']['git_ssh_url']
 
         settings = current_app.config['settings']
@@ -59,7 +61,7 @@ def hello_gitlab():
         return 'OK'
 
     except KeyError as error:
-        logging.error("Malformed request (Expected key %s not in payload)" % str(error))
+        logging.error("Malformed request (Expected key %s not in payload (%s))" % (str(error), str(payload)))
         return 'Malformed request', 400
     except NameError as error:
         logging.error("'%s' couldn't be found in repositories" % (url))
