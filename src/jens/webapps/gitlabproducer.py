@@ -17,6 +17,7 @@ from dirq.queue import Queue
 
 from jens.errors import JensError
 from jens.messaging import MSG_SCHEMA
+from jens.settings import Settings
 
 app = Flask(__name__)
 
@@ -28,7 +29,7 @@ def hello_gitlab():
             logging.debug('Incoming request with payload: %s' % str(payload))
         url = payload['repository']['git_ssh_url']
 
-        settings = current_app.config['settings']
+        settings = Settings('jens-gitlab-producer-runner').parse_config(current_app.config['config_file'])
         try:
             dirq = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
         except Exception as error:
