@@ -8,17 +8,14 @@
 
 import fcntl
 import logging
-import optparse
 import pickle
-import sys
 import yaml
 
 from datetime import datetime
 from flask import Flask, request, current_app
-from dirq.queue import Queue, QueueLockError
+from dirq.queue import Queue
 
-from jens.errors import JensConfigError, JensError
-from jens.settings import Settings
+from jens.errors import JensError
 from jens.messaging import MSG_SCHEMA
 
 app = Flask(__name__)
