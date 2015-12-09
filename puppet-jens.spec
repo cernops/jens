@@ -56,6 +56,7 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 %defattr(-,root,root,-)
 %doc README.md ENVIRONMENTS.md examples
 %{_mandir}/man1/*
+/var/www/jens/*
 %{python_sitelib}/*
 %{_bindir}/jens-*
 %attr(750, jens, jens) /var/lib/jens/*
