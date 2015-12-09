@@ -29,7 +29,8 @@ def hello_gitlab():
             logging.debug('Incoming request with payload: %s' % str(payload))
         url = payload['repository']['git_ssh_url']
 
-        settings = Settings('jens-gitlab-producer-runner').parse_config(current_app.config['config_file'])
+        settings = Settings('jens-gitlab-producer-runner')
+        settings.parse_config(current_app.config['config_file'])
         try:
             dirq = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
         except Exception as error:
