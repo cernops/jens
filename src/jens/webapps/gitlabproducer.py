@@ -24,13 +24,14 @@ app = Flask(__name__)
 @app.route('/gitlab', methods=['POST'])
 def hello_gitlab():
     try:
+        settings = Settings('jens-gitlab-producer-runner')
+        settings.parse_config(current_app.config['config_file'])
+
         payload = request.get_json(silent=True) or {}
         if payload:
             logging.debug('Incoming request with payload: %s' % str(payload))
         url = payload['repository']['git_ssh_url']
 
-        settings = Settings('jens-gitlab-producer-runner')
-        settings.parse_config(current_app.config['config_file'])
         try:
             dirq = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
         except Exception as error:
