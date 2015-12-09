@@ -42,6 +42,8 @@ mkdir -m 750 -p %{buildroot}/var/lib/jens/metadata
 mkdir -m 750 -p %{buildroot}/var/log/jens/
 mkdir -m 750 -p %{buildroot}/var/lock/jens/
 mkdir -m 750 -p %{buildroot}/var/spool/jens-update/
+mkdir -m 750 -p %{buildroot}/var/www/jens
+%{__install} -D -p -m 755 wsgi/* %{buildroot}/var/www/jens
 
 %clean
 %{__rm} -rf %{buildroot}
