@@ -16,6 +16,9 @@ from jens.decorators import timed
 
 MSG_SCHEMA = {'time': 'string', 'data': 'binary'}
 
+# Ex (after unpickling 'data'):
+# {'time': '2015-12-10T14:06:35.339550', 'data': {'modules': ['m1']}}
+
 @timed
 def fetch_update_hints(settings, lock):
     hints = {}
