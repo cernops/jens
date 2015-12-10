@@ -311,19 +311,22 @@ more modules... :)
 ## Running modes: Polling or on-demand?
 
 Jens has two running modes that can be selected using the `mode` key available
-in the configuration file. By default Jens will run in polling mode, that
-meaning that all the repositories that Jens is aware of will be polled
-(git-fetched) on every run. This is generally slow and not very efficient but,
-on the other hand, simpler.
+in the configuration file. By default Jens will run in polling mode, meaning
+that all the repositories that Jens is aware of will be polled (git-fetched) on
+every run. This is generally slow and not very efficient but, on the other
+hand, simpler.
 
-However, in deployments where notifications can be listened to when new code is
+However, in deployments where notifications can be sent when new code is
 available (for instance, via push webhooks emitted by Gitlab or Github), it's
-recommended to run Jens in on-demand mode instead. When this mode is enabled,
-every Jens run will first get "update hints" from a local python-dirq queue
-(path set in the configuration file, being `/var/spool/jens-update` the default
-value) and only bug the servers when there's actually something new to
-retrieve. This is much more efficient and it allows running Jens more often as
-it's faster and more lightweight for the server.
+recommended to run Jens in on-demand mode instead. These notifications can be
+received by a listener (read below), transformed, and handed over to Jens.
+
+When this mode is enabled, every Jens run will first get "update hints" from a
+local python-dirq queue (path set in the configuration file, being
+`/var/spool/jens-update` the default value) and only bug the servers when
+there's actually something new to retrieve. This is much more efficient and it
+allows running Jens more often as it's faster and more lightweight for the
+server.
 
 The format of the messages that Jens expects can be explored in detail by
 reading `messaging.py` but in short it contains two elements: a timestamp (str in
