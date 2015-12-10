@@ -16,4 +16,4 @@ install:
 before_script:
   - git config --global user.email "noreply@cern.ch"
   - git config --global user.name "Travis CI"
-script: nosetests -w src jens.test.update:UpdateTest jens.test.metadata:MetadataTest jens.test.messaging:MessagingTest
+script: nosetests
