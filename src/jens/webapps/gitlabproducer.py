@@ -7,6 +7,7 @@
 # or submit itself to any jurisdiction.
 
 import fcntl
+import json
 import logging
 import pickle
 import yaml
@@ -30,7 +31,11 @@ def hello_gitlab():
         payload = request.get_json(silent=True) or {}
         if payload:
             logging.debug('Incoming request with payload: %s' % str(payload))
-        url = payload['repository']['git_ssh_url']
+        try:
+            url = payload['repository']['git_ssh_url']
+        except (KeyError, TypeError) as error:
+            logging.error("Malformed payload (%s)" % json.dumps(payload))
+            return 'Malformed request', 400
 
         try:
             dirq = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
@@ -60,13 +65,10 @@ def hello_gitlab():
                      "" % (response['time'], partition, name, result))
         return 'OK'
 
-    except KeyError as error:
-        logging.error("Malformed request (Expected key %s not in payload "
-            "(%s))" % (str(error), str(payload)))
-        return 'Malformed request', 400
     except NameError as error:
         logging.error("'%s' couldn't be found in repositories" % (url))
         return 'Repository not found', 404
     except Exception as error:
         logging.error("Unexpected error (%s)" % repr(error))
         return 'Internal Server Error!', 500
+
