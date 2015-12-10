@@ -311,10 +311,10 @@ more modules... :)
 ## Running modes: Polling or on-demand?
 
 Jens has two running modes that can be selected using the `mode` key available
-in the configuration file. By default, if not specified, Jens will run in
-polling mode, that meaning that all the repositories that Jens is aware of
-will be polled (git-fetched) on every run. This is generally slow and not very
-efficient but, on the other hand, simpler.
+in the configuration file. By default Jens will run in polling mode, that
+meaning that all the repositories that Jens is aware of will be polled
+(git-fetched) on every run. This is generally slow and not very efficient but,
+on the other hand, simpler.
 
 However, in deployments where notifications can be listened to when new code is
 available (for instance, via push webhooks emitted by Gitlab or Github), it's
@@ -337,7 +337,8 @@ webhooks](http://doc.gitlab.com/ce/web_hooks/web_hooks.html) and translates it
 into the format used internally by Jens. This producer can be run standalone
 for testing purposes via `jens-gitlab-producer-runner` or, much better, on top of
 a web server talking WSGI. For this purpose an example WSGI file is also
-shipped along the software.
+shipped along the software. The producer has to run on the same host so it has
+access to the local queue.
 
 When a producer and `jens-update` are cooperating and the on-demand mode is
 enabled, information regarding the update hints consumed and the actions taken
