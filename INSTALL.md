@@ -310,9 +310,9 @@ more modules... :)
 
 ## Running modes: Polling or on-demand?
 
-Jens has two running modes that can be selected using the 'mode' key available
+Jens has two running modes that can be selected using the `mode` key available
 in the configuration file. By default, if not specified, Jens will run in
-"polling" mode, that meaning that all the repositories that Jens is aware of
+polling mode, that meaning that all the repositories that Jens is aware of
 will be polled (git-fetched) on every run. This is generally slow and not very
 efficient but, on the other hand, simpler.
 
