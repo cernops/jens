@@ -337,7 +337,7 @@ example:
 
 ```
 {'time': '2015-12-10T14:06:35.339550',
-'data': pickle.dump({'modules': ['m1'], 'hostgroups': ['h1', 'h2']})}
+'data': pickle.dumps({'modules': ['m1'], 'hostgroups': ['h1', 'h2']})}
 ```
 
 The idea then is to have something producing this type of message. This suite
