@@ -330,9 +330,15 @@ allows running Jens more often as it's faster and more lightweight for the
 server.
 
 The format of the messages that Jens expects can be explored in detail by
-reading `messaging.py` but in short it contains two elements: a timestamp (str in
-ISO format) and a pickled payload specifying what module or hostgroup has
-changed.
+reading `messaging.py` but in short the schema is composed by two keys: a
+timestamp in ISO format (time key) which is a string and a pickled binary
+payload (data key) specifying what modules or hostgroups have changed. For
+example:
+
+```
+{'time': '2015-12-10T14:06:35.339550',
+'data': pickle.dump({'modules': ['m1'], 'hostgroups': ['h1', 'h2']})}
+```
 
 The idea then is to have something producing this type of message. This suite
 also ships a Gitlab listener that understands the payload contained in the
