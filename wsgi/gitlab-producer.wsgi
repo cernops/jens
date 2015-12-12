@@ -6,6 +6,9 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from jens.settings import Settings
 from jens.webapps.gitlabproducer import app as application
 
-application.config['config_file'] = "/etc/jens/main.conf"
+settings = Settings('jens-gitlab-producer')
+settings.parse_config('/etc/jens/main.conf')
+application.config['settings'] = settings

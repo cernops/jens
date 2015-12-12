@@ -10,6 +10,7 @@ import sys
 import logging
 import optparse
 
+from jens.settings import Settings
 from jens.webapps.gitlabproducer import app
 
 def parse_cmdline_args():
@@ -28,7 +29,14 @@ def main():
     """Application entrypoint."""
     opts = parse_cmdline_args()
 
-    app.config['config_file'] = opts.config
+    settings = Settings("jens-gitlab-producer")
+    try:
+        settings.parse_config(opts.config)
+    except JensConfigError, error:
+        logging.error(error)
+        return 2
+
+    app.config['settings'] = settings
     app.run(host='0.0.0.0', port=opts.port)
     return 0
 

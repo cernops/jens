@@ -18,15 +18,13 @@ from dirq.queue import Queue
 
 from jens.errors import JensError
 from jens.messaging import MSG_SCHEMA
-from jens.settings import Settings
 
 app = Flask(__name__)
 
 @app.route('/gitlab', methods=['POST'])
 def hello_gitlab():
     try:
-        settings = Settings('jens-gitlab-producer')
-        settings.parse_config(current_app.config['config_file'])
+        settings = current_app.config['settings']
 
         payload = request.get_json(silent=True) or {}
         if payload:
