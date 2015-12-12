@@ -10,6 +10,7 @@ import sys
 import logging
 import optparse
 
+from jens.errors import JensConfigError
 from jens.settings import Settings
 from jens.webapps.gitlabproducer import app
 
