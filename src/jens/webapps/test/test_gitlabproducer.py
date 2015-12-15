@@ -5,6 +5,7 @@ import yaml
 from mock import patch
 from dirq.queue import Queue, QueueLockError
 
+from jens.errors import JensMessagingError
 from jens.test.tools import init_repositories
 from jens.test.tools import add_repository, del_repository
 from jens.test.tools import create_fake_repository
@@ -51,8 +52,8 @@ class GitlabProducerTestCase(JensTestCase):
         self.assertEquals(reply.data, 'Malformed request')
         self.assertEquals(reply.status_code, 400)
 
-    @patch.object(Queue, 'add')
-    def test_known_repository(self, mock_add):
+    @patch('jens.webapps.gitlabproducer.enqueue_hint')
+    def test_known_repository(self, mock_eq):
         reply = self.app.post('/gitlab', content_type='application/json',
                     data=json.dumps({'repository':
                         {
@@ -60,8 +61,21 @@ class GitlabProducerTestCase(JensTestCase):
                          'git_ssh_url': "file://%s" % self.site_bare
                         }
                     }))
-        mock_add.assert_called_once()
+        mock_eq.assert_called_once()
         self.assertEquals(reply.status_code, 200)
+
+    @patch('jens.webapps.gitlabproducer.enqueue_hint', side_effect=JensMessagingError)
+    def test_queue_error(self, mock_eq):
+        reply = self.app.post('/gitlab', content_type='application/json',
+                    data=json.dumps({'repository':
+                        {
+                         'name': 'it-puppet-site',
+                         'git_ssh_url': "file://%s" % self.site_bare
+                        }
+                    }))
+        mock_eq.assert_called_once()
+        self.assertEquals(reply.data, 'Queue not accessible')
+        self.assertEquals(reply.status_code, 500)
 
     def test_repository_not_found(self):
         reply = self.app.post('/gitlab', content_type='application/json',
