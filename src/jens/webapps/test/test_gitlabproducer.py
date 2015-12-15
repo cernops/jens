@@ -61,7 +61,7 @@ class GitlabProducerTestCase(JensTestCase):
                          'git_ssh_url': "file://%s" % self.site_bare
                         }
                     }))
-        mock_eq.assert_called_once_with('common', 'site')
+        mock_eq.assert_called_once_with(self.settings, 'common', 'site')
         self.assertEquals(reply.status_code, 200)
 
     @patch('jens.webapps.gitlabproducer.enqueue_hint', side_effect=JensMessagingError)
