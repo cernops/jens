@@ -9,15 +9,12 @@
 import fcntl
 import json
 import logging
-import pickle
 import yaml
 
-from datetime import datetime
 from flask import Flask, request, current_app
-from dirq.queue import Queue
 
-from jens.errors import JensError
-from jens.messaging import MSG_SCHEMA
+from jens.errors import JensError, JensMessagingError
+from jens.messaging import enqueue_hint
 
 app = Flask(__name__)
 
@@ -36,11 +33,6 @@ def hello_gitlab():
             return 'Malformed request', 400
 
         try:
-            dirq = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
-        except Exception as error:
-            logging.error("Problem initializing the queue ('%s')" % repr(error))
-            raise
-        try:
             with open(settings.REPO_METADATA, 'r') as metadata:
                 fcntl.flock(metadata, fcntl.LOCK_SH)
                 repositories = yaml.load(metadata)['repositories']
@@ -54,15 +46,11 @@ def hello_gitlab():
                 if _url == url:
                     partition, name = _partition, _name
 
-        response = {
-            'time' : datetime.now().isoformat(),
-            'data' : pickle.dumps({partition : [name]})
-        }
-        result = dirq.add(response)
-        logging.info("%s - %s/%s - '%s' added to the queue"
-                     "" % (response['time'], partition, name, result))
+        enqueue_hint(settings, partition, name)
         return 'OK'
-
+    except JensMessagingError as error:
+        logging.error("%s-%s couldn't be added to the Queue")
+        return 'Queue not accessible', 500
     except NameError as error:
         logging.error("'%s' couldn't be found in repositories" % (url))
         return 'Repository not found', 404
