@@ -49,7 +49,8 @@ def hello_gitlab():
         enqueue_hint(settings, partition, name)
         return 'OK'
     except JensMessagingError as error:
-        logging.error("%s-%s couldn't be added to the Queue (%s)" % (partition, name, str(error)))
+        logging.error("%s/%s couldn't be added to the queue (%s)" %
+            (partition, name, str(error)))
         return 'Queue not accessible', 500
     except NameError as error:
         logging.error("'%s' couldn't be found in repositories" % (url))
