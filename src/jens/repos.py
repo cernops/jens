@@ -17,7 +17,7 @@ import jens.git as git
 from jens.errors import JensRepositoriesError
 from jens.errors import JensGitError
 from jens.decorators import timed
-from jens.messaging import reenqueue_hint
+from jens.messaging import enqueue_hint
 from jens.reposinventory import get_inventory, persist_inventory
 from jens.reposinventory import get_desired_inventory
 from jens.tools import ref_is_commit
@@ -169,7 +169,7 @@ def _refresh_repository(data):
             logging.error("Unable to fetch '%s' from remote (%s)" % (repository, error))
             if settings.MODE == "ONDEMAND":
                 try:
-                    reenqueue_hint(settings, partition, repository)
+                    enqueue_hint(settings, partition, repository)
                 except JensMessagingError, error:
                     logging.error(error)
             return

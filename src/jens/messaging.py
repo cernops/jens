@@ -35,7 +35,7 @@ def fetch_update_hints(settings, lock):
     hints = _validate_and_merge_messages(messages)
     return hints
 
-def reenqueue_hint(settings, partition, name):
+def enqueue_hint(settings, partition, name):
     if partition not in ("modules", "hostgroups", "common"):
         raise JensMessagingError("Unknown partition '%s'" % partition)
     hint = {
