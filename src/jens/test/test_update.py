@@ -1091,7 +1091,6 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("test", 'hostgroups/hg_h1', 'boom')
 
     def test_hint_readded_to_the_queue_if_fetch_fails(self):
-        self.keep_sandbox = True
         self.settings.MODE = "ONDEMAND"
         yi_path = self._create_fake_hostgroup('yi', ['qa'])
         old_yi_qa = get_refs(yi_path + '/.git')['qa']
