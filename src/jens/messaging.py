@@ -43,7 +43,7 @@ def enqueue_hint(settings, partition, name):
         'data' : pickle.dumps({partition : [name]})
     }
     _queue_item(settings, hint)
-    logging.info("Hint '%s:%s' readded to the queue" % (partition, name))
+    logging.info("Hint '%s/%s' added to the queue" % (partition, name))
 
 def _queue_item(settings, item):
     try:
