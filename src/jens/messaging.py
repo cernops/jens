@@ -9,7 +9,10 @@ import yaml
 import logging
 import pickle
 
-from dirq.queue import Queue, QueueLockError
+from datetime import datetime
+
+from dirq.queue import Queue
+from dirq.queue import QueueLockError, QueueError
 
 from jens.errors import JensMessagingError
 from jens.decorators import timed
@@ -31,6 +34,27 @@ def fetch_update_hints(settings, lock):
     logging.info("%d messages found" % len(messages))
     hints = _validate_and_merge_messages(messages)
     return hints
+
+def reenqueue_hint(settings, partition, name):
+    if partition not in ("modules", "hostgroups", "common"):
+        raise JensMessagingError("Unknown partition '%s'" % partition)
+    hint = {
+        'time' : datetime.now().isoformat(),
+        'data' : pickle.dumps({partition : [name]})
+    }
+    _queue_item(settings, hint)
+    logging.info("Hint '%s:%s' readded to the queue" % (partition, name))
+
+def _queue_item(settings, item):
+    try:
+        queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
+    except OSError, error:
+        raise JensMessagingError("Failed to create Queue object (%s)" % error)
+
+    try:
+        queue.add(item)
+    except QueueError, error:
+        raise JensMessagingError("Failed to element (%s)" % error)
 
 def count_pending_hints(settings):
     try:

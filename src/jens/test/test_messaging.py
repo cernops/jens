@@ -10,9 +10,11 @@ import os
 from datetime import datetime
 
 from dirq.queue import Queue, QueueLockError
+from dirq.queue import QueueError
 
 from jens.messaging import _validate_and_merge_messages, _fetch_all_messages
 from jens.messaging import fetch_update_hints, count_pending_hints
+from jens.messaging import reenqueue_hint
 from jens.errors import JensMessagingError
 from jens.test.tools import init_repositories
 from jens.test.tools import add_repository, del_repository
@@ -175,3 +177,39 @@ class MessagingTest(JensTestCase):
         for h in hgs:
             self.assertTrue(h in result['hostgroups'])
         self.assertTrue('site' in result['common'])
+
+    def test_reenqueue_hint_okay(self):
+        reenqueue_hint(self.settings, 'modules', 'foo1')
+        reenqueue_hint(self.settings, 'modules', 'foo2')
+        reenqueue_hint(self.settings, 'modules', 'foo3')
+        reenqueue_hint(self.settings, 'hostgroups', 'hg1')
+        reenqueue_hint(self.settings, 'hostgroups', 'hg2')
+        reenqueue_hint(self.settings, 'common', 'site')
+        # If they are malformed fetch_update_hints
+        # will ignore them
+        hints = fetch_update_hints(self.settings, self.lock)
+        self.assertEquals(1, len(hints['common']))
+        self.assertEquals(2, len(hints['hostgroups']))
+        self.assertEquals(3, len(hints['modules']))
+
+    def test_reenqueue_hint_okay(self):
+        reenqueue_hint(self.settings, 'modules', 'foo1')
+        reenqueue_hint(self.settings, 'modules', 'foo2')
+        reenqueue_hint(self.settings, 'modules', 'foo3')
+        reenqueue_hint(self.settings, 'hostgroups', 'hg1')
+        reenqueue_hint(self.settings, 'hostgroups', 'hg2')
+        reenqueue_hint(self.settings, 'common', 'site')
+        hints = fetch_update_hints(self.settings, self.lock)
+        self.assertEquals(1, len(hints['common']))
+        self.assertEquals(2, len(hints['hostgroups']))
+        self.assertEquals(3, len(hints['modules']))
+
+
+    @patch.object(Queue, 'add', side_effect=QueueError)
+    def test_reenqueue_hint_queue_error(self, mock):
+        self.assertRaises(JensMessagingError, reenqueue_hint,\
+            self.settings, 'modules', 'foo')
+
+    def test_reenqueue_hint_bad_partition(self):
+        self.assertRaises(JensMessagingError, reenqueue_hint,\
+            self.settings, 'booboo', 'foo')

@@ -9,6 +9,7 @@ import os
 import yaml
 import shutil
 
+from jens.messaging import count_pending_hints
 from jens.repos import refresh_repositories
 from jens.locks import JensLockFactory
 from jens.environments import refresh_environments
@@ -1088,3 +1089,33 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentLinks("test")
         self.assertEnvironmentOverride("test", 'modules/m1', 'boom')
         self.assertEnvironmentOverride("test", 'hostgroups/hg_h1', 'boom')
+
+    def test_hint_readded_to_the_queue_if_fetch_fails(self):
+        self.keep_sandbox = True
+        self.settings.MODE = "ONDEMAND"
+        yi_path = self._create_fake_hostgroup('yi', ['qa'])
+        old_yi_qa = get_refs(yi_path + '/.git')['qa']
+        yi_path_bare = yi_path.replace('/user/', '/bare/')
+
+        self._jens_update()
+
+        self.assertBare('hostgroups/yi')
+        self.assertClone('hostgroups/yi/qa')
+
+        new_yi_qa = add_commit_to_branch(self.settings, yi_path, 'qa')
+
+        # ---- Make it temporary unavailable
+        shutil.move("%s/refs" % yi_path_bare, "%s/goat" % yi_path_bare)
+
+        self.assertEqual(0, count_pending_hints(self.settings))
+        self._jens_update(hints={'hostgroups': ['yi']}, errorsExpected=True)
+        self.assertEqual(1, count_pending_hints(self.settings))
+
+        self.assertBare('hostgroups/yi')
+        self.assertClone('hostgroups/yi/qa', pointsto=old_yi_qa)
+
+        # ---- Bring it back
+        shutil.move("%s/goat" % yi_path_bare, "%s/refs" % yi_path_bare)
+
+        self._jens_update(hints={'hostgroups': ['yi']})
+        self.assertClone('hostgroups/yi/qa', pointsto=new_yi_qa)
