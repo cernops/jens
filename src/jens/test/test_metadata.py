@@ -60,6 +60,22 @@ class MetadataTest(JensTestCase):
         self.assertEquals(get_repository_head(self.settings,\
             self.settings.REPO_METADATADIR), new_commit)
 
+    def test_metadata_updates_if_ondemand_mode_is_enabled(self):
+        self.settings.MODE = "ONDEMAND"
+        self._jens_refresh_metadata()
+
+        new_commit = add_commit_to_branch(self.settings, \
+            self.environments, 'master')
+        self._jens_refresh_metadata()
+        self.assertEquals(get_repository_head(self.settings,\
+            self.settings.ENV_METADATADIR), new_commit)
+
+        new_commit = add_commit_to_branch(self.settings, \
+            self.repositories, 'master')
+        self._jens_refresh_metadata()
+        self.assertEquals(get_repository_head(self.settings,\
+            self.settings.REPO_METADATADIR), new_commit)
+
     def test_fails_if_remote_repositories_unavailable(self):
         initial = get_repository_head(self.settings, self.repositories)
         self.assertEquals(get_repository_head(self.settings,\
