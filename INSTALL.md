@@ -308,6 +308,70 @@ INFO Done
 Now it's your turn to play with it! Commit things, create environments, add
 more modules... :)
 
+## Running modes: Polling or on-demand?
+
+Jens has two running modes that can be selected using the `mode` key available
+in the configuration file. By default Jens will run in polling mode
+(`mode=POLL`), meaning that all the repositories that Jens is aware of will be
+polled (git-fetched) on every run. This is generally slow and not very
+efficient but, on the other hand, simpler.
+
+However, in deployments where notifications can be sent when new code is
+available (for instance, via push webhooks emitted by Gitlab or Github), it's
+recommended to run Jens in on-demand mode instead (`mode=ONDEMAND`). These
+notifications can be received by a listener (read below), transformed, and
+handed over to Jens.
+
+When this mode is enabled, every Jens run will first get "update hints" from a
+local python-dirq queue (path set in the configuration file, being
+`/var/spool/jens-update` the default value) and only bug the servers when
+there's actually something new to retrieve. This is much more efficient and it
+allows running Jens more often as it's faster and more lightweight for the
+server.
+
+The format of the messages that Jens expects can be explored in detail by
+reading `messaging.py` but in short the schema is composed by two keys: a
+timestamp in ISO format (time key) which is a string and a pickled binary
+payload (data key) specifying what modules or hostgroups have changed. For
+example:
+
+```
+{'time': '2015-12-10T14:06:35.339550',
+'data': pickle.dumps({'modules': ['m1'], 'hostgroups': ['h1', 'h2']})}
+```
+
+The idea then is to have something producing this type of message. This suite
+also ships a Gitlab listener that understands the payload contained in the
+requests made via [Gitlab push
+webhooks](http://doc.gitlab.com/ce/web_hooks/web_hooks.html) and translates it
+into the format used internally, producing this way the messages required by
+Jens. This listener (and producer) can be run standalone for testing purposes
+via `jens-gitlab-producer-runner` or, much better, on top of a web server
+talking WSGI. For this purpose an example WSGI file is also shipped along the
+software.  The producer has to run on the same host so it has access to the
+local queue.
+
+When a producer and `jens-update` are cooperating and the on-demand mode is
+enabled, information regarding the update hints consumed and the actions taken
+is present in the usual log file, for example:
+
+```
+...
+INFO Getting and processing hints...
+INFO 1 messages found
+INFO Executed 'fetch_update_hints' in 2.31 ms
+...
+INFO Fetching hostgroups/foo upon demand...
+INFO Updating ref '/mnt/puppet/aijens-3afegt67.cern.ch/clone/hostgroups/foo/qa'
+```
+
+Also, `jens-gitlab-producer.log` is populated as notifications come in and hints
+are enqueued:
+
+```
+INFO 2015-12-10T14:43:01.705468 - hostgroups/foo - '0000003c/56698165ac7909' added to the queue
+```
+
 ### Getting statistics about the number of modules, hostgroups and environments
 
 ```

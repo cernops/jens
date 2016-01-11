@@ -5,26 +5,3 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-class JensError(Exception):
-    pass
-
-class JensConfigError(JensError):
-    pass
-
-class JensMessagingError(JensError):
-    pass
-
-class JensRepositoriesError(JensError):
-    pass
-
-class JensEnvironmentsError(JensError):
-    pass
-
-class JensGitError(JensError):
-    pass
-
-class JensLockError(JensError):
-    pass
-
-class JensLockExistsError(JensLockError):
-    pass

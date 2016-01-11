@@ -17,6 +17,7 @@ import jens.git as git
 from jens.errors import JensRepositoriesError
 from jens.errors import JensGitError
 from jens.decorators import timed
+from jens.messaging import enqueue_hint
 from jens.reposinventory import get_inventory, persist_inventory
 from jens.reposinventory import get_desired_inventory
 from jens.tools import ref_is_commit
@@ -24,7 +25,7 @@ from jens.tools import refname_to_dirname
 from jens.git import GIT_CLONE_TIMEOUT, GIT_FETCH_TIMEOUT
 
 @timed
-def refresh_repositories(settings, lock):
+def refresh_repositories(settings, lock, hints=None):
     try:
         logging.debug("Reading metadata from %s" % settings.REPO_METADATA)
         definition = yaml.load(open(settings.REPO_METADATA, 'r'))
@@ -57,9 +58,15 @@ def refresh_repositories(settings, lock):
         delta['new'] = _create_new_repositories(settings, delta['new'],
             partition, definition, inventory[partition], desired[partition])
 
+        # If hints are passed but there's nothing explicitly declared
+        # for a given partition, we make it explicit here.
+        if hints and not partition in hints:
+            hints[partition] = set()
+
         logging.info("Expanding EXISTING bare repositories...")
         _refresh_repositories(settings, delta['existing'], partition,
-            inventory[partition], desired[partition])
+            inventory[partition], desired[partition],
+            hints[partition] if hints else None)
 
         logging.info("Purging REMOVED bare repositories...")
         _purge_repositories(settings, delta['deleted'], partition,
@@ -113,7 +120,8 @@ def _create_new_repositories(settings, new_repositories, partition,
 
 # This is the most common operation Jens has to do, git-fetch
 # over all bare repos and the expansion of clones.
-def _refresh_repositories(settings, existing_repositories, partition, inventory, desired):
+def _refresh_repositories(settings, existing_repositories, partition,
+        inventory, desired, hints):
     if not existing_repositories:
         return # Seems that passing [] to pool.map makes .join never return
     manager = Manager()
@@ -123,7 +131,8 @@ def _refresh_repositories(settings, existing_repositories, partition, inventory,
     inventory_lock = manager.Lock()
     data = [{'settings': settings, 'partition': partition,
         'repository': repository, 'inventory': inventory_proxy,
-        'inventory_lock': inventory_lock, 'desired': desired}
+        'inventory_lock': inventory_lock, 'desired': desired,
+        'hints': hints}
         for repository in existing_repositories]
     pool = Pool(processes=int(math.ceil(cpu_count()*1.5)))
     pool.map(_refresh_repository, data)
@@ -138,19 +147,32 @@ def _refresh_repository(data):
     inventory = data['inventory']
     inventory_lock = data['inventory_lock']
     desired = data['desired']
-    logging.debug("Expanding %s/%s..." % (partition, repository))
+    hints = data['hints']
+    logging.debug("Expanding bare and clones of %s/%s..." % (partition, repository))
     bare_path = _compose_bare_repository_path(settings,
         repository, partition)
+
     try:
         old_refs = git.get_refs(bare_path)
     except JensGitError, error:
         logging.error("Unable to get old refs of '%s' (%s)" % (repository, error))
         return
-    try:
-        git.fetch(bare_path, prune=True, bare=True)
-    except JensGitError, error:
-        logging.error("Unable to fetch '%s' from remote (%s)" % (repository, error))
-        return
+
+    # If we know nothing or we know that we have to fetch
+    if hints is None or repository in hints:
+        try:
+            if settings.MODE == "ONDEMAND":
+                logging.info("Fetching %s/%s upon demand..."
+                    % (partition, repository))
+            git.fetch(bare_path, prune=True, bare=True)
+        except JensGitError, error:
+            logging.error("Unable to fetch '%s' from remote (%s)" % (repository, error))
+            if settings.MODE == "ONDEMAND":
+                try:
+                    enqueue_hint(settings, partition, repository)
+                except JensMessagingError, error:
+                    logging.error(error)
+            return
     try:
         # TODO: Found a corner case where git fetch wiped all
         # all the branches in the bare repository. That led 

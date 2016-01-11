@@ -12,6 +12,7 @@ import optparse
 
 from jens.errors import JensError, JensLockError
 from jens.errors import JensConfigError, JensRepositoriesError
+from jens.errors import JensMessagingError
 from jens.errors import JensLockExistsError
 from jens.settings import Settings
 from jens.repos import refresh_repositories
@@ -19,6 +20,7 @@ from jens.maintenance import refresh_metadata
 from jens.maintenance import validate_directories
 from jens.locks import JensLockFactory
 from jens.environments import refresh_environments
+from jens.messaging import fetch_update_hints
 
 def parse_cmdline_args():
     """Parses command line parameters."""
@@ -26,6 +28,9 @@ def parse_cmdline_args():
     parser.add_option('-c', '--config',
         help="Configuration file path (defaults to '/etc/jens/main.conf'",
         default="/etc/jens/main.conf")
+    parser.add_option('-p', '--poll',
+        help="Force POLL mode, regardless of what's in the config file",
+        action='store_true')
     opts, args = parser.parse_args()
     return opts
 
@@ -46,6 +51,9 @@ def main():
         logging.error("Failed to validate directories (%s)" % error)
         return 3
 
+    if opts.poll:
+        settings.MODE = 'POLL'
+
     try:
         with JensLockFactory.makeLock(settings) as lock:
             # Update metadata
@@ -56,11 +64,20 @@ def main():
                 logging.error(error)
                 return 20
 
+            if settings.MODE == 'ONDEMAND':
+                try:
+                    hints = fetch_update_hints(settings, lock)
+                except JensMessagingError, error:
+                    logging.error(error)
+                    return 25
+            else:
+                hints = None
+
             # Update repositories
             logging.info("Refreshing repositories...")
             try:
                 repositories_deltas, inventory = \
-                    refresh_repositories(settings, lock)
+                    refresh_repositories(settings, lock, hints)
             except JensRepositoriesError, error:
                 logging.error("Failed (%s)" % error)
                 return 30

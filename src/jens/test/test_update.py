@@ -9,6 +9,7 @@ import os
 import yaml
 import shutil
 
+from jens.messaging import count_pending_hints
 from jens.repos import refresh_repositories
 from jens.locks import JensLockFactory
 from jens.environments import refresh_environments
@@ -36,8 +37,10 @@ class UpdateTest(JensTestCase):
         init_repositories(self.settings)
         (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
         add_repository(self.settings, 'common', 'site', bare)
+        self.site_user = user
         (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
         add_repository(self.settings, 'common', 'hieradata', bare)
+        self.hieradata_user = user
 
         self.lock = JensLockFactory.makeLock(self.settings)
 
@@ -51,8 +54,9 @@ class UpdateTest(JensTestCase):
         add_repository(self.settings, 'hostgroups', hostgroup, bare)
         return user
 
-    def _jens_update(self, errorsExpected=False, errorRegexp=None):
-        repositories_deltas, inventory = refresh_repositories(self.settings, self.lock)
+    def _jens_update(self, errorsExpected=False, errorRegexp=None, hints=None):
+        repositories_deltas, inventory = \
+            refresh_repositories(self.settings, self.lock, hints=hints)
         refresh_environments(self.settings, self.lock, repositories_deltas, inventory)
         if errorsExpected:
             self.assertLogErrors(errorRegexp)
@@ -947,3 +951,170 @@ class UpdateTest(JensTestCase):
         self._jens_update()
 
         self.assertEnvironmentDoesntExist("test")
+
+    def test_clones_not_refreshed_if_bare_not_in_hints(self):
+        self.settings.MODE = "ONDEMAND"
+        murdock_path = self._create_fake_hostgroup('murdock', ['qa'])
+        old_qa = get_refs(murdock_path + '/.git')['qa']
+        ensure_environment(self.settings, 'test', 'master',
+            hostgroups=["murdock:qa"])
+
+        self._jens_update()
+
+        self.assertClone('hostgroups/murdock/qa', pointsto=old_qa)
+        self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', 'qa')
+
+        new_qa = add_commit_to_branch(self.settings, murdock_path, 'qa')
+
+        self._jens_update(hints={'hostgroups': ['other']})
+
+        self.assertClone('hostgroups/murdock/qa', pointsto=old_qa)
+        self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', 'qa')
+
+        self._jens_update(hints=None)
+
+        self.assertClone('hostgroups/murdock/qa', pointsto=new_qa)
+        self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', 'qa')
+
+    def test_clones_refreshed_if_bare_in_hints(self):
+        self.settings.MODE = "ONDEMAND"
+        murdock_path = self._create_fake_module('murdock', ['qa'])
+        old_qa = get_refs(murdock_path + '/.git')['qa']
+        old_site_qa = get_refs(self.site_user + '/.git')['qa']
+        old_hieradata_qa = get_refs(self.hieradata_user + '/.git')['qa']
+        ensure_environment(self.settings, 'test', 'master',
+            modules=["murdock:qa"])
+
+        self._jens_update()
+
+        self.assertClone('modules/murdock/qa', pointsto=old_qa)
+        self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
+
+        new_qa = add_commit_to_branch(self.settings, murdock_path, 'qa')
+        new_site_qa = add_commit_to_branch(self.settings, self.site_user, 'qa')
+        new_hieradata_qa = add_commit_to_branch(self.settings, self.hieradata_user, 'qa')
+
+        # Test that it actually intersects existing and hints
+        self._jens_update(hints={'modules': ['foo']})
+
+        self.assertClone('modules/murdock/qa', pointsto=old_qa)
+        self.assertClone('common/site/qa', pointsto=old_site_qa)
+        self.assertClone('common/hieradata/qa', pointsto=old_hieradata_qa)
+        self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
+
+        self._jens_update(hints=
+            {'modules': ['murdock', 'foo'], 'hostgroups': ['foo'], 'common': ['site']})
+
+        self.assertClone('modules/murdock/qa', pointsto=new_qa)
+        self.assertClone('common/site/qa', pointsto=new_site_qa)
+        self.assertClone('common/hieradata/qa', pointsto=old_hieradata_qa)
+        self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
+
+        self._jens_update(hints= {'common': ['hieradata']})
+        self.assertClone('common/hieradata/qa', pointsto=new_hieradata_qa)
+
+    def test_clones_not_refreshed_if_constaints_enabled_but_no_partition_declared(self):
+        self.settings.MODE = "ONDEMAND"
+        murdock_path = self._create_fake_module('murdock', ['qa'])
+        old_qa = get_refs(murdock_path + '/.git')['qa']
+        ensure_environment(self.settings, 'test', 'master',
+            modules=["murdock:qa"])
+
+        self._jens_update()
+
+        self.assertBare('modules/murdock')
+        self.assertClone('modules/murdock/qa', pointsto=old_qa)
+        self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
+
+        new_qa = add_commit_to_branch(self.settings, murdock_path, 'qa')
+
+        self._jens_update(hints={'hostgroups': ['foo']})
+
+        self.assertClone('modules/murdock/qa', pointsto=old_qa)
+
+    def test_created_if_new_and_removed_if_gone_regardless_of_hints(self):
+        self.settings.MODE = "ONDEMAND"
+        murdock_path = self._create_fake_module('murdock', ['qa'])
+        steve_path = self._create_fake_hostgroup('steve', ['qa'])
+        old_qa = get_refs(murdock_path + '/.git')['qa']
+        ensure_environment(self.settings, 'test', 'master',
+            modules=["murdock:qa"])
+
+        self._jens_update(hints={'hostgroups': ['foo']})
+
+        self.assertBare('modules/murdock')
+        self.assertBare('hostgroups/steve')
+        self.assertClone('modules/murdock/master')
+        self.assertClone('modules/murdock/qa', pointsto=old_qa)
+        self.assertClone('hostgroups/steve/qa')
+        self.assertClone('hostgroups/steve/master')
+        self.assertEnvironmentNumberOf("test", "modules", 1)
+        self.assertEnvironmentNumberOf("test", "hostgroups", 1)
+        self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
+        self.assertEnvironmentOverride("test", 'hostgroups/hg_steve', 'master')
+
+        del_repository(self.settings, 'modules', 'murdock')
+
+        repositories_deltas = self._jens_update(hints={'hostgroups': ['foo']})
+
+        self.assertTrue('murdock' in repositories_deltas['modules']['deleted'])
+        self.assertEnvironmentLinks("test")
+        self.assertEnvironmentNumberOf("test", "modules", 0)
+        self.assertEnvironmentNumberOf("test", "hostgroups", 1)
+        self.assertEnvironmentOverrideDoesntExist("test", 'modules/murdock')
+        self.assertEnvironmentOverride("test", 'hostgroups/hg_steve', 'master')
+
+    def test_environments_are_created_and_known_branches_expanded_regardless_of_update_hints(self):
+        self.settings.MODE = "ONDEMAND"
+        h1_path = self._create_fake_hostgroup('h1', ['qa', 'boom'])
+        old_h1_qa = get_refs(h1_path + '/.git')['qa']
+        m1_path = self._create_fake_module('m1', ['qa', 'boom'])
+
+        self._jens_update()
+
+        ensure_environment(self.settings, 'test', 'master',
+            hostgroups=['h1:boom'], modules=['m1:boom'])
+        new_h1_qa = add_commit_to_branch(self.settings, h1_path, 'qa')
+
+        self._jens_update(hints={'hostgroups': ['other']})
+
+        self.assertClone('hostgroups/h1/qa', pointsto=old_h1_qa)
+        self.assertEnvironmentLinks("test")
+        self.assertEnvironmentOverride("test", 'modules/m1', 'boom')
+        self.assertEnvironmentOverride("test", 'hostgroups/hg_h1', 'boom')
+
+        self._jens_update(hints={'modules': ['m1'], 'hostgroups': ['h1']})
+
+        self.assertClone('hostgroups/h1/qa', pointsto=new_h1_qa)
+        self.assertEnvironmentLinks("test")
+        self.assertEnvironmentOverride("test", 'modules/m1', 'boom')
+        self.assertEnvironmentOverride("test", 'hostgroups/hg_h1', 'boom')
+
+    def test_hint_readded_to_the_queue_if_fetch_fails(self):
+        self.settings.MODE = "ONDEMAND"
+        yi_path = self._create_fake_hostgroup('yi', ['qa'])
+        old_yi_qa = get_refs(yi_path + '/.git')['qa']
+        yi_path_bare = yi_path.replace('/user/', '/bare/')
+
+        self._jens_update()
+
+        self.assertBare('hostgroups/yi')
+        self.assertClone('hostgroups/yi/qa')
+
+        new_yi_qa = add_commit_to_branch(self.settings, yi_path, 'qa')
+
+        # ---- Make it temporary unavailable
+        shutil.move("%s/refs" % yi_path_bare, "%s/goat" % yi_path_bare)
+
+        self.assertEqual(0, count_pending_hints(self.settings))
+        self._jens_update(hints={'hostgroups': ['yi']}, errorsExpected=True)
+        self.assertEqual(1, count_pending_hints(self.settings))
+
+        self.assertBare('hostgroups/yi')
+        self.assertClone('hostgroups/yi/qa', pointsto=old_yi_qa)
+
+        # ---- Bring it back
+        shutil.move("%s/goat" % yi_path_bare, "%s/refs" % yi_path_bare)
+
+        self._jens_update(hints={'hostgroups': ['yi']})
+        self.assertClone('hostgroups/yi/qa', pointsto=new_yi_qa)

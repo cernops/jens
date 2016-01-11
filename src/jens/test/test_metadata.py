@@ -6,6 +6,9 @@
 # or submit itself to any jurisdiction.
 
 import shutil
+import fcntl
+
+from mock import Mock, patch
 
 from jens.maintenance import refresh_metadata
 from jens.git import clone
@@ -43,6 +46,22 @@ class MetadataTest(JensTestCase):
     #### TESTS ####
 
     def test_basic_updates(self):
+        self._jens_refresh_metadata()
+
+        new_commit = add_commit_to_branch(self.settings, \
+            self.environments, 'master')
+        self._jens_refresh_metadata()
+        self.assertEquals(get_repository_head(self.settings,\
+            self.settings.ENV_METADATADIR), new_commit)
+
+        new_commit = add_commit_to_branch(self.settings, \
+            self.repositories, 'master')
+        self._jens_refresh_metadata()
+        self.assertEquals(get_repository_head(self.settings,\
+            self.settings.REPO_METADATADIR), new_commit)
+
+    def test_metadata_updates_if_ondemand_mode_is_enabled(self):
+        self.settings.MODE = "ONDEMAND"
         self._jens_refresh_metadata()
 
         new_commit = add_commit_to_branch(self.settings, \
@@ -136,3 +155,7 @@ class MetadataTest(JensTestCase):
         # Should be the same if it did a reset
         self.assertEquals(get_repository_head(self.settings,\
             self.settings.ENV_METADATADIR), new_commit)
+
+    @patch.object(fcntl, 'flock', side_effect=IOError)
+    def test_fails_if_lock_cannot_be_acquired(self, mock):
+        self.assertRaises(JensError, self._jens_refresh_metadata)

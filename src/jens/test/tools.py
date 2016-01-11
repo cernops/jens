@@ -10,8 +10,13 @@ import yaml
 import tempfile
 import shutil
 import time
+import pickle
+from datetime import datetime
+
+from dirq.queue import Queue, QueueError, QueueLockError
 
 from jens.git import _git
+from jens.messaging import MSG_SCHEMA
 
 def init_sandbox(path):
     dirs = [
@@ -27,6 +32,7 @@ def init_sandbox(path):
         "%s/lib/metadata/repositories" % path,
         "%s/log" % path,
         "%s/etc" % path,
+        "%s/spool" % path,
         "%s/repos/user" % path,
         "%s/repos/bare" % path]
     map(os.makedirs, dirs)
@@ -116,10 +122,11 @@ def create_fake_repository(settings, base, branches=[]):
     shutil.copy("%s/dummy" % repo_path, "%s/data/datacentres" % repo_path)
     shutil.copy("%s/dummy" % repo_path, "%s/data/hardware" % repo_path)
     shutil.copy("%s/dummy" % repo_path, "%s/data/environments" % repo_path)
+    shutil.copy("%s/dummy" % repo_path, "%s/repositories.yaml" % repo_path)
     gitdir = "%s/.git" % repo_path
     args = ["init"]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
-    args = ["add", "dummy", "code", "data"]
+    args = ["add", "dummy", "code", "data", "repositories.yaml"]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
     args = ["commit", "-m", "init"]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
@@ -193,3 +200,24 @@ def reset_branch_to(settings, repo_path, branch, commit_id):
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
     args = ["reset", "--hard", commit_id]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
+
+## Messaging
+
+def add_msg_to_queue(settings, msg):
+    queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
+    queue.enqueue(msg)
+
+def create_module_event(settings, module):
+    msg = {'time': datetime.now().isoformat(),
+        'data': pickle.dumps({'modules': [module]})}
+    add_msg_to_queue(settings, msg)
+
+def create_hostgroup_event(settings, hostgroup):
+    msg = {'time': datetime.now().isoformat(),
+        'data': pickle.dumps({'hostgroups': [hostgroup]})}
+    add_msg_to_queue(settings, msg)
+
+def create_common_event(settings, element):
+    msg = {'time': datetime.now().isoformat(),
+        'data': pickle.dumps({'common': [element]})}
+    add_msg_to_queue(settings, msg)

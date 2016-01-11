@@ -20,6 +20,7 @@ cachedir = string(default='/var/lib/jens/cache')
 hashprefix = string(default='commit/')
 directory_environments = boolean(default=False)
 common_hieradata_items = list(default=list())
+mode = option('POLL', 'ONDEMAND', default='POLL')
 [lock]
 type = option('DISABLED', 'FILE', 'ETCD', default='FILE')
 name = string(default='jens')
@@ -29,4 +30,6 @@ lockdir = string(default='/var/lock/jens')
 servers = list(default=list("127.0.0.1:4001"))
 acqtimeout = integer(default=1)
 initialttl = integer(default=60)
+[messaging]
+queuedir = string(default='/var/spool/jens-update')
 """

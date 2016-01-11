@@ -7,27 +7,27 @@ Make sure that all the run-time dependencies declared in the spec file and
 ## Running the tests with a human-readable output
 
 ```
-$ nosetests -w src jens.test.update:UpdateTest jens.test.metadata:MetadataTest -v
+$ nosetests -v
 ```
 
 ### Just a single test
 
 ```
-$ nosetests -w src jens.test.update:UpdateTest.test_base -v
+$ nosetests jens.test.test_update:UpdateTest.test_base -v
 ```
 
 ### Without capturing STDOUT
 
 ```
-$ nosetests -w src jens.test.update:UpdateTest.test_base -v --nocapture
+$ nosetests jens.test.test_update:UpdateTest.test_base -v --nocapture
 ```
 
 ## Running the tests with xunit-suitable output
 
 
 ```
-$ nosetests -w src jens.test.metadata:MetadataTest \
-   jens.test.update:UpdateTest \
+$ nosetests -w src jens.test.test_metadata:MetadataTest \
+   jens.test.test_update:UpdateTest \
    --with-xunit \
    --xunit-file=/tmp/jens-test-results.xml
 ```
