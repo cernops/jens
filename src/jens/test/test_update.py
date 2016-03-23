@@ -1118,3 +1118,25 @@ class UpdateTest(JensTestCase):
 
         self._jens_update(hints={'hostgroups': ['yi']})
         self.assertClone('hostgroups/yi/qa', pointsto=new_yi_qa)
+
+    def test_directory_environments_parser_modes(self):
+        self.settings.DIRECTORY_ENVIRONMENTS = True
+        ensure_environment(self.settings, 'noparser', 'qa')
+        ensure_environment(self.settings, 'parserfuture', 'qa', parser='future')
+        ensure_environment(self.settings, 'parsercurrent', 'qa', parser='current')
+        self._jens_update()
+
+        self.assertEnvironmentLinks('noparser')
+        self.assertEnvironmentHasAConfigFile('noparser')
+        self.assertEnvironmentHasAConfigFileAndParserSet('noparser', None)
+        self.assertEnvironmentLinks('parserfuture')
+        self.assertEnvironmentHasAConfigFile('parserfuture')
+        self.assertEnvironmentHasAConfigFileAndParserSet('parserfuture', 'future')
+        self.assertEnvironmentLinks('parsercurrent')
+        self.assertEnvironmentHasAConfigFile('parsercurrent')
+        self.assertEnvironmentHasAConfigFileAndParserSet('parsercurrent', 'current')
+
+    def test_directory_environments_parser_modes_bad_value(self):
+        ensure_environment(self.settings, 'parserbroken', 'qa', parser='broken')
+        self._jens_update(errorsExpected=True)
+        self.assertEnvironmentDoesntExist('parserbroken')
