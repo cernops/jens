@@ -102,8 +102,10 @@ class UpdateTest(JensTestCase):
             self.assertClone('common/hieradata/%s' % branch)
         self.assertEnvironmentLinks("qa")
         self.assertEnvironmentHasAConfigFile("qa")
+        self.assertEnvironmentHasAConfigFileAndParserSet('qa', None)
         self.assertEnvironmentLinks("production")
         self.assertEnvironmentHasAConfigFile("production")
+        self.assertEnvironmentHasAConfigFileAndParserSet('production', None)
 
     def test_directory_environments_not_enabled_by_default(self):
         self._jens_update()
