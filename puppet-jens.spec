@@ -1,6 +1,6 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
-Version: 0.12
+Version: 0.13
 Release: 1%{?dist}
 
 License: GPL
@@ -66,6 +66,9 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 %config(noreplace) %{_sysconfdir}/jens/main.conf
 
 %changelog
+* Tue Mar 29 2016 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.13-1
+- Allow setting 'parser' in environment.conf
+
 * Mon Jan 11 2016 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.12-1
 - Add on-demand mode to jens-update.
 - Add webapps/gitlabproducer.
