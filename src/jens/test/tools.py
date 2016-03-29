@@ -41,7 +41,7 @@ def destroy_sandbox(path):
     shutil.rmtree(path)
 
 def ensure_environment(settings, envname, default,
-        modules=[], hostgroups=[], common=[]):
+        modules=[], hostgroups=[], common=[], parser=None):
     environment = {'notifications': 'higgs@example.org'}
     if default is not None:
         environment['default'] = default
@@ -60,6 +60,9 @@ def ensure_environment(settings, envname, default,
     for hostgroup in hostgroups:
         name, override = hostgroup.split(':')
         environment['overrides']['hostgroups'][name] = override
+
+    if parser:
+        environment['parser'] = parser
 
     environment_file = open("%s/%s.yaml" % (settings.ENV_METADATADIR, envname), 'w+')
     yaml.dump(environment, environment_file, default_flow_style=False)

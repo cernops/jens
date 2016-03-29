@@ -12,6 +12,8 @@ import shutil
 import re
 import math
 
+from configobj import ConfigObj
+
 from jens.git import hash_object
 from jens.decorators import timed
 from jens.errors import JensEnvironmentsError
@@ -19,6 +21,7 @@ from jens.tools import refname_to_dirname
 from jens.tools import aggregate_deltas
 
 DIRECTORY_ENVIRONMENTS_CONF_FILENAME = "environment.conf"
+DIRECTORY_ENVIRONMENTS_CONF_PARSER_VALUES = ('current', 'future')
 
 @timed
 def refresh_environments(settings, lock, repositories_deltas, inventory):
@@ -181,7 +184,7 @@ def _create_new_environment(settings, environment, inventory):
 
     if settings.DIRECTORY_ENVIRONMENTS:
         try:
-            _add_configuration_file(settings, environment)
+            _add_configuration_file(settings, environment, definition)
         except JensEnvironmentsError, error:
             logging.error("Failed to generate config file for environment '%s' (%s)" % \
                 (environment, error))
@@ -200,6 +203,11 @@ def read_environment_definition(settings, environment):
         if 'overrides' in environment and environment['overrides'] is None:
                 raise JensEnvironmentsError("Lacking overrides in environment '%s'" %
                     environment)
+        if 'parser' in environment and \
+            environment['parser'] not in DIRECTORY_ENVIRONMENTS_CONF_PARSER_VALUES:
+                raise JensEnvironmentsError("Environment '%s' has an invalid "
+                    "value for the parser option: %s" % (environment,
+                        environment['parser']))
         # What about checking that default in settings.mandatory_barnches?
         return environment
     except yaml.YAMLError:
@@ -461,16 +469,18 @@ def _link_common_hieradata(settings, environment, definition):
         except OSError, error:
             raise JensEnvironmentsError(error)
 
-def _add_configuration_file(settings, environment):
+def _add_configuration_file(settings, environment, definition):
     conf_file_path = "%s/%s/%s" % \
         (settings.ENVIRONMENTSDIR, environment,
         DIRECTORY_ENVIRONMENTS_CONF_FILENAME)
-    conf = """modulepath = modules:hostgroups
-manifest = site/site.pp
-"""
+    config = ConfigObj(conf_file_path)
+    config['modulepath'] = "modules:hostgroups"
+    config['manifest'] = "site/site.pp"
+    if 'parser' in definition:
+        config['parser'] = definition['parser']
+
     try:
-        with open(conf_file_path, 'w') as conf_file:
-            conf_file.write(conf)
+        config.write()
     except IOError:
-        raise JensEnvironmentsError("Unable to open %s for writing" % \
+        raise JensEnvironmentsError("Unable to write to %s" % \
             conf_file_path)

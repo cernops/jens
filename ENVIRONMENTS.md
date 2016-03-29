@@ -113,6 +113,23 @@ However, the same way as dynamic environments:
 * If a module/hostgroup is removed from the library, it will be removed from
   all the shapshots too, as if they were dynamic environments.
 
+## Parser type
+
+When declaring an environment, use the _parser_ option to set the parser type
+that you want to have enabled in that particular Puppet environment. Example:
+
+```
+$ cat future.yaml
+---
+default: qa
+notitications: higgs@cern.ch
+parser: future
+```
+
+The allowed values are: unset (parser key not declared), current or future.
+
+See [PuppetLabs' documentation](http://cern.ch/go/mb6h) for more information.
+
 ## Which environment should I use for my production service?
 
 Disclaimer: The following tips are inevitably coupled to CERN IT policies so

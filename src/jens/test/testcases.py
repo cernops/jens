@@ -13,6 +13,7 @@ import tempfile
 import time
 
 from string import Template
+from configobj import ConfigObj
 
 from jens.locks import JensLockFactory
 from jens.settings import Settings
@@ -169,6 +170,15 @@ class JensTestCase(unittest.TestCase):
             raise AssertionError("Environment '%s' doesn't have a config file" % environment)
         if not os.stat(conf_file_path).st_size > 0:
             raise AssertionError("Environment '%s''s config file seems empty" % environment)
+
+    def assertEnvironmentHasAConfigFileAndParserSet(self, environment, parser):
+        conf_file_path = "%s/%s/environment.conf" % \
+            (self.settings.ENVIRONMENTSDIR, environment)
+
+        config = ConfigObj(conf_file_path)
+        if config.get('parser', None) != parser:
+            raise AssertionError("Environment '%s''s parser:'s value is not %s" %
+                (environment, parser))
 
     def assertEnvironmentDoesNotHaveAConfigFile(self, environment):
         try:
