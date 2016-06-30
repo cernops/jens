@@ -11,12 +11,41 @@ import tempfile
 import shutil
 import time
 import pickle
+import signal
+import logging
+from subprocess import Popen, PIPE
 from datetime import datetime
-
+from jens.git import GIT_DEFAULT_SOFT_TIMEOUT, GIT_GC_TIMEOUT,\
+                     GIT_FETCH_TIMEOUT, GIT_CLONE_TIMEOUT
 from dirq.queue import Queue, QueueError, QueueLockError
 
-from jens.git import _git
 from jens.messaging import MSG_SCHEMA
+
+GITBINPATH = "git"
+
+def _git(args, gitdir=None, gitworkingtree=None,
+        timeout=GIT_DEFAULT_SOFT_TIMEOUT):
+    env = os.environ.copy()
+    if gitdir is not None:
+        logging.debug("Setting GIT_DIR to %s" % gitdir)
+        env['GIT_DIR'] = gitdir
+    if gitworkingtree is not None:
+        logging.debug("Setting GIT_WORK_TREE to %s" % gitworkingtree)
+        env['GIT_WORK_TREE'] = gitworkingtree
+    env['GIT_HTTP_LOW_SPEED_TIME'] = str(timeout)
+    env['GIT_HTTP_LOW_SPEED_LIMIT'] = "2000"
+    args = [GITBINPATH] + args
+    logging.debug("Executing git %s" % args)
+    (returncode, stdout, stderr) = _exec(args, env, timeout)
+    if returncode != 0:
+        raise JensGitError("Couldn't execute git %s (%s)" % \
+            (args, stderr.strip()))
+    return (stdout, returncode)
+
+def _exec(args, environment, timeout):
+    git = Popen(args, stdout = PIPE, stderr=PIPE, env=environment)
+    (stdout, stderr) = git.communicate()
+    return (git.returncode, stdout, stderr)
 
 def init_sandbox(path):
     dirs = [
