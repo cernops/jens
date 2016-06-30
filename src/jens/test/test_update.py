@@ -799,7 +799,7 @@ class UpdateTest(JensTestCase):
         self._create_fake_module('newguy', ['qa'])
 
         repositories_deltas = self._jens_update(errorsExpected=True,
-            errorRegexp='foobroken')
+            errorRegexp='broken')
 
         self.assertNotBare('modules/broken')
         self.assertBare('modules/newguy')
