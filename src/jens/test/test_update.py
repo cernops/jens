@@ -13,7 +13,7 @@ from jens.messaging import count_pending_hints
 from jens.repos import refresh_repositories
 from jens.locks import JensLockFactory
 from jens.environments import refresh_environments
-from jens.git import get_refs
+from jens.git_wrapper import get_refs
 
 from jens.test.tools import ensure_environment, destroy_environment
 from jens.test.tools import init_repositories

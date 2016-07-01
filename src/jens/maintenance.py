@@ -9,7 +9,7 @@ import os
 import logging
 import fcntl
 
-import jens.git as git
+import jens.git_wrapper as git
 from jens.decorators import timed
 from jens.errors import JensError, JensGitError
 

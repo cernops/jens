@@ -5,39 +5,43 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-# while WIP, just for not renaming current module for now
-from __future__ import absolute_import
+import git
 import logging
 import os
 import re
-import git
-
-from jens.errors import JensGitError
+from jens.decorators import git_exec
 
 GIT_DEFAULT_SOFT_TIMEOUT = 4
 GIT_FETCH_TIMEOUT = GIT_DEFAULT_SOFT_TIMEOUT
 GIT_CLONE_TIMEOUT = 8
 GIT_GC_TIMEOUT = 10
 
+
 def _init_git_env(timeout=GIT_DEFAULT_SOFT_TIMEOUT):
     env = os.environ.copy()
     env['GIT_HTTP_LOW_SPEED_TIME'] = str(timeout)
     env['GIT_HTTP_LOW_SPEED_LIMIT'] = "2000"
-    return env
+    git_context = git.cmd.Git()
+
+    return env, git_context
 
 def hash_object(path):
     args = [path]
     kwargs = {}
-    env = _init_git_env()
+    env, git_context = _init_git_env()
     logging.debug("Hashing object %s" % path)
 
-    with git.cmd.Git().custom_environment(**env):
+    @git_exec
+    def hash_object_exec(*args, **kwargs):
         return git.cmd.Git().hash_object(*args, **kwargs).strip()
+
+    return hash_object_exec(env=env, git_context=git_context,
+                            args=args, kwargs=kwargs)
 
 def gc(repository_path, aggressive=False, bare=False):
     args = []
     kwargs = {"quiet": True, "aggressive": aggressive}
-    env = _init_git_env(GIT_GC_TIMEOUT)
+    env, git_context = _init_git_env(GIT_GC_TIMEOUT)
     logging.debug("Collecting garbage in %s" % repository_path)
     repo = git.Repo(repository_path)
     if bare is False:
@@ -46,13 +50,16 @@ def gc(repository_path, aggressive=False, bare=False):
     logging.debug("Setting GIT_DIR to %s" % gitdir)
     env['GIT_DIR'] = gitdir
 
-    with git.cmd.Git().custom_environment(**env):
+    @git_exec
+    def gc_exec(*args, **kwargs):
         repo.git.gc(*args, **kwargs)
+
+    gc_exec(env=env, git_context=git_context, args=args, kwargs=kwargs)
 
 def clone(repository_path, url, bare=False, shared=False, branch=None):
     args = [url, repository_path]
     kwargs = {"no-hardlinks": True, "shared": shared}
-    env = _init_git_env(GIT_CLONE_TIMEOUT)
+    env, git_context = _init_git_env(GIT_CLONE_TIMEOUT)
     logging.debug("Cloning from %s to %s" % (url, repository_path))
     if bare is True:
         kwargs["bare"] = True
@@ -60,34 +67,32 @@ def clone(repository_path, url, bare=False, shared=False, branch=None):
     if branch is not None:
         kwargs["branch"] = branch
 
-    try:
-        with git.cmd.Git().custom_environment(**env):
-            git.Repo.clone_from(*args, **kwargs)
-    except git.exc.GitCommandError as e:
-        raise JensGitError("Couldn't execute git %s, %s (%s)" %
-                           (args, kwargs, e.stderr.strip()))
+    @git_exec
+    def clone_exec(*args, **kwargs):
+        git.Repo.clone_from(*args, **kwargs)
+
+    clone_exec(env=env, git_context=git_context, args=args, kwargs=kwargs)
 
 def fetch(repository_path, bare=False, prune=False):
     args = []
     kwargs = {"no-tags": True, "prune": prune}
-    env = _init_git_env(GIT_FETCH_TIMEOUT)
+    env, git_context = _init_git_env(GIT_FETCH_TIMEOUT)
     logging.debug("Fetching new refs in %s" % repository_path)
     if bare is False:
         repository_path = "%s/.git" % repository_path
     logging.debug("Setting GIT_DIR to %s" % repository_path)
     env['GIT_DIR'] = repository_path
 
-    try:
-        with git.cmd.Git().custom_environment(**env):
-            git.Repo(repository_path).remotes.origin.fetch(*args, **kwargs)
-    except git.exc.GitCommandError as e:
-        raise JensGitError("Couldn't execute git %s, %s (%s)" %
-                           (args, kwargs, e.stderr.strip()))
+    @git_exec
+    def fetch_exec(*args, **kwargs):
+        git.Repo(repository_path).remotes.origin.fetch(*args, **kwargs)
+
+    fetch_exec(env=env, git_context=git_context, args=args, kwargs=kwargs)
 
 def reset(repository_path, treeish, hard=False):
     args = [treeish]
     kwargs = {"hard": hard}
-    env = _init_git_env()
+    env, git_context = _init_git_env()
     logging.debug("Resetting %s to %s" % (repository_path, treeish))
     repo = git.Repo(repository_path)
 
@@ -99,23 +104,25 @@ def reset(repository_path, treeish, hard=False):
     logging.debug("Setting GIT_WORK_TREE to %s" % gitworkingtree)
     env['GIT_WORK_TREE'] = gitworkingtree
 
-    try:
-        with git.cmd.Git().custom_environment(**env):
-            git.refs.head.HEAD(repo).reset(*args, **kwargs)
-    except git.exc.GitCommandError as e:
-        raise JensGitError("Couldn't execute git %s %s (%s)" %
-                           (args, kwargs, e.stderr.strip()))
+    @git_exec
+    def reset_exec(*args, **kwargs):
+        git.refs.head.HEAD(repo).reset(*args, **kwargs)
+
+    reset_exec(env=env, git_context=git_context, args=args, kwargs=kwargs)
 
 def get_refs(repository_path):
     args = []
     kwargs = {"heads": True}
-    env = _init_git_env()
+    env, git_context = _init_git_env()
     logging.debug("Setting GIT_DIR to %s" % repository_path)
     env['GIT_DIR'] = repository_path
 
-    git_context = git.cmd.Git()
-    with git_context.custom_environment(**env):
-        refs = git_context.show_ref(*args, **kwargs)
+    @git_exec
+    def get_refs_exec(*args, **kwargs):
+        return git_context.show_ref(*args, **kwargs)
+
+    refs = get_refs_exec(env=env, git_context=git_context,
+                         args=args, kwargs=kwargs)
 
     result = {}
     for ref in refs.strip().split('\n'):

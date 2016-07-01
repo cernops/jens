@@ -15,7 +15,7 @@ import signal
 import logging
 from subprocess import Popen, PIPE
 from datetime import datetime
-from jens.git import GIT_DEFAULT_SOFT_TIMEOUT, GIT_GC_TIMEOUT,\
+from jens.git_wrapper import GIT_DEFAULT_SOFT_TIMEOUT, GIT_GC_TIMEOUT,\
                      GIT_FETCH_TIMEOUT, GIT_CLONE_TIMEOUT
 from dirq.queue import Queue, QueueError, QueueLockError
 

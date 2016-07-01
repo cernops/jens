@@ -12,7 +12,7 @@ import shutil
 import math
 from multiprocessing import Pool, cpu_count, Manager
 
-import jens.git as git
+import jens.git_wrapper as git
 
 from jens.errors import JensRepositoriesError
 from jens.errors import JensGitError
