@@ -25,16 +25,13 @@ def timed(f):
 def git_exec(f):
     @wraps(f)
     def wrapper(*w_args, **w_kwargs):
-        env = w_kwargs["env"]
         args = w_kwargs["args"]
         kwargs = w_kwargs["kwargs"]
-        git_context = w_kwargs["git_context"]
 
         logging.debug("Executing git %s" % args)
 
         try:
-            with git_context.custom_environment(**env):
-                res = f(*args, **kwargs)
+            res = f(*args, **kwargs)
         except GitCommandError as e:
             raise JensGitError("Couldn't execute git %s, %s (%s)" %
                                (args, kwargs, e.stderr.strip()))

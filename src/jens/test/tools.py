@@ -15,11 +15,14 @@ import signal
 import logging
 from subprocess import Popen, PIPE
 from datetime import datetime
-from jens.git_wrapper import GIT_DEFAULT_SOFT_TIMEOUT, GIT_GC_TIMEOUT,\
-                     GIT_FETCH_TIMEOUT, GIT_CLONE_TIMEOUT
 from dirq.queue import Queue, QueueError, QueueLockError
 
 from jens.messaging import MSG_SCHEMA
+
+GIT_DEFAULT_SOFT_TIMEOUT = 4
+GIT_FETCH_TIMEOUT = GIT_DEFAULT_SOFT_TIMEOUT
+GIT_CLONE_TIMEOUT = 8
+GIT_GC_TIMEOUT = 10
 
 GITBINPATH = "git"
 
