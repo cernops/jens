@@ -34,7 +34,7 @@ def git_exec(f):
             res = f(*args, **kwargs)
         except GitCommandError as e:
             raise JensGitError("Couldn't execute git %s, %s (%s)" %
-                               (args, kwargs, e.stderr.strip()))
+                               (args, kwargs, e.stderr))
         return res
 
     return wrapper
