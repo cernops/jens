@@ -55,7 +55,7 @@ class JensTestCase(unittest.TestCase):
             prefix="jens_sandbox_%s-" % self._testMethodName,
             suffix='-' + str(time.time()))
         init_sandbox(self.sandbox_path)
-        self.keep_sandbox = False
+        self.keep_sandbox = bool(os.getenv('JENS_TEST_KEEP_SANDBOX', False))
         self.debug_level = JensTestCase.DEFAULT_DEBUG_LEVEL
         self.config_file_path = "%s/etc/main.conf" % self.sandbox_path
         config_file = open(self.config_file_path, 'w+')

@@ -22,6 +22,12 @@ $ nosetests jens.test.test_update:UpdateTest.test_base -v
 $ nosetests jens.test.test_update:UpdateTest.test_base -v --nocapture
 ```
 
+### And keeping the sandbox in disk
+
+```
+$ JENS_TEST_KEEP_SANDBOX=1 nosetests jens.test.test_update:UpdateTest.test_base -v --nocapture
+```
+
 ## Running the tests with xunit-suitable output
 
 
