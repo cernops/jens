@@ -19,15 +19,9 @@ from dirq.queue import Queue, QueueError, QueueLockError
 
 from jens.messaging import MSG_SCHEMA
 
-GIT_DEFAULT_SOFT_TIMEOUT = 4
-GIT_FETCH_TIMEOUT = GIT_DEFAULT_SOFT_TIMEOUT
-GIT_CLONE_TIMEOUT = 8
-GIT_GC_TIMEOUT = 10
-
 GITBINPATH = "git"
 
-def _git(args, gitdir=None, gitworkingtree=None,
-        timeout=GIT_DEFAULT_SOFT_TIMEOUT):
+def _git(args, gitdir=None, gitworkingtree=None):
     env = os.environ.copy()
     if gitdir is not None:
         logging.debug("Setting GIT_DIR to %s" % gitdir)
@@ -35,17 +29,15 @@ def _git(args, gitdir=None, gitworkingtree=None,
     if gitworkingtree is not None:
         logging.debug("Setting GIT_WORK_TREE to %s" % gitworkingtree)
         env['GIT_WORK_TREE'] = gitworkingtree
-    env['GIT_HTTP_LOW_SPEED_TIME'] = str(timeout)
-    env['GIT_HTTP_LOW_SPEED_LIMIT'] = "2000"
     args = [GITBINPATH] + args
     logging.debug("Executing git %s" % args)
-    (returncode, stdout, stderr) = _exec(args, env, timeout)
+    (returncode, stdout, stderr) = _exec(args, env)
     if returncode != 0:
         raise JensGitError("Couldn't execute git %s (%s)" % \
             (args, stderr.strip()))
     return (stdout, returncode)
 
-def _exec(args, environment, timeout):
+def _exec(args, environment):
     git = Popen(args, stdout = PIPE, stderr=PIPE, env=environment)
     (stdout, stderr) = git.communicate()
     return (git.returncode, stdout, stderr)
