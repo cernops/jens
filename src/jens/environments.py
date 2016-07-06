@@ -32,13 +32,6 @@ def refresh_environments(settings, lock, repositories_deltas, inventory):
     logging.debug("Existing but not changed environments: %s" % delta['notchanged'])
     logging.info("Deleted environments: %s" % delta['deleted'])
 
-    # Based on monitoring data, time will determine if it's ok or not
-    total_new, total_deleted = aggregate_deltas(repositories_deltas)
-    lock.renew(int(math.ceil((len(delta['new']) * 0.3) +
-       (len(delta['changed']) * 0.4) +
-       (len(delta['notchanged']) * (0.2*total_new + 0.1*total_deleted)) +
-       (len(delta['deleted']) * 0.1))) + 2)
-
     logging.info("Creating new environments...")
     _create_new_environments(settings, delta['new'], inventory)
     logging.info("Purging deleted environments...")

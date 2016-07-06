@@ -64,11 +64,6 @@ class Settings():
         # [filelock]
         self.FILELOCK_LOCKDIR = config["filelock"]["lockdir"]
 
-        # [etcd]
-        self.ETCD_SERVERS = config["etcd"]["servers"]
-        self.ETCD_ACQTIMEOUT = config["etcd"]["acqtimeout"]
-        self.ETCD_INITIALTTL = config["etcd"]["initialttl"]
-
         # [messaging]
         self.MESSAGING_QUEUEDIR = config["messaging"]["queuedir"]
 
