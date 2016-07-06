@@ -18,7 +18,6 @@ from jens.git import hash_object
 from jens.decorators import timed
 from jens.errors import JensEnvironmentsError
 from jens.tools import refname_to_dirname
-from jens.tools import aggregate_deltas
 
 DIRECTORY_ENVIRONMENTS_CONF_FILENAME = "environment.conf"
 DIRECTORY_ENVIRONMENTS_CONF_PARSER_VALUES = ('current', 'future')
