@@ -27,14 +27,15 @@ def git_exec(f):
     def wrapper(*w_args, **w_kwargs):
         args = w_kwargs["args"]
         kwargs = w_kwargs["kwargs"]
+        name = w_kwargs["name"]
 
-        logging.debug("Executing git %s" % args)
+        logging.debug("Executing git %s %s %s" % (name, args, kwargs))
 
         try:
             res = f(*args, **kwargs)
         except GitCommandError as e:
-            raise JensGitError("Couldn't execute git %s, %s (%s)" %
-                               (args, kwargs, e.stderr))
+            raise JensGitError("Couldn't execute %s (%s)" %
+                               (e.command, e.stderr))
         return res
 
     return wrapper

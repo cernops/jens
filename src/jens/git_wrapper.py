@@ -19,7 +19,7 @@ def hash_object(path):
     def hash_object_exec(*args, **kwargs):
         return git.cmd.Git().hash_object(*args, **kwargs).strip()
 
-    return hash_object_exec(args=args, kwargs=kwargs)
+    return hash_object_exec(name='hash-object', args=args, kwargs=kwargs)
 
 def gc(repository_path, aggressive=False, bare=False):
     args = []
@@ -31,7 +31,7 @@ def gc(repository_path, aggressive=False, bare=False):
     def gc_exec(*args, **kwargs):
         repo.git.gc(*args, **kwargs)
 
-    gc_exec(args=args, kwargs=kwargs)
+    gc_exec(name='gc', args=args, kwargs=kwargs)
 
 def clone(repository_path, url, bare=False, shared=False, branch=None):
     args = [url, repository_path]
@@ -47,7 +47,7 @@ def clone(repository_path, url, bare=False, shared=False, branch=None):
     def clone_exec(*args, **kwargs):
         git.Repo.clone_from(*args, **kwargs)
 
-    clone_exec(args=args, kwargs=kwargs)
+    clone_exec(name='clone', args=args, kwargs=kwargs)
 
 def fetch(repository_path, bare=False, prune=False):
     args = []
@@ -60,7 +60,7 @@ def fetch(repository_path, bare=False, prune=False):
     def fetch_exec(*args, **kwargs):
         git.Repo(repository_path).remotes.origin.fetch(*args, **kwargs)
 
-    fetch_exec(args=args, kwargs=kwargs)
+    fetch_exec(name='fetch', args=args, kwargs=kwargs)
 
 def reset(repository_path, treeish, hard=False):
     args = [treeish]
@@ -71,7 +71,7 @@ def reset(repository_path, treeish, hard=False):
     def reset_exec(*args, **kwargs):
         git.refs.head.HEAD(git.Repo(repository_path)).reset(*args, **kwargs)
 
-    reset_exec(args=args, kwargs=kwargs)
+    reset_exec(name='reset', args=args, kwargs=kwargs)
 
 def get_refs(repository_path):
     args = []
@@ -81,4 +81,4 @@ def get_refs(repository_path):
     def get_refs_exec(*args, **kwargs):
         return dict((h.name, h.commit.hexsha) for h in git.Repo(repository_path).heads)
 
-    return get_refs_exec(args=args, kwargs=kwargs)
+    return get_refs_exec(name='show-ref', args=args, kwargs=kwargs)
