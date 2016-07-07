@@ -91,13 +91,11 @@ def main():
 
     try:
         with JensLockFactory.makeLock(settings, tries=10, waittime=10) as lock:
-            lock.renew(60*3)
             if opts.bare or opts.all:
                 logging.info("GCing bare repositories...")
                 processed_count = gc_bares(settings, opts)
                 logging.info("Done (%d repositories cleaned up)" % processed_count)
 
-            lock.renew(60*6)
             if opts.clones or opts.all:
                 logging.info("GCing clones...")
                 processed_count = gc_clones(settings, opts)

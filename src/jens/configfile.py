@@ -22,14 +22,10 @@ directory_environments = boolean(default=False)
 common_hieradata_items = list(default=list())
 mode = option('POLL', 'ONDEMAND', default='POLL')
 [lock]
-type = option('DISABLED', 'FILE', 'ETCD', default='FILE')
+type = option('DISABLED', 'FILE', default='FILE')
 name = string(default='jens')
 [filelock]
 lockdir = string(default='/var/lock/jens')
-[etcd]
-servers = list(default=list("127.0.0.1:4001"))
-acqtimeout = integer(default=1)
-initialttl = integer(default=60)
 [messaging]
 queuedir = string(default='/var/spool/jens-update')
 """

@@ -86,16 +86,12 @@ def main():
         with JensLockFactory.makeLock(settings) as lock:
             logging.info("Cleaning everything up...")
             logging.info("Removing bare repositories...")
-            lock.renew(200)
             remove_bares(settings)
             logging.info("Removing clones of bare repositories")
-            lock.renew(300)
             remove_clones(settings)
             logging.info("Removing all Puppet environments...")
-            lock.renew(100)
             remove_environments(settings)
             logging.info("Removing all environments' cache...")
-            lock.renew(60)
             remove_cache(settings)
     except JensLockError, error:
         logging.error("Locking failed (%s)" % error)

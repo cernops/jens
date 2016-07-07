@@ -23,10 +23,3 @@ def ref_is_commit(settings, refname):
     return re.match("^%s([0-9A-Fa-f]+)" % settings.HASHPREFIX,
         refname,
         re.IGNORECASE)
-
-def aggregate_deltas(deltas):
-    new = deleted = 0
-    for partition in ("modules", "hostgroups", "common"):
-       new += len(deltas[partition]["new"])
-       deleted += len(deltas[partition]["deleted"])
-    return (new, deleted)

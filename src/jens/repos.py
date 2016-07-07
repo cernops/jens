@@ -22,7 +22,6 @@ from jens.reposinventory import get_inventory, persist_inventory
 from jens.reposinventory import get_desired_inventory
 from jens.tools import ref_is_commit
 from jens.tools import refname_to_dirname
-from jens.git import GIT_CLONE_TIMEOUT, GIT_FETCH_TIMEOUT
 
 @timed
 def refresh_repositories(settings, lock, hints=None):
@@ -49,10 +48,6 @@ def refresh_repositories(settings, lock, hints=None):
         logging.info("New repositories: %s" % delta['new'])
         logging.debug("Existing repositories: %s" % delta['existing'])
         logging.info("Deleted repositories: %s" % delta['deleted'])
-
-        lock.renew((len(delta['new']) * GIT_CLONE_TIMEOUT) + \
-            (len(delta['existing']) * GIT_FETCH_TIMEOUT) + \
-            len(delta['deleted']))
 
         logging.info("Cloning and expanding NEW bare repositories...")
         delta['new'] = _create_new_repositories(settings, delta['new'],

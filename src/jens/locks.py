@@ -16,8 +16,6 @@ class JensLockFactory(object):
     def makeLock(settings, tries=1, waittime=10):
         if settings.LOCK_TYPE == 'FILE':
             return JensFileLock(settings, tries, waittime)
-        elif settings.LOCK_TYPE == 'ETCD':
-            return JensEtcdLock(settings, tries, waittime)
         elif settings.LOCK_TYPE == 'DISABLED':
             logging.warn("Danger zone: no locking has been configured!")
             return JensDumbLock(settings, tries, waittime)
@@ -92,50 +90,3 @@ class JensDumbLock(JensLock):
 
     def renew_lock(self, ttl):
         pass
-
-class JensEtcdLock(JensLock):
-    def __init__(self, settings, tries, waittime):
-        try:
-            super(JensEtcdLock, self).__init__(settings, tries, waittime)
-            import etcd
-            self.etcd = etcd
-        except ImportError:
-            raise JensLockError("python-etcd not installed")
-
-    def obtain_lock(self):
-        from urllib3.exceptions import TimeoutError
-        servers = map(lambda x: x.split(':'), self.settings.ETCD_SERVERS)
-        servers = map(lambda x: (x[0], int(x[1]) if len(x) > 1 else 4001), servers)
-        logging.debug("Etcd servers: %s", servers)
-        try:
-            client = self.etcd.Client(host=tuple(servers), allow_redirect=True,
-                allow_reconnect=True)
-            logging.debug("Current leader: %s" % client.leader)
-            logging.debug("Machines in the cluster: %s" % client.machines)
-            self.lock = client.get_lock('/%s' % self.settings.LOCK_NAME,
-                ttl=self.settings.ETCD_INITIALTTL)
-            self.lock.acquire(timeout=self.settings.ETCD_ACQTIMEOUT)
-        except TimeoutError:
-            raise JensLockExistsError("Lock already taken")
-        except self.etcd.EtcdException, error:
-            raise JensLockError("Etcd locking failed: '%s'" % error)
-        # Apparently, if the leader is being elected python-etcd raises
-        # exception.Exception FFS.
-        except Exception, error:
-            raise JensLockError("Couldn't get the etcd lock (%s)" % error)
-
-    def release_lock(self):
-        try:
-            self.lock.release()
-        except TimeoutError:
-            raise JensLockError("The connection timed out when releasing the lock")
-        except self.etcd.EtcdException, error:
-            raise JensLockError("Etcd locking failed: '%s'" % error)
-
-    def renew_lock(self, ttl, timeout=3):
-        try:
-            self.lock.renew(ttl, timeout)
-        except TimeoutError:
-            raise JensLockError("The connection timed out when renewing the lock")
-        except self.etcd.EtcdException, error:
-            raise JensLockError("Etcd lock renewal failed: '%s'" % error)
