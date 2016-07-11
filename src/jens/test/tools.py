@@ -17,6 +17,7 @@ from subprocess import Popen, PIPE
 from datetime import datetime
 from dirq.queue import Queue, QueueError, QueueLockError
 
+from jens.errors import JensGitError
 from jens.messaging import MSG_SCHEMA
 
 GITBINPATH = "git"
@@ -33,7 +34,7 @@ def _git(args, gitdir=None, gitworkingtree=None):
     logging.debug("Executing git %s" % args)
     (returncode, stdout, stderr) = _exec(args, env)
     if returncode != 0:
-        raise JensGitError("Couldn't execute git %s (%s)" % \
+        raise JensGitError("Couldn't execute %s (%s)" % \
             (args, stderr.strip()))
     return (stdout, returncode)
 

@@ -25,10 +25,10 @@ def gc(repository_path, aggressive=False, bare=False):
     args = []
     kwargs = {"quiet": True, "aggressive": aggressive}
     logging.debug("Collecting garbage in %s" % repository_path)
-    repo = git.Repo(repository_path)
 
     @git_exec
     def gc_exec(*args, **kwargs):
+        repo = git.Repo(repository_path)
         repo.git.gc(*args, **kwargs)
 
     gc_exec(name='gc', args=args, kwargs=kwargs)
