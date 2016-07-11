@@ -49,12 +49,10 @@ def clone(repository_path, url, bare=False, shared=False, branch=None):
 
     clone_exec(name='clone', args=args, kwargs=kwargs)
 
-def fetch(repository_path, bare=False, prune=False):
+def fetch(repository_path, prune=False):
     args = []
     kwargs = {"no-tags": True, "prune": prune}
     logging.debug("Fetching new refs in %s" % repository_path)
-    if bare is False:
-        repository_path = "%s/.git" % repository_path
 
     @git_exec
     def fetch_exec(*args, **kwargs):

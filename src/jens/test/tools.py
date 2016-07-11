@@ -11,7 +11,6 @@ import tempfile
 import shutil
 import time
 import pickle
-import signal
 import logging
 from subprocess import Popen, PIPE
 from datetime import datetime

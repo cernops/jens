@@ -5,65 +5,125 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+import os
 import jens.git_wrapper as git_wrapper
 from jens.test.testcases import JensTestCase
 from jens.errors import JensGitError
 from jens.test.tools import create_fake_repository, add_commit_to_branch,\
-                            get_repository_head
+                            get_repository_head, remove_branch_from_repo
+
 
 class GitWrapperTest(JensTestCase):
     def setUp(self):
         super(GitWrapperTest, self).setUp()
 
     def test_hash_object_raises_jens_git_error(self):
-        self.assertRaises(JensGitError, git_wrapper.hash_object, 'platform-9-and-0.75')
+        self.assertRaises(JensGitError, git_wrapper.hash_object,
+                          'platform-9-and-0.75')
 
     def test_gc_existing_repository(self):
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa'])
         git_wrapper.gc(bare)
 
     def test_gc_non_existing_repository(self):
         self.assertRaises(JensGitError, git_wrapper.gc, '/tmp/37d8s8dd')
 
-    def test_clone_existing_bare_repository(self):
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
+    def test_bare_clone_existing_bare_repository(self):
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa'])
         git_wrapper.clone("%s/repo" % self.settings.CLONEDIR, bare, bare=True)
 
+    def test_clone_existing_bare_repository_specific_branch(self):
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa', 'foo'])
+        git_wrapper.clone("%s/repo" % self.settings.CLONEDIR, bare,
+                          bare=False, branch='foo')
+
     def test_clone_existing_repository(self):
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa'])
         git_wrapper.clone("%s/repo" % self.settings.CLONEDIR, user)
 
     def test_clone_non_existing_repository(self):
-        self.assertRaises(JensGitError, git_wrapper.clone, "%s/repo" 
+        self.assertRaises(JensGitError, git_wrapper.clone, "%s/repo"
                           % self.settings.CLONEDIR, '/tmp/37d8s8de')
 
+    def test_clone_mirrored_repository(self):
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa'])
+        clone_path = "%s/repo" % self.settings.CLONEDIR
+        git_wrapper.clone(clone_path, bare, shared=True)
+        self.assertTrue(os.path.isfile("%s/.git/objects/info/alternates" %
+                                       clone_path))
+
     def test_fetch_existing_repository(self):
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa'])
         git_wrapper.fetch(user)
+
+    def test_fetch_existing_bare_repository_and_prune(self):
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa', 'f'])
+        jens_bare = "%s/_bare" % self.settings.BAREDIR
+        git_wrapper.clone(jens_bare, bare, bare=True)
+        git_wrapper.fetch(jens_bare, prune=True)
+        self.assertTrue('f' in git_wrapper.get_refs(jens_bare))
+        remove_branch_from_repo(self.settings, user, 'f')
+        git_wrapper.fetch(jens_bare, prune=False)
+        self.assertTrue('f' in git_wrapper.get_refs(jens_bare))
+        git_wrapper.fetch(jens_bare, prune=True)
+        self.assertFalse('f' in git_wrapper.get_refs(jens_bare))
+
+    def test_fetch_existing_bare_repository(self):
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa'])
+        new_bare_path = "%s/cloned" % self.settings.CLONEDIR
+        git_wrapper.clone(new_bare_path, bare, bare=True)
+        git_wrapper.fetch(new_bare_path)
 
     def test_fetch_non_existing_repository(self):
         self.assertRaises(JensGitError, git_wrapper.fetch, '/tmp/37d8s8df')
 
     def test_reset_to_head(self):
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa'])
         head = get_repository_head(self.settings, user)
         git_wrapper.reset(user, head)
 
     def test_reset_to_commit(self):
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa'])
         head = get_repository_head(self.settings, user)
         commit_id = add_commit_to_branch(self.settings, user, "master")
         git_wrapper.reset(user, head)
 
     def test_reset_non_existing_repository(self):
-        self.assertRaises(JensGitError, git_wrapper.reset, '/tmp/37d8s8e0', "37d8s8e0")
+        self.assertRaises(JensGitError, git_wrapper.reset, '/tmp/37d8s8e0',
+                          "37d8s8e0")
 
     def test_reset_non_existing_commit(self):
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa'])
         self.assertRaises(JensGitError, git_wrapper.reset, user, "37d8s8e1")
 
+    def test_reset_and_fetch_refs_match_after_remote_commit(self):
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa'])
+        jens_bare = "%s/_bare" % self.settings.BAREDIR
+        git_wrapper.clone(jens_bare, bare, bare=True)
+        jens_clone = "%s/_clone" % self.settings.CLONEDIR
+        git_wrapper.clone(jens_clone, jens_bare, bare=False, branch='qa')
+        commit_id = add_commit_to_branch(self.settings, user, 'qa')
+        git_wrapper.fetch(jens_bare)
+        git_wrapper.fetch(jens_clone)
+        git_wrapper.reset(jens_clone, 'origin/qa', hard=True)
+        self.assertEquals(get_repository_head(self.settings, jens_clone),
+                          commit_id)
+
     def test_get_refs_existing_repository(self):
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
+        (bare, user) = create_fake_repository(self.settings, self.sandbox_path,
+                                              ['qa'])
         r = git_wrapper.get_refs(user)
         self.assertEqual(type(r), dict)
         self.assertTrue('qa' in r)

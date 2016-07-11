@@ -159,7 +159,7 @@ def _refresh_repository(data):
             if settings.MODE == "ONDEMAND":
                 logging.info("Fetching %s/%s upon demand..."
                     % (partition, repository))
-            git.fetch(bare_path, prune=True, bare=True)
+            git.fetch(bare_path, prune=True)
         except JensGitError, error:
             logging.error("Unable to fetch '%s' from remote (%s)" % (repository, error))
             if settings.MODE == "ONDEMAND":
