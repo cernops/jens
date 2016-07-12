@@ -10,7 +10,6 @@ import logging
 import yaml
 import shutil
 import re
-import math
 
 from configobj import ConfigObj
 
