@@ -121,6 +121,10 @@ def del_repository(settings, partition, name):
     yaml.dump(data, repositories_file, default_flow_style=False)
     repositories_file.close()
 
+def create_folder_not_repository(settings, base):
+    not_repo_path = tempfile.mkdtemp(dir="%s/repos/user" % base)
+    return not_repo_path
+
 def create_fake_repository(settings, base, branches=[]):
     bare_repo_path = tempfile.mkdtemp(dir="%s/repos/bare" % base)
     gitdir = "%s" % bare_repo_path
