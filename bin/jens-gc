@@ -11,7 +11,7 @@ import os
 import logging
 import optparse
 
-import jens.git as git
+import jens.git_wrapper as git
 from jens.errors import JensError, JensLockError
 from jens.errors import JensConfigError, JensGitError
 from jens.settings import Settings

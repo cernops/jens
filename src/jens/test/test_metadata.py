@@ -11,7 +11,7 @@ import fcntl
 from mock import Mock, patch
 
 from jens.maintenance import refresh_metadata
-from jens.git import clone
+from jens.git_wrapper import clone
 from jens.errors import JensError
 
 from jens.test.tools import create_fake_repository

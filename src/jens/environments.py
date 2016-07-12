@@ -10,11 +10,10 @@ import logging
 import yaml
 import shutil
 import re
-import math
 
 from configobj import ConfigObj
 
-from jens.git import hash_object
+from jens.git_wrapper import hash_object
 from jens.decorators import timed
 from jens.errors import JensEnvironmentsError
 from jens.tools import refname_to_dirname

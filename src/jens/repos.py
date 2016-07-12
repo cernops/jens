@@ -12,7 +12,7 @@ import shutil
 import math
 from multiprocessing import Pool, cpu_count, Manager
 
-import jens.git as git
+import jens.git_wrapper as git
 
 from jens.errors import JensRepositoriesError
 from jens.errors import JensGitError
@@ -159,7 +159,7 @@ def _refresh_repository(data):
             if settings.MODE == "ONDEMAND":
                 logging.info("Fetching %s/%s upon demand..."
                     % (partition, repository))
-            git.fetch(bare_path, prune=True, bare=True)
+            git.fetch(bare_path, prune=True)
         except JensGitError, error:
             logging.error("Unable to fetch '%s' from remote (%s)" % (repository, error))
             if settings.MODE == "ONDEMAND":

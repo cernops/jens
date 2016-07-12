@@ -11,12 +11,36 @@ import tempfile
 import shutil
 import time
 import pickle
+import logging
+from subprocess import Popen, PIPE
 from datetime import datetime
-
 from dirq.queue import Queue, QueueError, QueueLockError
 
-from jens.git import _git
+from jens.errors import JensGitError
 from jens.messaging import MSG_SCHEMA
+
+GITBINPATH = "git"
+
+def _git(args, gitdir=None, gitworkingtree=None):
+    env = os.environ.copy()
+    if gitdir is not None:
+        logging.debug("Setting GIT_DIR to %s" % gitdir)
+        env['GIT_DIR'] = gitdir
+    if gitworkingtree is not None:
+        logging.debug("Setting GIT_WORK_TREE to %s" % gitworkingtree)
+        env['GIT_WORK_TREE'] = gitworkingtree
+    args = [GITBINPATH] + args
+    logging.debug("Executing git %s" % args)
+    (returncode, stdout, stderr) = _exec(args, env)
+    if returncode != 0:
+        raise JensGitError("Couldn't execute %s (%s)" % \
+            (args, stderr.strip()))
+    return (stdout, returncode)
+
+def _exec(args, environment):
+    git = Popen(args, stdout = PIPE, stderr=PIPE, env=environment)
+    (stdout, stderr) = git.communicate()
+    return (git.returncode, stdout, stderr)
 
 def init_sandbox(path):
     dirs = [
@@ -96,6 +120,10 @@ def del_repository(settings, partition, name):
     repositories_file = open(settings.REPO_METADATA, 'w+')
     yaml.dump(data, repositories_file, default_flow_style=False)
     repositories_file.close()
+
+def create_folder_not_repository(settings, base):
+    not_repo_path = tempfile.mkdtemp(dir="%s/repos/user" % base)
+    return not_repo_path
 
 def create_fake_repository(settings, base, branches=[]):
     bare_repo_path = tempfile.mkdtemp(dir="%s/repos/bare" % base)

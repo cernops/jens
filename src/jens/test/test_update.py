@@ -13,7 +13,7 @@ from jens.messaging import count_pending_hints
 from jens.repos import refresh_repositories
 from jens.locks import JensLockFactory
 from jens.environments import refresh_environments
-from jens.git import get_refs
+from jens.git_wrapper import get_refs
 
 from jens.test.tools import ensure_environment, destroy_environment
 from jens.test.tools import init_repositories
@@ -799,7 +799,7 @@ class UpdateTest(JensTestCase):
         self._create_fake_module('newguy', ['qa'])
 
         repositories_deltas = self._jens_update(errorsExpected=True,
-            errorRegexp='foobroken')
+            errorRegexp='broken')
 
         self.assertNotBare('modules/broken')
         self.assertBare('modules/newguy')
