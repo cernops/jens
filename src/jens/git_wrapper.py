@@ -28,14 +28,15 @@ def gc(repository_path, aggressive=False, bare=False):
 
     @git_exec
     def gc_exec(*args, **kwargs):
-        repo = git.Repo(repository_path)
+        repo = git.Repo(repository_path, odbt=git.GitCmdObjectDB)
         repo.git.gc(*args, **kwargs)
 
     gc_exec(name='gc', args=args, kwargs=kwargs)
 
 def clone(repository_path, url, bare=False, shared=False, branch=None):
     args = [url, repository_path]
-    kwargs = {"no-hardlinks": True, "shared": shared}
+    kwargs = {"no-hardlinks": True, "shared": shared,
+              "odbt": git.GitCmdObjectDB}
     logging.debug("Cloning from %s to %s" % (url, repository_path))
     if bare is True:
         kwargs["bare"] = True
@@ -56,7 +57,8 @@ def fetch(repository_path, prune=False):
 
     @git_exec
     def fetch_exec(*args, **kwargs):
-        git.Repo(repository_path).remotes.origin.fetch(*args, **kwargs)
+        repo = git.Repo(repository_path, odbt=git.GitCmdObjectDB)
+        repo.remotes.origin.fetch(*args, **kwargs)
 
     fetch_exec(name='fetch', args=args, kwargs=kwargs)
 
@@ -67,7 +69,8 @@ def reset(repository_path, treeish, hard=False):
 
     @git_exec
     def reset_exec(*args, **kwargs):
-        git.refs.head.HEAD(git.Repo(repository_path)).reset(*args, **kwargs)
+        repo = git.Repo(repository_path, odbt=git.GitCmdObjectDB)
+        git.refs.head.HEAD(repo).reset(*args, **kwargs)
 
     reset_exec(name='reset', args=args, kwargs=kwargs)
 
@@ -77,6 +80,8 @@ def get_refs(repository_path):
 
     @git_exec
     def get_refs_exec(*args, **kwargs):
-        return dict((h.name, h.commit.hexsha) for h in git.Repo(repository_path).heads)
+        r = dict((h.name, h.commit.hexsha) for h in git.Repo(repository_path,
+                 odbt=git.GitCmdObjectDB).heads)
+        return r
 
     return get_refs_exec(name='show-ref', args=args, kwargs=kwargs)
