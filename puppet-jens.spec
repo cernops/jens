@@ -1,6 +1,6 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
-Version: 0.14
+Version: 0.15
 Release: 1%{?dist}
 
 License: GPL
@@ -66,6 +66,10 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 %config(noreplace) %{_sysconfdir}/jens/main.conf
 
 %changelog
+* Wed Jul 13 2016 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.15-1
+- Configure GitPython differently to avoid leaking file descriptors as per
+  upstream's recommendation.
+
 * Tue Jul 12 2016 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.14-1
 - Remove support for etcd.
 - Use GitPython for Git operations instead of subprocessing directly.
