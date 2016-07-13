@@ -9,7 +9,7 @@ import logging
 
 from functools import wraps
 from time import time
-from git.exc import GitCommandError, NoSuchPathError, InvalidGitRepositoryError
+from git.exc import *
 from jens.errors import JensGitError
 
 def timed(f):
@@ -33,7 +33,7 @@ def git_exec(f):
 
         try:
             res = f(*args, **kwargs)
-        except GitCommandError as e:
+        except (GitCommandError, GitCommandNotFound) as e:
             raise JensGitError("Couldn't execute %s (%s)" %
                                (e.command, e.stderr))
         except NoSuchPathError as e:
