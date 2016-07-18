@@ -124,6 +124,13 @@ class JensTestCase(unittest.TestCase):
             self.assertEquals(get_repository_head(self.settings, path),
                 pointsto)
 
+    def assertCloneFileExists(self, identifier, fname):
+        partition, element, dirname = identifier.split('/')
+        path = "%s/%s/%s/%s/%s" % (self.settings.CLONEDIR, \
+            partition, element, dirname, fname)
+        if not os.path.isfile(path):
+            raise AssertionError("File '%s' not found" % path)
+
     def assertNotClone(self, identifier):
         try:
             self.assertClone(identifier)

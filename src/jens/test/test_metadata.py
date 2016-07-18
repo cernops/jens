@@ -7,6 +7,7 @@
 
 import shutil
 import fcntl
+import os
 
 from mock import Mock, patch
 
@@ -48,17 +49,37 @@ class MetadataTest(JensTestCase):
     def test_basic_updates(self):
         self._jens_refresh_metadata()
 
+        fname = 'basic_updates_1'
         new_commit = add_commit_to_branch(self.settings, \
-            self.environments, 'master')
+            self.environments, 'master', fname=fname)
         self._jens_refresh_metadata()
         self.assertEquals(get_repository_head(self.settings,\
             self.settings.ENV_METADATADIR), new_commit)
-
+        # The reset is --hard
+        self.assertTrue(os.path.isfile("%s/%s" %
+            (self.settings.ENV_METADATADIR, fname)))
         new_commit = add_commit_to_branch(self.settings, \
-            self.repositories, 'master')
+            self.environments, 'master', fname=fname, remove=True)
+        self._jens_refresh_metadata()
+        self.assertFalse(os.path.isfile("%s/%s" %
+            (self.settings.ENV_METADATADIR, fname)))
+
+        fname = 'basic_updates_2'
+        new_commit = add_commit_to_branch(self.settings, \
+            self.repositories, 'master', fname=fname)
         self._jens_refresh_metadata()
         self.assertEquals(get_repository_head(self.settings,\
             self.settings.REPO_METADATADIR), new_commit)
+        self.assertTrue(os.path.isfile("%s/%s" %
+            (self.settings.REPO_METADATADIR, fname)))
+
+        new_commit = add_commit_to_branch(self.settings, \
+            self.repositories, 'master', fname=fname, remove=True)
+        self._jens_refresh_metadata()
+        self.assertEquals(get_repository_head(self.settings,\
+            self.settings.REPO_METADATADIR), new_commit)
+        self.assertFalse(os.path.isfile("%s/%s" %
+            (self.settings.REPO_METADATADIR, fname)))
 
     def test_metadata_updates_if_ondemand_mode_is_enabled(self):
         self.settings.MODE = "ONDEMAND"
