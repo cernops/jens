@@ -198,15 +198,21 @@ def add_branch_to_repo(settings, repo_path, branch):
     args = ["push", "origin", branch]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
 
-def add_commit_to_branch(settings, repo_path, branch, force=False):
+def add_commit_to_branch(settings, repo_path, branch,
+        force=False, fname=None, remove=False):
+    if fname is None:
+        fname = time.time()
     gitdir = "%s/.git" % repo_path
     args = ["checkout", branch]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
-    fake_file_path = "%s/%s" % (repo_path, time.time())
-    fake_file = open(fake_file_path, 'w+')
-    fake_file.write("foo")
-    fake_file.close()
-    args = ["add", fake_file_path]
+    fake_file_path = "%s/%s" % (repo_path, fname)
+    if not remove:
+        fake_file = open(fake_file_path, 'w+')
+        fake_file.write("foo")
+        fake_file.close()
+        args = ["add", fake_file_path]
+    else:
+        args = ["rm", fake_file_path]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
     args = ["commit", "-a", "-m", "update"]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)

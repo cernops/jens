@@ -123,12 +123,23 @@ class GitWrapperTest(JensTestCase):
         git_wrapper.clone(jens_bare, bare, bare=True)
         jens_clone = "%s/_clone" % self.settings.CLONEDIR
         git_wrapper.clone(jens_clone, jens_bare, bare=False, branch='qa')
-        commit_id = add_commit_to_branch(self.settings, user, 'qa')
+        fname = 'should_be_checkedout'
+        commit_id = add_commit_to_branch(self.settings, user, 'qa', fname=fname)
         git_wrapper.fetch(jens_bare)
         git_wrapper.fetch(jens_clone)
         git_wrapper.reset(jens_clone, 'origin/qa', hard=True)
         self.assertEquals(get_repository_head(self.settings, jens_clone),
                           commit_id)
+        self.assertTrue(os.path.isfile("%s/%s" % (jens_clone, fname)))
+
+
+        new_commit = add_commit_to_branch(self.settings,
+                    user, 'qa', fname=fname, remove=True)
+        git_wrapper.fetch(jens_bare)
+        git_wrapper.fetch(jens_clone)
+        git_wrapper.reset(jens_clone, 'origin/qa', hard=True)
+        self.assertFalse(os.path.isfile("%s/%s" %
+            (jens_clone, fname)))
 
     def test_reset_not_repository(self):
         not_repo_path = create_folder_not_repository(self.settings,

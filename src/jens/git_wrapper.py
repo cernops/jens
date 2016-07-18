@@ -70,7 +70,7 @@ def reset(repository_path, treeish, hard=False):
     @git_exec
     def reset_exec(*args, **kwargs):
         repo = git.Repo(repository_path, odbt=git.GitCmdObjectDB)
-        git.refs.head.HEAD(repo).reset(*args, **kwargs)
+        repo.git.reset(*args, **kwargs)
 
     reset_exec(name='reset', args=args, kwargs=kwargs)
 

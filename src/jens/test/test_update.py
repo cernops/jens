@@ -224,17 +224,25 @@ class UpdateTest(JensTestCase):
             self.assertClone('hostgroups/h1/%s' % branch)
             self.assertClone('modules/m1/%s' % branch)
 
-        h1_commit_id = add_commit_to_branch(self.settings, h1_path, 'qa')
-        m1_commit_id = add_commit_to_branch(self.settings, m1_path, 'master')
-        h1_boom_commit_id = add_commit_to_branch(self.settings, h1_path, 'boom')
-        m1_boom_commit_id = add_commit_to_branch(self.settings, m1_path, 'boom')
+        h1_commit_id = add_commit_to_branch(self.settings, h1_path,
+            'qa', fname='h1qa')
+        m1_commit_id = add_commit_to_branch(self.settings, m1_path,
+            'master', fname='m1master')
+        h1_boom_commit_id = add_commit_to_branch(self.settings,
+            h1_path, 'boom', fname='h1boom')
+        m1_boom_commit_id = add_commit_to_branch(self.settings,
+            m1_path, 'boom', fname='m1boom')
 
         self._jens_update()
 
         self.assertClone('hostgroups/h1/qa', pointsto=h1_commit_id)
+        self.assertCloneFileExists('hostgroups/h1/qa', 'h1qa')
         self.assertClone('modules/m1/master', pointsto=m1_commit_id)
+        self.assertCloneFileExists('modules/m1/master', 'm1master')
         self.assertClone('hostgroups/h1/boom', pointsto=h1_boom_commit_id)
+        self.assertCloneFileExists('hostgroups/h1/boom', 'h1boom')
         self.assertClone('modules/m1/boom', pointsto=m1_boom_commit_id)
+        self.assertCloneFileExists('modules/m1/boom','m1boom')
 
     def test_all_is_added_to_new_environments(self):
         self._create_fake_module('electron', ['qa'])
