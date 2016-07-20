@@ -46,7 +46,7 @@ def hello_gitlab():
                 if _url == url:
                     partition, name = _partition, _name
 
-        enqueue_hint(settings, partition, name)
+        enqueue_hint(partition, name)
         return 'OK'
     except JensMessagingError as error:
         logging.error("%s/%s couldn't be added to the queue (%s)" %

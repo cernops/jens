@@ -41,7 +41,8 @@ def parse_cmdline_args():
     return opts
 
 @timed
-def gc_bares(settings, opts):
+def gc_bares(opts):
+    settings = Settings()
     processed = 0
     for partition in ("modules", "hostgroups", "common"):
         base_path = settings.BAREDIR + "/%s" % partition
@@ -56,7 +57,8 @@ def gc_bares(settings, opts):
     return processed
 
 @timed
-def gc_clones(settings, opts):
+def gc_clones(opts):
+    settings = Settings()
     processed = 0
     for partition in ("modules", "hostgroups", "common"):
         base_path = settings.CLONEDIR + "/%s" % partition
@@ -84,21 +86,21 @@ def main():
         return 2
 
     try:
-        validate_directories(settings)
+        validate_directories()
     except JensError, error:
         logging.error("Failed to validate directories (%s)" % error)
         return 3
 
     try:
-        with JensLockFactory.makeLock(settings, tries=10, waittime=10) as lock:
+        with JensLockFactory.makeLock(tries=10, waittime=10) as lock:
             if opts.bare or opts.all:
                 logging.info("GCing bare repositories...")
-                processed_count = gc_bares(settings, opts)
+                processed_count = gc_bares(opts)
                 logging.info("Done (%d repositories cleaned up)" % processed_count)
 
             if opts.clones or opts.all:
                 logging.info("GCing clones...")
-                processed_count = gc_clones(settings, opts)
+                processed_count = gc_clones(opts)
                 logging.info("Done (%d repositories cleaned up)" % processed_count)
     except JensLockError, error:
         logging.error("Locking failed (%s)" % error)

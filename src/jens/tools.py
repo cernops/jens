@@ -6,20 +6,23 @@
 # or submit itself to any jurisdiction.
 
 import re
+from jens.settings import Settings
 
-def refname_to_dirname(settings, refname):
-    match = ref_is_commit(settings, refname)
+def refname_to_dirname(refname):
+    settings = Settings()
+    match = ref_is_commit(refname)
     if match:
         return ".%s" % match.group(1)
     return refname
 
-def dirname_to_refname(settings, dirname):
+def dirname_to_refname(dirname):
+    settings = Settings()
     match = re.match("^\.([^\.]+)", dirname)
     if match:
         return "%s%s" % (settings.HASHPREFIX, match.group(1))
     return dirname
 
-def ref_is_commit(settings, refname):
+def ref_is_commit(refname):
+    settings = Settings()
     return re.match("^%s([0-9A-Fa-f]+)" % settings.HASHPREFIX,
-        refname,
-        re.IGNORECASE)
+                    refname, re.IGNORECASE)

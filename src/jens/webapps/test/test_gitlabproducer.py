@@ -11,16 +11,17 @@ from jens.test.tools import add_repository, del_repository
 from jens.test.tools import create_fake_repository
 from jens.test.testcases import JensTestCase
 from jens.webapps.gitlabproducer import app as gitlabproducer
+from jens.settings import Settings
 
 class GitlabProducerTestCase(JensTestCase):
 
     def setUp(self):
         super(GitlabProducerTestCase, self).setUp()
-        init_repositories(self.settings)
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
-        add_repository(self.settings, 'common', 'site', bare)
+        init_repositories()
+        (bare, user) = create_fake_repository(self.sandbox_path, ['qa'])
+        add_repository('common', 'site', bare)
         self.site_bare = bare
-        gitlabproducer.config['settings'] = self.settings
+        gitlabproducer.config['settings'] = Settings()
         self.app = gitlabproducer.test_client()
    
     def test_get(self):
@@ -61,7 +62,7 @@ class GitlabProducerTestCase(JensTestCase):
                          'git_ssh_url': "file://%s" % self.site_bare
                         }
                     }))
-        mock_eq.assert_called_once_with(self.settings, 'common', 'site')
+        mock_eq.assert_called_once_with('common', 'site')
         self.assertEquals(reply.status_code, 200)
 
     @patch('jens.webapps.gitlabproducer.enqueue_hint', side_effect=JensMessagingError)

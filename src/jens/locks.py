@@ -8,30 +8,32 @@
 import logging
 import time
 from urllib3.exceptions import TimeoutError
+from jens.settings import Settings
 
 from jens.errors import JensLockError, JensLockExistsError
 
 class JensLockFactory(object):
     @staticmethod
-    def makeLock(settings, tries=1, waittime=10):
+    def makeLock(tries=1, waittime=10):
+        settings = Settings()
         if settings.LOCK_TYPE == 'FILE':
-            return JensFileLock(settings, tries, waittime)
+            return JensFileLock(tries, waittime)
         elif settings.LOCK_TYPE == 'DISABLED':
             logging.warn("Danger zone: no locking has been configured!")
-            return JensDumbLock(settings, tries, waittime)
-        else: # Shouldn't ever happen, config is validated
+            return JensDumbLock(tries, waittime)
+        else:  # Shouldn't ever happen, config is validated
             raise JensLockError("Unknown lock type '%s'", settings.LOCK_TYPE)
 
 class JensLock(object):
-    def __init__(self, settings, tries, waittime):
-        self.settings = settings
+    def __init__(self, tries, waittime):
+        self.settings = Settings()
         self.tries = tries
         self.waittime = waittime
 
     def __enter__(self):
         for attempt in range(1, self.tries+1):
             logging.info("Obtaining lock '%s' (attempt: %d)..." %
-                (self.settings.LOCK_NAME, attempt))
+                         (self.settings.LOCK_NAME, attempt))
             try:
                 self.obtain_lock()
                 logging.debug("Lock acquired")
@@ -41,7 +43,7 @@ class JensLock(object):
                     raise error
                 else:
                     logging.debug("Couldn't lock (%s). Sleeping for %d seconds..." %
-                        (error, self.waittime))
+                                  (error, self.waittime))
                     time.sleep(self.waittime)
 
     def __exit__(self, type, value, traceback):
@@ -52,8 +54,8 @@ class JensLock(object):
         if ttl <= 0:
             logging.warn("Invalid new TTL, resetting to 1 by default")
             ttl = 1
-        logging.info("Setting '%s' lock TTL to %d secs..." % \
-            (self.settings.LOCK_NAME, ttl))
+        logging.info("Setting '%s' lock TTL to %d secs..." %
+                     (self.settings.LOCK_NAME, ttl))
         self.renew_lock(ttl)
 
 class JensFileLock(JensLock):

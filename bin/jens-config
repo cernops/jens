@@ -30,7 +30,8 @@ def parse_cmdline_args():
         raise JensConfigError("--key is mandatory")
     return opts
 
-def get_config(settings, section, key):
+def get_config(section, key):
+    settings = Settings()
     raw_config = settings.config
     if section in raw_config:
         if key in raw_config[section]:
@@ -54,7 +55,7 @@ def main():
         return 2
 
     try:
-        value = get_config(settings, opts.section, opts.key)
+        value = get_config(opts.section, opts.key)
     except JensError, error:
         logging.error(str(error) + "\n")
         return 3
