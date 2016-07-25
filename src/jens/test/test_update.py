@@ -8,12 +8,14 @@
 import os
 import yaml
 import shutil
+import mock
 
 from jens.messaging import count_pending_hints
 from jens.repos import refresh_repositories
 from jens.locks import JensLockFactory
 from jens.environments import refresh_environments
 from jens.git_wrapper import get_refs
+from jens.errors import JensMessagingError
 
 from jens.test.tools import ensure_environment, destroy_environment
 from jens.test.tools import init_repositories
@@ -1123,6 +1125,27 @@ class UpdateTest(JensTestCase):
 
         self._jens_update(hints={'hostgroups': ['yi']})
         self.assertClone('hostgroups/yi/qa', pointsto=new_yi_qa)
+
+    @mock.patch('jens.repos.enqueue_hint', side_effect=JensMessagingError())
+    def test_hint_readded_to_the_queue_if_fetch_fails_enqueuing_error(self, mock):
+        self.settings.MODE = "ONDEMAND"
+        yi_path = self._create_fake_hostgroup('yi', ['qa'])
+        old_yi_qa = get_refs(yi_path + '/.git')['qa']
+        yi_path_bare = yi_path.replace('/user/', '/bare/')
+
+        self._jens_update()
+
+        self.assertBare('hostgroups/yi')
+        self.assertClone('hostgroups/yi/qa')
+
+        new_yi_qa = add_commit_to_branch(yi_path, 'qa')
+
+        # ---- Make it temporary unavailable
+        shutil.move("%s/refs" % yi_path_bare, "%s/goat" % yi_path_bare)
+
+        self.assertEqual(0, count_pending_hints())
+        self._jens_update(hints={'hostgroups': ['yi']}, errorsExpected=True)
+        self.assertEqual(0, count_pending_hints())
 
     def test_directory_environments_parser_modes(self):
         self.settings.DIRECTORY_ENVIRONMENTS = True
