@@ -28,4 +28,6 @@ name = string(default='jens')
 lockdir = string(default='/var/lock/jens')
 [messaging]
 queuedir = string(default='/var/spool/jens-update')
+[git]
+ssh_cmd_path = string(default=None)
 """

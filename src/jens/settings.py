@@ -71,6 +71,9 @@ class Settings():
         # [messaging]
         self.MESSAGING_QUEUEDIR = config["messaging"]["queuedir"]
 
+        # [git]
+        self.SSH_CMD_PATH = config["git"]["ssh_cmd_path"]
+
         if self.logfile:
             logging.basicConfig(
                 level = getattr(logging, self.DEBUG_LEVEL),

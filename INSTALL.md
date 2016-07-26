@@ -362,6 +362,29 @@ are enqueued:
 INFO 2015-12-10T14:43:01.705468 - hostgroups/foo - '0000003c/56698165ac7909' added to the queue
 ```
 
+### Setting a timeout for Git operations via SSH
+
+To protect Jens from hanging indefinetely in case of a lack of response from
+the remote, it's possible to override the SSH command and put a timeout in
+between so the Git operations don't run forever. This only applies if the
+traffic to the remotes is transported via SSH.
+
+The idea is to write a file wrapping the call to ssh in a timeout. Example:
+
+```shell
+# cat /usr/local/bin/timeoutssh.sh
+timeout 10 ssh $@
+```
+
+And then tell Jens to use that wrapper via the configuration file:
+
+```
+[git]
+ssh_cmd_path = /usr/local/bin/timeoutssh.sh
+```
+
+If the configuration option is not set the environment variable GIT_SSH won't be internally set by Jens.
+
 ### Getting statistics about the number of modules, hostgroups and environments
 
 ```

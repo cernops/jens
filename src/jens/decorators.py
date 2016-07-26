@@ -7,10 +7,12 @@
 
 import logging
 
+import os
 from functools import wraps
 from time import time
 from git.exc import *
 from jens.errors import JensGitError
+from jens.settings import Settings
 
 def timed(f):
     @wraps(f)
@@ -25,6 +27,12 @@ def timed(f):
 def git_exec(f):
     @wraps(f)
     def wrapper(*w_args, **w_kwargs):
+        settings = Settings()
+        ssh_cmd_path = settings.SSH_CMD_PATH
+
+        if ssh_cmd_path:
+            os.environ['GIT_SSH'] = ssh_cmd_path
+
         args = w_kwargs["args"]
         kwargs = w_kwargs["kwargs"]
         name = w_kwargs["name"]
