@@ -44,27 +44,30 @@ def parse_cmdline_args():
     opts, args = parser.parse_args()
     return opts
 
-def get_bare_repositories(settings):
+def get_bare_repositories():
+    settings = Settings()
     result = {}
-    result['modules'] = [attach_information(settings, "modules", element) \
+    result['modules'] = [attach_information("modules", element) \
         for element in sorted(os.listdir(settings.BAREDIR + "/modules"))]
-    result['hostgroups'] = [attach_information(settings, "hostgroups", element) \
+    result['hostgroups'] = [attach_information("hostgroups", element) \
         for element in sorted(os.listdir(settings.BAREDIR + "/hostgroups"))]
-    result['common'] = [attach_information(settings, "common", element) \
+    result['common'] = [attach_information("common", element) \
         for element in os.listdir(settings.BAREDIR + "/common")]
     return result
 
-def attach_information(settings, partition, element):
-    branches = get_branches(settings, partition, element)
-    master_size = get_size(settings, partition, element, "master")
+def attach_information(partition, element):
+    branches = get_branches(partition, element)
+    master_size = get_size(partition, element, "master")
     return "%s (%s) [%s]" % (element, branches, master_size)
 
-def get_branches(settings, partition, element):
+def get_branches(partition, element):
+    settings = Settings()
     path = "%s/%s/%s" % (settings.CLONEDIR, partition, element)
     branches = os.listdir(path)
     return "%s" % ",".join(sorted(branches))
 
-def get_size(settings, partition, element, branch):
+def get_size(partition, element, branch):
+    settings = Settings()
     path = "%s/%s/%s/%s" % \
         (settings.CLONEDIR, partition, element, branch)
     size = 0
@@ -84,13 +87,16 @@ def fmt_bytes(num):
         num /= 1024.0
     return "%3.1f%s" % (num, 'TB')
     
-def get_puppet_environments(settings):
+def get_puppet_environments():
+    settings = Settings()
     return os.listdir(settings.ENVIRONMENTSDIR)
 
-def get_environments_in_cache(settings):
+def get_environments_in_cache():
+    settings = Settings()
     return os.listdir(settings.CACHEDIR + "/environments")
 
-def get_environments_in_metadata(settings):
+def get_environments_in_metadata():
+    settings = Settings()
     return __listdir_nohidden(settings.ENV_METADATADIR)
 
 def __listdir_nohidden(dir):
@@ -108,13 +114,13 @@ def main():
         return 2
 
     try:
-        validate_directories(settings)
+        validate_directories()
     except JensError, error:
         logging.error("Failed to validate directories (%s)" % error)
         return 3
 
     if opts.repositories or opts.all:
-        bares = get_bare_repositories(settings)
+        bares = get_bare_repositories()
         logging.info("There are %d modules:" % len(bares['modules']))
         for module in bares['modules']:
             logging.info( "\t- %s" % module)
@@ -124,9 +130,9 @@ def main():
 
     if opts.environment or opts.all:
         environments = {}
-        environments['synchronized'] = get_puppet_environments(settings)
-        environments['declared'] = get_environments_in_metadata(settings)
-        environments['cached'] = get_environments_in_cache(settings)
+        environments['synchronized'] = get_puppet_environments()
+        environments['declared'] = get_environments_in_metadata()
+        environments['cached'] = get_environments_in_cache()
     
         for type, list in environments.iteritems():
             logging.info("There are %d %s environments" % (len(list), type))
@@ -134,13 +140,13 @@ def main():
                 logging.info("\t - %s " % environment)
 
     if opts.inventory or opts.all:
-        inventory = get_inventory(settings)
+        inventory = get_inventory()
         pp = pprint.PrettyPrinter()
         pp.pprint(inventory)
 
     if opts.queues or opts.all:
         try:
-            count = count_pending_hints(settings)
+            count = count_pending_hints()
             logging.info("There are '%d' messages in the hints queue" % count)
         except JensMessagingError, error:
             logging.error(error)

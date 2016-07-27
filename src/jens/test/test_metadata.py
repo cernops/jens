@@ -18,6 +18,7 @@ from jens.errors import JensError
 from jens.test.tools import create_fake_repository
 from jens.test.tools import add_commit_to_branch, reset_branch_to
 from jens.test.tools import get_repository_head
+from jens.settings import Settings
 
 from jens.test.testcases import JensTestCase
 
@@ -25,20 +26,22 @@ class MetadataTest(JensTestCase):
     def setUp(self):
         super(MetadataTest, self).setUp()
 
+        self.settings = Settings()
+
         (self.environments_bare, self.environments) = \
-            create_fake_repository(self.settings, self.sandbox_path)
+            create_fake_repository(self.sandbox_path)
         shutil.rmtree(self.settings.ENV_METADATADIR)
         clone(self.settings.ENV_METADATADIR, self.environments_bare, \
             branch='master')
 
         (self.repositories_bare, self.repositories) = \
-            create_fake_repository(self.settings, self.sandbox_path)
+            create_fake_repository(self.sandbox_path)
         shutil.rmtree(self.settings.REPO_METADATADIR)
         clone(self.settings.REPO_METADATADIR, self.repositories_bare, \
             branch='master')
 
     def _jens_refresh_metadata(self, errorsExpected=False, errorRegexp=None):
-        refresh_metadata(self.settings, self.lock)
+        refresh_metadata(self.lock)
         if errorsExpected:
             self.assertLogErrors(errorRegexp)
         else:
@@ -50,34 +53,30 @@ class MetadataTest(JensTestCase):
         self._jens_refresh_metadata()
 
         fname = 'basic_updates_1'
-        new_commit = add_commit_to_branch(self.settings, \
-            self.environments, 'master', fname=fname)
+        new_commit = add_commit_to_branch(self.environments, 'master', fname=fname)
         self._jens_refresh_metadata()
-        self.assertEquals(get_repository_head(self.settings,\
-            self.settings.ENV_METADATADIR), new_commit)
+        self.assertEquals(get_repository_head(self.settings.ENV_METADATADIR), new_commit)
         # The reset is --hard
         self.assertTrue(os.path.isfile("%s/%s" %
             (self.settings.ENV_METADATADIR, fname)))
-        new_commit = add_commit_to_branch(self.settings, \
-            self.environments, 'master', fname=fname, remove=True)
+        new_commit = add_commit_to_branch(self.environments, 'master', fname=fname,
+                                          remove=True)
         self._jens_refresh_metadata()
         self.assertFalse(os.path.isfile("%s/%s" %
             (self.settings.ENV_METADATADIR, fname)))
 
         fname = 'basic_updates_2'
-        new_commit = add_commit_to_branch(self.settings, \
-            self.repositories, 'master', fname=fname)
+        new_commit = add_commit_to_branch(self.repositories, 'master', fname=fname)
         self._jens_refresh_metadata()
-        self.assertEquals(get_repository_head(self.settings,\
-            self.settings.REPO_METADATADIR), new_commit)
+        self.assertEquals(get_repository_head(self.settings.REPO_METADATADIR),
+                          new_commit)
         self.assertTrue(os.path.isfile("%s/%s" %
             (self.settings.REPO_METADATADIR, fname)))
 
-        new_commit = add_commit_to_branch(self.settings, \
-            self.repositories, 'master', fname=fname, remove=True)
+        new_commit = add_commit_to_branch(self.repositories, 'master', fname=fname,
+                                          remove=True)
         self._jens_refresh_metadata()
-        self.assertEquals(get_repository_head(self.settings,\
-            self.settings.REPO_METADATADIR), new_commit)
+        self.assertEquals(get_repository_head(self.settings.REPO_METADATADIR), new_commit)
         self.assertFalse(os.path.isfile("%s/%s" %
             (self.settings.REPO_METADATADIR, fname)))
 
@@ -85,25 +84,19 @@ class MetadataTest(JensTestCase):
         self.settings.MODE = "ONDEMAND"
         self._jens_refresh_metadata()
 
-        new_commit = add_commit_to_branch(self.settings, \
-            self.environments, 'master')
+        new_commit = add_commit_to_branch(self.environments, 'master')
         self._jens_refresh_metadata()
-        self.assertEquals(get_repository_head(self.settings,\
-            self.settings.ENV_METADATADIR), new_commit)
+        self.assertEquals(get_repository_head(self.settings.ENV_METADATADIR), new_commit)
 
-        new_commit = add_commit_to_branch(self.settings, \
-            self.repositories, 'master')
+        new_commit = add_commit_to_branch(self.repositories, 'master')
         self._jens_refresh_metadata()
-        self.assertEquals(get_repository_head(self.settings,\
-            self.settings.REPO_METADATADIR), new_commit)
+        self.assertEquals(get_repository_head(self.settings.REPO_METADATADIR), new_commit)
 
     def test_fails_if_remote_repositories_unavailable(self):
-        initial = get_repository_head(self.settings, self.repositories)
-        self.assertEquals(get_repository_head(self.settings,\
-            self.settings.REPO_METADATADIR), initial)
+        initial = get_repository_head(self.repositories)
+        self.assertEquals(get_repository_head(self.settings.REPO_METADATADIR), initial)
         self._jens_refresh_metadata()
-        self.assertEquals(get_repository_head(self.settings,\
-            self.settings.REPO_METADATADIR), initial)
+        self.assertEquals(get_repository_head(self.settings.REPO_METADATADIR), initial)
 
         # -- "not available" --
 
@@ -117,12 +110,10 @@ class MetadataTest(JensTestCase):
         self._jens_refresh_metadata()
 
     def test_fails_if_remote_environments_unavailable(self):
-        initial = get_repository_head(self.settings, self.environments)
-        self.assertEquals(get_repository_head(self.settings,\
-            self.settings.ENV_METADATADIR), initial)
+        initial = get_repository_head(self.environments)
+        self.assertEquals(get_repository_head(self.settings.ENV_METADATADIR), initial)
         self._jens_refresh_metadata()
-        self.assertEquals(get_repository_head(self.settings,\
-            self.settings.ENV_METADATADIR), initial)
+        self.assertEquals(get_repository_head(self.settings.ENV_METADATADIR), initial)
 
         # -- "not available" --
 
@@ -140,42 +131,40 @@ class MetadataTest(JensTestCase):
 
         bombs = []
         for x in range(0,4):
-            bombs.append(add_commit_to_branch(self.settings, self.repositories, 'master'))
+            bombs.append(add_commit_to_branch(self.repositories, 'master'))
 
         self._jens_refresh_metadata()
 
-        self.assertEquals(get_repository_head(self.settings, self.repositories), bombs[-1])
+        self.assertEquals(get_repository_head(self.repositories), bombs[-1])
 
-        reset_branch_to(self.settings, self.repositories, "master", bombs[0])
-        new_commit = add_commit_to_branch(self.settings, self.repositories, \
+        reset_branch_to(self.repositories, "master", bombs[0])
+        new_commit = add_commit_to_branch(self.repositories, \
             'master', force=True)
 
         self._jens_refresh_metadata()
 
         # Should be the same if it did a reset
-        self.assertEquals(get_repository_head(self.settings,\
-            self.settings.REPO_METADATADIR), new_commit)
+        self.assertEquals(get_repository_head(self.settings.REPO_METADATADIR), new_commit)
 
     def test_environments_is_history_is_mangled(self):
         self._jens_refresh_metadata()
 
         bombs = []
         for x in range(0,4):
-            bombs.append(add_commit_to_branch(self.settings, self.environments, 'master'))
+            bombs.append(add_commit_to_branch(self.environments, 'master'))
 
         self._jens_refresh_metadata()
 
-        self.assertEquals(get_repository_head(self.settings, self.environments), bombs[-1])
+        self.assertEquals(get_repository_head(self.environments), bombs[-1])
 
-        reset_branch_to(self.settings, self.environments, "master", bombs[0])
-        new_commit = add_commit_to_branch(self.settings, self.environments, \
+        reset_branch_to(self.environments, "master", bombs[0])
+        new_commit = add_commit_to_branch(self.environments, \
             'master', force=True)
 
         self._jens_refresh_metadata()
 
         # Should be the same if it did a reset
-        self.assertEquals(get_repository_head(self.settings,\
-            self.settings.ENV_METADATADIR), new_commit)
+        self.assertEquals(get_repository_head(self.settings.ENV_METADATADIR), new_commit)
 
     @patch.object(fcntl, 'flock', side_effect=IOError)
     def test_fails_if_lock_cannot_be_acquired(self, mock):

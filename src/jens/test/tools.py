@@ -15,6 +15,7 @@ import logging
 from subprocess import Popen, PIPE
 from datetime import datetime
 from dirq.queue import Queue, QueueError, QueueLockError
+from jens.settings import Settings
 
 from jens.errors import JensGitError
 from jens.messaging import MSG_SCHEMA
@@ -64,7 +65,7 @@ def init_sandbox(path):
 def destroy_sandbox(path):
     shutil.rmtree(path)
 
-def ensure_environment(settings, envname, default,
+def ensure_environment(envname, default,
         modules=[], hostgroups=[], common=[], parser=None):
     environment = {'notifications': 'higgs@example.org'}
     if default is not None:
@@ -88,14 +89,17 @@ def ensure_environment(settings, envname, default,
     if parser:
         environment['parser'] = parser
 
+    settings = Settings()
     environment_file = open("%s/%s.yaml" % (settings.ENV_METADATADIR, envname), 'w+')
     yaml.dump(environment, environment_file, default_flow_style=False)
     environment_file.close()
 
-def destroy_environment(settings, envname):
+def destroy_environment(envname):
+    settings = Settings()
     os.remove("%s/%s.yaml" % (settings.ENV_METADATADIR, envname))
 
-def init_repositories(settings):
+def init_repositories():
+    settings = Settings()
     data = {'repositories': {'modules': {},
         'hostgroups': {},
         'common': {}}}
@@ -103,7 +107,8 @@ def init_repositories(settings):
     yaml.dump(data, repositories_file, default_flow_style=False)
     repositories_file.close()
 
-def add_repository(settings, partition, name, url):
+def add_repository(partition, name, url):
+    settings = Settings()
     repositories_file = open(settings.REPO_METADATA, 'r')
     data = yaml.load(repositories_file)
     repositories_file.close()
@@ -112,7 +117,8 @@ def add_repository(settings, partition, name, url):
     yaml.dump(data, repositories_file, default_flow_style=False)
     repositories_file.close()
 
-def del_repository(settings, partition, name):
+def del_repository(partition, name):
+    settings = Settings()
     repositories_file = open(settings.REPO_METADATA, 'r')
     data = yaml.load(repositories_file)
     repositories_file.close()
@@ -121,11 +127,11 @@ def del_repository(settings, partition, name):
     yaml.dump(data, repositories_file, default_flow_style=False)
     repositories_file.close()
 
-def create_folder_not_repository(settings, base):
+def create_folder_not_repository(base):
     not_repo_path = tempfile.mkdtemp(dir="%s/repos/user" % base)
     return not_repo_path
 
-def create_fake_repository(settings, base, branches=[]):
+def create_fake_repository(base, branches=[]):
     bare_repo_path = tempfile.mkdtemp(dir="%s/repos/bare" % base)
     gitdir = "%s" % bare_repo_path
     args = ["init", "--bare"]
@@ -185,20 +191,20 @@ def create_fake_repository(settings, base, branches=[]):
     # bare_repo_path is returned to be added to the lib only.
     return (bare_repo_path, repo_path)
 
-def get_repository_head(settings, repo_path):
+def get_repository_head(repo_path):
     args = ["rev-parse", "HEAD"]
     gitdir = "%s/.git" % repo_path
     (out, code) =_git(args, gitdir=gitdir, gitworkingtree=repo_path)
     return out.strip()
 
-def add_branch_to_repo(settings, repo_path, branch):
+def add_branch_to_repo(repo_path, branch):
     gitdir = "%s/.git" % repo_path
     args = ["checkout", "-b", branch]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
     args = ["push", "origin", branch]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
 
-def add_commit_to_branch(settings, repo_path, branch,
+def add_commit_to_branch(repo_path, branch,
         force=False, fname=None, remove=False):
     if fname is None:
         fname = time.time()
@@ -220,9 +226,9 @@ def add_commit_to_branch(settings, repo_path, branch,
     if force:
         args.append("--force")
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
-    return get_repository_head(settings, repo_path)
+    return get_repository_head(repo_path)
 
-def remove_branch_from_repo(settings, repo_path, branch):
+def remove_branch_from_repo(repo_path, branch):
     gitdir = "%s/.git" % repo_path
     args = ["checkout", "master"]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
@@ -231,7 +237,7 @@ def remove_branch_from_repo(settings, repo_path, branch):
     args = ["push", "origin", ":%s" % branch]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
 
-def reset_branch_to(settings, repo_path, branch, commit_id):
+def reset_branch_to(repo_path, branch, commit_id):
     gitdir = "%s/.git" % repo_path
     args = ["checkout", branch]
     _git(args, gitdir=gitdir, gitworkingtree=repo_path)
@@ -240,21 +246,22 @@ def reset_branch_to(settings, repo_path, branch, commit_id):
 
 ## Messaging
 
-def add_msg_to_queue(settings, msg):
+def add_msg_to_queue(msg):
+    settings = Settings()
     queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
     queue.enqueue(msg)
 
-def create_module_event(settings, module):
+def create_module_event(module):
     msg = {'time': datetime.now().isoformat(),
         'data': pickle.dumps({'modules': [module]})}
-    add_msg_to_queue(settings, msg)
+    add_msg_to_queue(msg)
 
-def create_hostgroup_event(settings, hostgroup):
+def create_hostgroup_event(hostgroup):
     msg = {'time': datetime.now().isoformat(),
         'data': pickle.dumps({'hostgroups': [hostgroup]})}
-    add_msg_to_queue(settings, msg)
+    add_msg_to_queue(msg)
 
-def create_common_event(settings, element):
+def create_common_event(element):
     msg = {'time': datetime.now().isoformat(),
         'data': pickle.dumps({'common': [element]})}
-    add_msg_to_queue(settings, msg)
+    add_msg_to_queue(msg)

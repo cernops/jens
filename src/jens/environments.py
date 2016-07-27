@@ -17,91 +17,95 @@ from jens.git_wrapper import hash_object
 from jens.decorators import timed
 from jens.errors import JensEnvironmentsError
 from jens.tools import refname_to_dirname
+from jens.settings import Settings
 
 DIRECTORY_ENVIRONMENTS_CONF_FILENAME = "environment.conf"
 DIRECTORY_ENVIRONMENTS_CONF_PARSER_VALUES = ('current', 'future')
 
 @timed
-def refresh_environments(settings, lock, repositories_deltas, inventory):
+def refresh_environments(lock, repositories_deltas, inventory):
     logging.debug("Calculating delta...")
-    delta = _calculate_delta(settings)
+    delta = _calculate_delta()
     logging.info("New environments: %s" % delta['new'])
     logging.info("Existing and changed environments: %s" % delta['changed'])
     logging.debug("Existing but not changed environments: %s" % delta['notchanged'])
     logging.info("Deleted environments: %s" % delta['deleted'])
 
     logging.info("Creating new environments...")
-    _create_new_environments(settings, delta['new'], inventory)
+    _create_new_environments(delta['new'], inventory)
     logging.info("Purging deleted environments...")
-    _purge_deleted_environments(settings, delta['deleted'])
+    _purge_deleted_environments(delta['deleted'])
     logging.info("Recreating changed environments...")
-    _recreate_changed_environments(settings, delta['changed'], inventory)
+    _recreate_changed_environments(delta['changed'], inventory)
     logging.info("Refreshing not changed environments...")
-    _refresh_notchanged_environments(settings, delta['notchanged'],
-        repositories_deltas)
+    _refresh_notchanged_environments(delta['notchanged'], repositories_deltas)
 
-def _refresh_notchanged_environments(settings, environments, repositories_deltas):
+def _refresh_notchanged_environments(environments, repositories_deltas):
     for environment in environments:
         logging.debug("Refreshing environment '%s'..." % environment)
         try:
-            definition = read_environment_definition(settings, environment)
+            definition = read_environment_definition(environment)
         except JensEnvironmentsError, error:
-            logging.error("Unable to read and parse '%s' definition (%s). Skipping" % \
-                    (environment, error))
+            logging.error("Unable to read and parse '%s' definition (%s). Skipping" %
+                          (environment, error))
             return
 
         if definition.get('default', None) is None:
-            logging.debug("Environment '%s' won't get new modules (no default)" % environment)
+            logging.debug("Environment '%s' won't get new modules (no default)" %
+                          environment)
         else:
             for module in repositories_deltas['modules']['new']:
                 try:
-                    _link_module(settings, module, environment, definition)
+                    _link_module(module, environment, definition)
                 except JensEnvironmentsError, error:
-                    logging.error("Failed to link module '%s' in enviroment '%s' (%s)" % \
-                        (module, environment, error))
+                    logging.error("Failed to link module '%s' in enviroment '%s' (%s)" %
+                                  (module, environment, error))
 
         for module in repositories_deltas['modules']['deleted']:
             logging.debug("Deleting module '%s' from environment '%s'" %
-                (module, environment))
-            _unlink_module(settings, module, environment)
+                          (module, environment))
+            _unlink_module(module, environment)
 
         if definition.get('default', None) is None:
-            logging.debug("Environment '%s' won't get new hostgroups (no default)" % environment)
+            logging.debug("Environment '%s' won't get new hostgroups (no default)" %
+                          environment)
         else:
             for hostgroup in repositories_deltas['hostgroups']['new']:
                 try:
-                    _link_hostgroup(settings, hostgroup, environment, definition)
+                    _link_hostgroup(hostgroup, environment, definition)
                 except JensEnvironmentsError, error:
-                    logging.error("Failed to link hostgroup '%s' in enviroment '%s' (%s)" % \
-                        (hostgroup, environment, error))
+                    logging.error("Failed to link hostgroup '%s' in enviroment '%s' (%s)" %
+                                  (hostgroup, environment, error))
 
         for hostgroup in repositories_deltas['hostgroups']['deleted']:
             logging.debug("Deleting hostgroup '%s' from environment '%s'" %
-                (hostgroup, environment))
-            _unlink_hostgroup(settings, hostgroup, environment)
+                          (hostgroup, environment))
+            _unlink_hostgroup(hostgroup, environment)
 
-def _recreate_changed_environments(settings, environments, inventory):
+def _recreate_changed_environments(environments, inventory):
     for environment in environments:
         logging.info("Recreating environment '%s'" % environment)
-        _purge_deleted_environment(settings, environment)
-        _create_new_environment(settings, environment, inventory)
+        _purge_deleted_environment(environment)
+        _create_new_environment(environment, inventory)
 
-def _purge_deleted_environments(settings, environments):
+def _purge_deleted_environments(environments):
     for environment in environments:
-        _purge_deleted_environment(settings, environment)
+        _purge_deleted_environment(environment)
 
-def _purge_deleted_environment(settings, environment):
+def _purge_deleted_environment(environment):
+    settings = Settings()
     logging.info("Deleting environment '%s'" % environment)
     env_basepath = "%s/%s" % (settings.ENVIRONMENTSDIR, environment)
     shutil.rmtree(env_basepath)
     logging.info("Deleted '%s'" % env_basepath)
-    _remove_environment_annotation(settings, environment)
+    _remove_environment_annotation(environment)
 
-def _create_new_environments(settings, environments, inventory):
+def _create_new_environments(environments, inventory):
     for environment in environments:
-        _create_new_environment(settings, environment, inventory)
+        _create_new_environment(environment, inventory)
 
-def _create_new_environment(settings, environment, inventory):
+def _create_new_environment(environment, inventory):
+    settings = Settings()
     logging.info("Creating new environment '%s'" % environment)
 
     if re.match(r"^\w+$", environment) is None:
@@ -109,10 +113,10 @@ def _create_new_environment(settings, environment, inventory):
         return
 
     try:
-        definition = read_environment_definition(settings, environment)
+        definition = read_environment_definition(environment)
     except JensEnvironmentsError, error:
-        logging.error("Unable to read and parse '%s' definition (%s). Skipping" % \
-            (environment, error))
+        logging.error("Unable to read and parse '%s' definition (%s). Skipping" %
+                      (environment, error))
         return
 
     if definition is None:
@@ -131,7 +135,7 @@ def _create_new_environment(settings, environment, inventory):
 
     logging.info("Processing modules...")
     modules = inventory['modules'].keys()
-    if not 'default' in definition:
+    if 'default' not in definition:
         try:
             necessary_modules = definition['overrides']['modules'].keys()
         except KeyError:
@@ -139,14 +143,14 @@ def _create_new_environment(settings, environment, inventory):
         modules = set(modules).intersection(necessary_modules)
     for module in modules:
         try:
-            _link_module(settings, module, environment, definition)
+            _link_module(module, environment, definition)
         except JensEnvironmentsError, error:
-            logging.error("Failed to link module '%s' in enviroment '%s' (%s)" % \
-                (module, environment, error))
+            logging.error("Failed to link module '%s' in enviroment '%s' (%s)" %
+                          (module, environment, error))
 
     logging.info("Processing hostgroups...")
     hostgroups = inventory['hostgroups'].keys()
-    if not 'default' in definition:
+    if 'default' not in definition:
         try:
             necessary_hostgroups = definition['overrides']['hostgroups'].keys()
         except KeyError:
@@ -154,35 +158,36 @@ def _create_new_environment(settings, environment, inventory):
         hostgroups = set(hostgroups).intersection(necessary_hostgroups)
     for hostgroup in hostgroups:
         try:
-            _link_hostgroup(settings, hostgroup, environment, definition)
+            _link_hostgroup(hostgroup, environment, definition)
         except JensEnvironmentsError, error:
-            logging.error("Failed to link hostgroup '%s' in enviroment '%s' (%s)" % \
-                (hostgroup, environment, error))
+            logging.error("Failed to link hostgroup '%s' in enviroment '%s' (%s)" %
+                          (hostgroup, environment, error))
 
     logging.info("Processing site...")
     try:
-        _link_site(settings, environment, definition)
+        _link_site(environment, definition)
     except JensEnvironmentsError, error:
-        logging.error("Failed to link site in enviroment '%s' (%s)" % \
-            (environment, error))
+        logging.error("Failed to link site in enviroment '%s' (%s)" %
+                      (environment, error))
 
     logging.info("Processing common Hiera data...")
     try:
-        _link_common_hieradata(settings, environment, definition)
+        _link_common_hieradata(environment, definition)
     except JensEnvironmentsError, error:
-        logging.error("Failed to link common hieradata in enviroment '%s' (%s)" % \
-            (environment, error))
+        logging.error("Failed to link common hieradata in enviroment '%s' (%s)" %
+                      (environment, error))
 
     if settings.DIRECTORY_ENVIRONMENTS:
         try:
-            _add_configuration_file(settings, environment, definition)
+            _add_configuration_file(environment, definition)
         except JensEnvironmentsError, error:
-            logging.error("Failed to generate config file for environment '%s' (%s)" % \
-                (environment, error))
+            logging.error("Failed to generate config file for environment '%s' (%s)" %
+                          (environment, error))
 
-    _annotate_environment(settings, environment)
+    _annotate_environment(environment)
 
-def read_environment_definition(settings, environment):
+def read_environment_definition(environment):
+    settings = Settings()
     try:
         path = settings.ENV_METADATADIR + "/%s.yaml" % environment
         logging.debug("Reading environment from %s" % path)
@@ -190,36 +195,36 @@ def read_environment_definition(settings, environment):
         for key in ('notifications',):
             if key not in environment:
                 raise JensEnvironmentsError("Missing '%s' in environemnt '%s'" %
-                    (key, environment))
+                                            (key, environment))
         if 'overrides' in environment and environment['overrides'] is None:
                 raise JensEnvironmentsError("Lacking overrides in environment '%s'" %
-                    environment)
+                                            environment)
         if 'parser' in environment and \
             environment['parser'] not in DIRECTORY_ENVIRONMENTS_CONF_PARSER_VALUES:
                 raise JensEnvironmentsError("Environment '%s' has an invalid "
-                    "value for the parser option: %s" % (environment,
+                        "value for the parser option: %s" % (environment,
                         environment['parser']))
-        # What about checking that default in settings.mandatory_barnches?
+        # What about checking that default in settings.mandatory_branches?
         return environment
     except yaml.YAMLError:
         raise JensEnvironmentsError("Unable to parse %s" % path)
     except IOError:
         raise JensEnvironmentsError("Unable to open %s for reading" % path)
 
-def _link_module(settings, module, environment, definition):
-    branch, overridden = _resolve_branch(settings, 'modules', module, definition)
+def _link_module(module, environment, definition):
+    settings = Settings()
+    branch, overridden = _resolve_branch('modules', module, definition)
     logging.debug("Adding module '%s' (%s) to environment '%s'" %
-        (module, branch, environment))
+                  (module, branch, environment))
 
     # 1. Module's code directory
     # LINK_NAME: $environment/modules/$module
     # TARGET: $clonedir/modules/$module/$branch/code
     target = "%s/modules/%s/%s/code" % \
         (settings.CLONEDIR, module, branch)
-    link_name = _generate_module_env_code_path(settings,
-        module, environment)
+    link_name = _generate_module_env_code_path(module, environment)
     target = os.path.relpath(target,
-        os.path.abspath(os.path.join(link_name, os.pardir)))
+                             os.path.abspath(os.path.join(link_name, os.pardir)))
     logging.debug("Linking %s to %s" % (link_name, target))
     try:
         os.symlink(target, link_name)
@@ -230,28 +235,27 @@ def _link_module(settings, module, environment, definition):
     # LINK_NAME: $environment/hieradata/module_names/$module
     # TARGET: $clonedir/modules/$module/$branch/data
     target = "%s/modules/%s/%s/data" % \
-        (settings.CLONEDIR, module, branch)
-    link_name = _generate_module_env_hieradata_path(settings,
-        module, environment)
-    target = os.path.relpath(target, \
-        os.path.abspath(os.path.join(link_name, os.pardir)))
+             (settings.CLONEDIR, module, branch)
+    link_name = _generate_module_env_hieradata_path(module, environment)
+    target = os.path.relpath(target,
+                             os.path.abspath(os.path.join(link_name, os.pardir)))
     logging.debug("Linking %s to %s" % (link_name, target))
     try:
         os.symlink(target, link_name)
     except OSError, error:
         raise JensEnvironmentsError(error)
 
-def _link_hostgroup(settings, hostgroup, environment, definition):
-    branch, overridden = _resolve_branch(settings, 'hostgroups', hostgroup, definition)
+def _link_hostgroup(hostgroup, environment, definition):
+    settings = Settings()
+    branch, overridden = _resolve_branch('hostgroups', hostgroup, definition)
     logging.debug("Adding hostgroup '%s' (%s) to environment '%s'" %
-        (hostgroup, branch, environment))
+                  (hostgroup, branch, environment))
     # 1. Hostgroup's code directory
     # LINK_NAME: $environment/hostgroups/hg_$hostgroup
     # TARGET: $clonedir/hostgroups/$hostgroup/$branch/code
     target = "%s/hostgroups/%s/%s/code" % \
-        (settings.CLONEDIR, hostgroup, branch)
-    link_name = _generate_hostgroup_env_code_path(settings,
-        hostgroup, environment)
+             (settings.CLONEDIR, hostgroup, branch)
+    link_name = _generate_hostgroup_env_code_path(hostgroup, environment)
     target = os.path.relpath(target,
         os.path.abspath(os.path.join(link_name, os.pardir)))
     logging.debug("Linking %s to %s" % (link_name, target))
@@ -264,12 +268,11 @@ def _link_hostgroup(settings, hostgroup, environment, definition):
     # LINK_NAME: $environment/hostgroups/hieratata/hostgroups/$hostgroup
     # TARGET: $clonedir/hostgroups/$hostgroup/$branch/data/hostgroup
     target = "%s/hostgroups/%s/%s/data/hostgroup" % \
-        (settings.CLONEDIR, hostgroup, branch)
+             (settings.CLONEDIR, hostgroup, branch)
     link_name = \
-        _generate_hostgroup_env_hieradata_hostgroup_path(
-        settings, hostgroup, environment)
-    target = os.path.relpath(target, \
-        os.path.abspath(os.path.join(link_name, os.pardir)))
+        _generate_hostgroup_env_hieradata_hostgroup_path(hostgroup, environment)
+    target = os.path.relpath(target,
+                             os.path.abspath(os.path.join(link_name, os.pardir)))
     logging.debug("Linking %s to %s" % (link_name, target))
     try:
         os.symlink(target, link_name)
@@ -280,40 +283,36 @@ def _link_hostgroup(settings, hostgroup, environment, definition):
     # LINK_NAME: $environment/hostgroups/hieratata/fqdns/$hostgroup
     # TARGET: $clonedir/hostgroups/$hostgroup/$branch/data/fqdns
     target = "%s/hostgroups/%s/%s/data/fqdns" % \
-        (settings.CLONEDIR, hostgroup, branch)
+             (settings.CLONEDIR, hostgroup, branch)
     link_name = \
-        _generate_hostgroup_env_hieradata_fqdns_path(
-        settings, hostgroup, environment)
-    target = os.path.relpath(target, \
-        os.path.abspath(os.path.join(link_name, os.pardir)))
+        _generate_hostgroup_env_hieradata_fqdns_path(hostgroup, environment)
+    target = os.path.relpath(target,
+                             os.path.abspath(os.path.join(link_name, os.pardir)))
     logging.debug("Linking %s to %s" % (link_name, target))
     try:
         os.symlink(target, link_name)
     except OSError, error:
         raise JensEnvironmentsError(error)
 
-def _unlink_module(settings, module, environment):
+def _unlink_module(module, environment):
     # 1. Module's code directory
     # LINK_NAME: $environment/modules/$module
-    link_name = _generate_module_env_code_path(settings,
-        module, environment)
+    link_name = _generate_module_env_code_path(module, environment)
     logging.debug("Making sure link '%s' does not exist" % link_name)
     if os.path.islink(link_name):
         os.unlink(link_name)
 
     # 2. Module's data directory
     # LINK_NAME: $environment/hieradata/module_names/$module
-    link_name = _generate_module_env_hieradata_path(settings,
-        module, environment)
+    link_name = _generate_module_env_hieradata_path(module, environment)
     logging.debug("Making sure link '%s' does not exist" % link_name)
     if os.path.islink(link_name):
         os.unlink(link_name)
 
-def _unlink_hostgroup(settings, hostgroup, environment):
+def _unlink_hostgroup(hostgroup, environment):
     # 1. Hostgroup's code directory
     # LINK_NAME: $environment/hostgroups/hg_$hostgroup
-    link_name = _generate_hostgroup_env_code_path(settings,
-        hostgroup, environment)
+    link_name = _generate_hostgroup_env_code_path(hostgroup, environment)
     logging.debug("Making sure link '%s' does not exist" % link_name)
     if os.path.islink(link_name):
         os.unlink(link_name)
@@ -321,8 +320,7 @@ def _unlink_hostgroup(settings, hostgroup, environment):
     # 2. Hostgroup's hostgroup data directory
     # LINK_NAME: $environment/hostgroups/hieratata/hostgroups/$hostgroup
     link_name = \
-        _generate_hostgroup_env_hieradata_hostgroup_path(
-        settings, hostgroup, environment)
+        _generate_hostgroup_env_hieradata_hostgroup_path(hostgroup, environment)
     logging.debug("Making sure link '%s' does not exist" % link_name)
     if os.path.islink(link_name):
         os.unlink(link_name)
@@ -330,47 +328,53 @@ def _unlink_hostgroup(settings, hostgroup, environment):
     # 3. Hostgroup's FQDNs data directory
     # LINK_NAME: $environment/hostgroups/hieratata/fqdns/$hostgroup
     link_name = \
-        _generate_hostgroup_env_hieradata_fqdns_path(
-        settings, hostgroup, environment)
+        _generate_hostgroup_env_hieradata_fqdns_path(hostgroup, environment)
     logging.debug("Making sure link '%s' does not exist" % link_name)
     if os.path.islink(link_name):
         os.unlink(link_name)
 
-def _generate_module_env_code_path(settings, module, environment):
+def _generate_module_env_code_path(module, environment):
+    settings = Settings()
     return "%s/%s/modules/%s" % \
-        (settings.ENVIRONMENTSDIR, environment, module)
+            (settings.ENVIRONMENTSDIR, environment, module)
 
-def _generate_module_env_hieradata_path(settings, module, environment):
+def _generate_module_env_hieradata_path(module, environment):
+    settings = Settings()
     return "%s/%s/hieradata/module_names/%s" % \
-        (settings.ENVIRONMENTSDIR, environment, module)
+            (settings.ENVIRONMENTSDIR, environment, module)
 
-def _generate_hostgroup_env_code_path(settings, hostgroup, environment):
+def _generate_hostgroup_env_code_path(hostgroup, environment):
+    settings = Settings()
     return "%s/%s/hostgroups/hg_%s" % \
-        (settings.ENVIRONMENTSDIR, environment, hostgroup)
+            (settings.ENVIRONMENTSDIR, environment, hostgroup)
 
-def _generate_hostgroup_env_hieradata_hostgroup_path(settings, hostgroup, environment):
+def _generate_hostgroup_env_hieradata_hostgroup_path(hostgroup, environment):
+    settings = Settings()
     return "%s/%s/hieradata/hostgroups/%s" % \
-        (settings.ENVIRONMENTSDIR, environment, hostgroup)
+            (settings.ENVIRONMENTSDIR, environment, hostgroup)
 
-def _generate_hostgroup_env_hieradata_fqdns_path(settings, hostgroup, environment):
+def _generate_hostgroup_env_hieradata_fqdns_path(hostgroup, environment):
+    settings = Settings()
     return "%s/%s/hieradata/fqdns/%s" % \
-        (settings.ENVIRONMENTSDIR, environment, hostgroup)
+            (settings.ENVIRONMENTSDIR, environment, hostgroup)
 
-def _annotate_environment(settings, environment):
-    hash_cache_file = open(settings.CACHEDIR + "/environments/%s" % \
-            environment, "w+")
+def _annotate_environment(environment):
+    settings = Settings()
+    hash_cache_file = open(settings.CACHEDIR + "/environments/%s" %
+                           environment, "w+")
     environment_definition = settings.ENV_METADATADIR + "/%s.yaml" % \
-            environment
+                             environment
     hash_value = hash_object(environment_definition)
-    logging.debug("New cached hash for environment '%s' is '%s'" % \
-        (environment, hash_value))
+    logging.debug("New cached hash for environment '%s' is '%s'" %
+                  (environment, hash_value))
     # TODO: Add error handling here, if the cache can't be saved
     # basically the environment will be regenerated in the next
     # run (which is fine, but must be logged at INFO level)
     hash_cache_file.write(hash_value)
     hash_cache_file.close()
 
-def _remove_environment_annotation(settings, environment):
+def _remove_environment_annotation(environment):
+    settings = Settings()
     logging.debug("Removing cached hash for environment '%s'" % environment)
     hash_cache_file = settings.CACHEDIR + "/environments/%s" % environment
     try:
@@ -379,17 +383,19 @@ def _remove_environment_annotation(settings, environment):
     # changed its permissions externally
     except OSError, error:
         logging.error("Couldn't remove cached hash for environemnt '%s'" %
-            environment)
+                      environment)
 
-def get_names_of_declared_environments(settings):
+def get_names_of_declared_environments():
+    settings = Settings()
     environments = os.listdir(settings.ENV_METADATADIR)
     environments = filter(lambda x: re.match("^.+?\.yaml$", x), environments)
     return map(lambda x: re.sub("\.yaml$", "", x), environments)
 
-def _calculate_delta(settings):
+def _calculate_delta():
+    settings = Settings()
     delta = {'notchanged': [], 'changed': []}
     current_envs = set(os.listdir(settings.CACHEDIR + "/environments"))
-    updated_envs = set(get_names_of_declared_environments(settings))
+    updated_envs = set(get_names_of_declared_environments())
 
     delta['new'] = updated_envs.difference(current_envs)
     delta['deleted'] = current_envs.difference(updated_envs)
@@ -400,11 +406,11 @@ def _calculate_delta(settings):
         # TODO: Cache file should always be there, but check just in case
         # and count it as changed if missing so the cache is generated again.
         hash_cache_file = open(settings.CACHEDIR + "/environments/%s" %
-            environment)
+                               environment)
         old_hash = hash_cache_file.read()
         hash_cache_file.close()
         new_hash = hash_object(settings.ENV_METADATADIR + "/%s.yaml" %
-            environment)
+                               environment)
         if old_hash == new_hash:
             delta['notchanged'].append(environment)
         else:
@@ -412,7 +418,7 @@ def _calculate_delta(settings):
 
     return delta
 
-def _resolve_branch(settings, partition, element, definition):
+def _resolve_branch(partition, element, definition):
     overridden = False
     branch = 'master'
     if 'overrides' in definition:
@@ -420,19 +426,20 @@ def _resolve_branch(settings, partition, element, definition):
             if element in definition['overrides'][partition].keys():
                 branch = definition['overrides'][partition][element]
                 logging.info("%s '%s' overridden to use treeish '%s'" %
-                    (partition, element, branch))
+                             (partition, element, branch))
                 overridden = True
     if not overridden and 'default' in definition:
         branch = definition['default']
-    return (refname_to_dirname(settings, branch), overridden)
+    return (refname_to_dirname(branch), overridden)
 
-def _link_site(settings, environment, definition):
+def _link_site(environment, definition):
     # LINK_NAME: $environment/site
     # TARGET: $clonedir/common/site/$branch/code
-    branch, overridden = _resolve_branch(settings, 'common', 'site', definition)
+    settings = Settings()
+    branch, overridden = _resolve_branch('common', 'site', definition)
     target = settings.CLONEDIR + "/common/site/%s/code" % branch
     link_name = settings.ENVIRONMENTSDIR + "/%s/site" % environment
-    target = os.path.relpath(target, \
+    target = os.path.relpath(target,
         os.path.abspath(os.path.join(link_name, os.pardir)))
     logging.debug("Linking %s to %s" % (link_name, target))
     try:
@@ -440,12 +447,13 @@ def _link_site(settings, environment, definition):
     except OSError, error:
         raise JensEnvironmentsError(error)
 
-def _link_common_hieradata(settings, environment, definition):
+def _link_common_hieradata(environment, definition):
     # Global scoped (aka, 'common') Hiera data
     # LINK_NAME: $environment/hieradata/
     # {settings.COMMON_HIERADATA_ITEMS}
     # TARGET: $clonedir/common/hieradata/$branch/data/{ditto}
-    branch, overridden = _resolve_branch(settings, 'common', 'hieradata', definition)
+    settings = Settings()
+    branch, overridden = _resolve_branch('common', 'hieradata', definition)
     base_target = settings.CLONEDIR + "/common/hieradata/%s/data" % branch
     base_link_name = settings.ENVIRONMENTSDIR + "/%s/hieradata" % environment
 
@@ -460,7 +468,8 @@ def _link_common_hieradata(settings, environment, definition):
         except OSError, error:
             raise JensEnvironmentsError(error)
 
-def _add_configuration_file(settings, environment, definition):
+def _add_configuration_file(environment, definition):
+    settings = Settings()
     conf_file_path = "%s/%s/%s" % \
         (settings.ENVIRONMENTSDIR, environment,
         DIRECTORY_ENVIRONMENTS_CONF_FILENAME)
@@ -473,5 +482,5 @@ def _add_configuration_file(settings, environment, definition):
     try:
         config.write()
     except IOError:
-        raise JensEnvironmentsError("Unable to write to %s" % \
-            conf_file_path)
+        raise JensEnvironmentsError("Unable to write to %s" %
+                                    conf_file_path)

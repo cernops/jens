@@ -46,7 +46,7 @@ def main():
         return 2
 
     try:
-        validate_directories(settings)
+        validate_directories()
     except JensError, error:
         logging.error("Failed to validate directories (%s)" % error)
         return 3
@@ -55,18 +55,18 @@ def main():
         settings.MODE = 'POLL'
 
     try:
-        with JensLockFactory.makeLock(settings) as lock:
+        with JensLockFactory.makeLock() as lock:
             # Update metadata
             logging.info("Refreshing metadata...")
             try:
-                refresh_metadata(settings, lock)
+                refresh_metadata(lock)
             except JensError, error:
                 logging.error(error)
                 return 20
 
             if settings.MODE == 'ONDEMAND':
                 try:
-                    hints = fetch_update_hints(settings, lock)
+                    hints = fetch_update_hints(lock)
                 except JensMessagingError, error:
                     logging.error(error)
                     return 25
@@ -77,7 +77,7 @@ def main():
             logging.info("Refreshing repositories...")
             try:
                 repositories_deltas, inventory = \
-                    refresh_repositories(settings, lock, hints)
+                    refresh_repositories(lock, hints)
             except JensRepositoriesError, error:
                 logging.error("Failed (%s)" % error)
                 return 30
@@ -85,7 +85,7 @@ def main():
             # Update environments
             logging.info("Refreshing environments...")
             try:
-                refresh_environments(settings, lock,
+                refresh_environments(lock,
                     repositories_deltas, inventory)
             except JensRepositoriesError, error:
                 logging.error("Failed (%s)" % error)

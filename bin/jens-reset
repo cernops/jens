@@ -30,33 +30,38 @@ def parse_cmdline_args():
     opts, args = parser.parse_args()
     return opts
 
-def remove_bares(settings):
+def remove_bares():
+    settings = Settings()
     for partition in ("modules", "hostgroups", "common"):
         basepath = settings.BAREDIR + "/%s" % partition
         for element in os.listdir(basepath):
             shutil.rmtree(basepath + "/%s" % element)
 
-def remove_clones(settings):
+def remove_clones():
+    settings = Settings()
     for partition in ("modules", "hostgroups", "common"):
         basepath = settings.CLONEDIR + "/%s" % partition
         for element in os.listdir(basepath):
             shutil.rmtree(basepath + "/%s" % element)
 
-def remove_environments(settings):
+def remove_environments():
+    settings = Settings()
     basepath = settings.ENVIRONMENTSDIR
     for environment in os.listdir(basepath):
         shutil.rmtree(basepath + "/%s" % environment)
 
-def remove_cache(settings):
-    remove_environments_cache(settings)
-    remove_inventory_cache(settings)
+def remove_cache():
+    remove_environments_cache()
+    remove_inventory_cache()
 
-def remove_inventory_cache(settings):
+def remove_inventory_cache():
+    settings = Settings()
     path = settings.CACHEDIR + "/repositories"
     if os.path.exists(path):
         os.remove(path)
 
-def remove_environments_cache(settings):
+def remove_environments_cache():
+    settings = Settings()
     basepath = settings.CACHEDIR + "/environments"
     for environment in os.listdir(basepath):
         os.remove(basepath + "/%s" % environment)
@@ -73,7 +78,7 @@ def main():
         return 2
 
     try:
-        validate_directories(settings)
+        validate_directories()
     except JensError, error:
         logging.error("Failed to validate directories (%s)" % error)
         return 3
@@ -83,16 +88,16 @@ def main():
         return 10
 
     try:
-        with JensLockFactory.makeLock(settings) as lock:
+        with JensLockFactory.makeLock() as lock:
             logging.info("Cleaning everything up...")
             logging.info("Removing bare repositories...")
-            remove_bares(settings)
+            remove_bares()
             logging.info("Removing clones of bare repositories")
-            remove_clones(settings)
+            remove_clones()
             logging.info("Removing all Puppet environments...")
-            remove_environments(settings)
+            remove_environments()
             logging.info("Removing all environments' cache...")
-            remove_cache(settings)
+            remove_cache()
     except JensLockError, error:
         logging.error("Locking failed (%s)" % error)
         return 50

@@ -9,22 +9,24 @@ import os
 import logging
 import fcntl
 
+from jens.settings import Settings
 import jens.git_wrapper as git
 from jens.decorators import timed
 from jens.errors import JensError, JensGitError
 
 @timed
-def refresh_metadata(settings, lock):
-    _refresh_environments(settings)
-    _refresh_repositories(settings)
+def refresh_metadata(lock):
+    _refresh_environments()
+    _refresh_repositories()
 
-def validate_directories(settings):
+def validate_directories():
+    settings = Settings()
     directories = [settings.BAREDIR,
-        settings.CLONEDIR,
-        settings.CACHEDIR,
-        settings.CACHEDIR + "/environments",
-        settings.REPO_METADATADIR,
-        settings.ENV_METADATADIR]
+                   settings.CLONEDIR,
+                   settings.CACHEDIR,
+                   settings.CACHEDIR + "/environments",
+                   settings.REPO_METADATADIR,
+                   settings.ENV_METADATADIR]
 
     for partition in ("modules", "hostgroups", "common"):
         directories.append(settings.BAREDIR + "/%s" % partition)
@@ -37,12 +39,12 @@ def validate_directories(settings):
         _validate_directory(settings.FILELOCK_LOCKDIR)
 
     if not os.path.exists(settings.ENV_METADATADIR + "/.git"):
-        raise JensError("%s not initialized (no Git repository found)" % \
-            settings.ENV_METADATADIR)
+        raise JensError("%s not initialized (no Git repository found)" %
+                        settings.ENV_METADATADIR)
 
     if not os.path.exists(settings.REPO_METADATA):
-        raise JensError("Couldn't find metadata of repositories (%s not initialized)" % \
-            settings.REPO_METADATADIR)
+        raise JensError("Couldn't find metadata of repositories (%s not initialized)" %
+                        settings.REPO_METADATADIR)
 
 def _validate_directory(directory):
     try:
@@ -52,7 +54,8 @@ def _validate_directory(directory):
     if not os.access(directory, os.W_OK):
         raise JensError("Cannot read or write on directory '%s'" % directory)
 
-def _refresh_environments(settings):
+def _refresh_environments():
+    settings = Settings()
     logging.debug("Refreshing environment metadata...")
     path = settings.ENV_METADATADIR
     try:
@@ -61,7 +64,8 @@ def _refresh_environments(settings):
     except JensGitError, error:
         raise JensError("Couldn't refresh environments metadata (%s)" % error)
 
-def _refresh_repositories(settings):
+def _refresh_repositories():
+    settings = Settings()
     logging.debug("Refreshing repositories metadata...")
     path = settings.REPO_METADATADIR
     try:
@@ -69,8 +73,8 @@ def _refresh_repositories(settings):
         try:
             metadata = open(settings.REPO_METADATA, 'r')
         except IOError, error:
-            raise JensError("Could not open '%s' to put a lock on it" % \
-                settings.REPO_METADATA)
+            raise JensError("Could not open '%s' to put a lock on it" %
+                            settings.REPO_METADATA)
         # jens-gitlab-producer collaborates with jens-update asynchronously
         # so have to make sure that exclusive access to the file when writing
         # is guaranteed. Of course, the reader will have to implement the same

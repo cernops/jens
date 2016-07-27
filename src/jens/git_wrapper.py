@@ -80,8 +80,7 @@ def get_refs(repository_path):
 
     @git_exec
     def get_refs_exec(*args, **kwargs):
-        r = dict((h.name, h.commit.hexsha) for h in git.Repo(repository_path,
-                 odbt=git.GitCmdObjectDB).heads)
-        return r
+        repo = git.Repo(repository_path, odbt=git.GitCmdObjectDB)
+        return dict((h.name, h.commit.hexsha) for h in repo.heads)
 
     return get_refs_exec(name='show-ref', args=args, kwargs=kwargs)

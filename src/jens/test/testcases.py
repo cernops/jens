@@ -115,13 +115,13 @@ class JensTestCase(unittest.TestCase):
             raise AssertionError("Clone '%s' does not have code dir" % path)
         if not os.path.isdir("%s/data" % path):
             raise AssertionError("Clone '%s' does not have data dir" % path)
-        inventory = get_inventory(self.settings)
+        inventory = get_inventory()
         self.assertTrue(partition in inventory)
         self.assertTrue(element in inventory[partition])
-        refname = dirname_to_refname(self.settings, dirname)
+        refname = dirname_to_refname(dirname)
         self.assertTrue(refname in inventory[partition][element])
         if pointsto is not None:
-            self.assertEquals(get_repository_head(self.settings, path),
+            self.assertEquals(get_repository_head(path),
                 pointsto)
 
     def assertCloneFileExists(self, identifier, fname):
@@ -225,7 +225,7 @@ class JensTestCase(unittest.TestCase):
                 raise AssertionError("Env '%s' -- '%s' -- '%s' does not exist" % \
                     (environment, identifier, link))
             target = os.readlink(link)
-            dirname = refname_to_dirname(self.settings, desired)
+            dirname = refname_to_dirname(desired)
             # Link not broken
             link_parent = os.path.abspath(os.path.join(link, os.pardir))
             if not self._verify_link(link_parent, link):
@@ -275,7 +275,7 @@ class JensTestCase(unittest.TestCase):
                 raise AssertionError("Env '%s' -- '%s' -- '%s' does not exist" % \
                     (environment, identifier, link))
             target = os.readlink(link)
-            dirname = refname_to_dirname(self.settings, desired)
+            dirname = refname_to_dirname(desired)
             link_parent = os.path.abspath(os.path.join(link, os.pardir))
             # Link broken
             if self._verify_link(link_parent, link):

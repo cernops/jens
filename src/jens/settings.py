@@ -15,26 +15,30 @@ from errors import JensConfigError
 from configfile import CONFIG_GRAMMAR
 
 class Settings():
+    __shared_state = {}
+
     def __init__(self, logfile=None):
-        self.logfile = logfile
+        self.__dict__ = self.__shared_state
+        if 'logfile' not in self.__dict__:
+            self.logfile = logfile
 
     def parse_config(self, config_file_path):
         try:
             config = ConfigObj(infile=config_file_path,
-                            configspec=CONFIG_GRAMMAR.split("\n"))
+                               configspec=CONFIG_GRAMMAR.split("\n"))
         except ConfigObjError, error:
             raise JensConfigError("Config file parsing failed (%s)" % error)
-            
+
         validator = Validator()
         results = config.validate(validator)
 
-        if results != True:
+        if results is not True:
             for error in flatten_errors(config, results):
                 section_list, key, msg = error
                 section_string = '.'.join(section_list)
                 if key is not None:
-                    raise JensConfigError("Missing/not valid mandatory configuration key %s in section %s" \
-                        % (key, section_string))
+                    raise JensConfigError("Missing/not valid mandatory configuration key %s in section %s"
+                                          % (key, section_string))
                 else:
                     raise JensConfigError("Section '%s' is missing" % section_string)
 

@@ -8,12 +8,14 @@
 import os
 import yaml
 import shutil
+import mock
 
 from jens.messaging import count_pending_hints
 from jens.repos import refresh_repositories
 from jens.locks import JensLockFactory
 from jens.environments import refresh_environments
 from jens.git_wrapper import get_refs
+from jens.errors import JensMessagingError
 
 from jens.test.tools import ensure_environment, destroy_environment
 from jens.test.tools import init_repositories
@@ -31,33 +33,33 @@ class UpdateTest(JensTestCase):
     def setUp(self):
         super(UpdateTest, self).setUp()
 
-        ensure_environment(self.settings, 'production', 'master')
-        ensure_environment(self.settings, 'qa', 'qa')
+        ensure_environment('production', 'master')
+        ensure_environment('qa', 'qa')
 
-        init_repositories(self.settings)
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
-        add_repository(self.settings, 'common', 'site', bare)
+        init_repositories()
+        (bare, user) = create_fake_repository(self.sandbox_path, ['qa'])
+        add_repository('common', 'site', bare)
         self.site_user = user
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, ['qa'])
-        add_repository(self.settings, 'common', 'hieradata', bare)
+        (bare, user) = create_fake_repository(self.sandbox_path, ['qa'])
+        add_repository('common', 'hieradata', bare)
         self.hieradata_user = user
 
-        self.lock = JensLockFactory.makeLock(self.settings)
+        self.lock = JensLockFactory.makeLock()
 
     def _create_fake_module(self, modulename, branches=[]):
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, branches)
-        add_repository(self.settings, 'modules', modulename, bare)
+        (bare, user) = create_fake_repository(self.sandbox_path, branches)
+        add_repository('modules', modulename, bare)
         return user
 
     def _create_fake_hostgroup(self, hostgroup, branches=[]):
-        (bare, user) = create_fake_repository(self.settings, self.sandbox_path, branches)
-        add_repository(self.settings, 'hostgroups', hostgroup, bare)
+        (bare, user) = create_fake_repository(self.sandbox_path, branches)
+        add_repository('hostgroups', hostgroup, bare)
         return user
 
     def _jens_update(self, errorsExpected=False, errorRegexp=None, hints=None):
         repositories_deltas, inventory = \
-            refresh_repositories(self.settings, self.lock, hints=hints)
-        refresh_environments(self.settings, self.lock, repositories_deltas, inventory)
+            refresh_repositories(self.lock, hints=hints)
+        refresh_environments(self.lock, repositories_deltas, inventory)
         if errorsExpected:
             self.assertLogErrors(errorRegexp)
         else:
@@ -133,7 +135,7 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride('production', 'modules/electron', 'master')
         self.assertEnvironmentOverride('production', 'hostgroups/hg_aisusie', 'master')
 
-        del_repository(self.settings, 'hostgroups', 'aisusie')
+        del_repository('hostgroups', 'aisusie')
 
         repositories_deltas = self._jens_update()
 
@@ -156,7 +158,7 @@ class UpdateTest(JensTestCase):
         murdock_path = self._create_fake_hostgroup('murdock', ['qa'])
         commit_id = get_refs(murdock_path + '/.git')['qa']
         override = "{0}{1}".format(COMMIT_PREFIX, commit_id)
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=["murdock:%s" % override])
 
         repositories_deltas = self._jens_update()
@@ -168,7 +170,7 @@ class UpdateTest(JensTestCase):
         self.assertClone('hostgroups/murdock/.%s' % commit_id, pointsto=commit_id)
         self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', override)
 
-        del_repository(self.settings, 'hostgroups', 'murdock')
+        del_repository('hostgroups', 'murdock')
 
         repositories_deltas = self._jens_update()
 
@@ -213,7 +215,7 @@ class UpdateTest(JensTestCase):
         h1_path = self._create_fake_hostgroup('h1', ['qa', 'boom'])
         m1_path = self._create_fake_module('m1', ['qa', 'boom'])
 
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=['h1:boom'], modules=['m1:boom'])
 
         self._jens_update()
@@ -224,14 +226,14 @@ class UpdateTest(JensTestCase):
             self.assertClone('hostgroups/h1/%s' % branch)
             self.assertClone('modules/m1/%s' % branch)
 
-        h1_commit_id = add_commit_to_branch(self.settings, h1_path,
+        h1_commit_id = add_commit_to_branch(h1_path,
             'qa', fname='h1qa')
-        m1_commit_id = add_commit_to_branch(self.settings, m1_path,
+        m1_commit_id = add_commit_to_branch(m1_path,
             'master', fname='m1master')
-        h1_boom_commit_id = add_commit_to_branch(self.settings,
-            h1_path, 'boom', fname='h1boom')
-        m1_boom_commit_id = add_commit_to_branch(self.settings,
-            m1_path, 'boom', fname='m1boom')
+        h1_boom_commit_id = add_commit_to_branch(h1_path, 'boom',
+            fname='h1boom')
+        m1_boom_commit_id = add_commit_to_branch(m1_path, 'boom',
+            fname='m1boom')
 
         self._jens_update()
 
@@ -257,7 +259,7 @@ class UpdateTest(JensTestCase):
 
         # -- Add new environment, check all is added
 
-        ensure_environment(self.settings, 'test', 'qa')
+        ensure_environment('test', 'qa')
 
         self._jens_update()
 
@@ -285,7 +287,7 @@ class UpdateTest(JensTestCase):
         self.assertNotClone('hostgroups/murdock/aijens_etcd')
 
     def test_override_to_branch(self):
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=['murdock:aijens_etcd'], modules=['foo:bar'])
         self._create_fake_hostgroup('murdock', ['qa', 'aijens_etcd'])
         self._create_fake_module('foo', ['qa', 'bar'])
@@ -351,9 +353,9 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentDoesntExist("test")
 
     def test_environment_is_deleted_if_ok_and_then_broken(self):
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=['murdock:aijens_etcd'], modules=['foo:bar'])
-        ensure_environment(self.settings, 'test2', 'master',
+        ensure_environment('test2', 'master',
             hostgroups=['murdock:aijens_etcd'])
         self._create_fake_hostgroup('murdock', ['qa', 'aijens_etcd'])
         self._create_fake_module('foo', ['qa', 'bar'])
@@ -400,7 +402,7 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("test2", 'modules/foo', 'master')
 
     def test_override_to_mandatory_branch_with_new_repo(self):
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=['murdock:qa'], modules=['foo:qa'])
         self._create_fake_hostgroup('murdock', ['qa'])
         self._create_fake_module('foo', ['qa'])
@@ -420,7 +422,7 @@ class UpdateTest(JensTestCase):
         murdock_path = self._create_fake_hostgroup('murdock', ['qa'])
         commit_id = get_refs(murdock_path + '/.git')['qa']
         override = "{0}{1}".format(COMMIT_PREFIX, commit_id)
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=["murdock:%s" % override])
 
         self._jens_update()
@@ -436,7 +438,7 @@ class UpdateTest(JensTestCase):
         murdock_path = self._create_fake_hostgroup('murdock', ['qa'])
         commit_id = get_refs(murdock_path + '/.git')['qa']
         override = "{0}{1}".format(COMMIT_PREFIX, commit_id)
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=["murdock:%s" % override])
 
         self._jens_update()
@@ -446,7 +448,7 @@ class UpdateTest(JensTestCase):
         self.assertClone('hostgroups/murdock/.%s' % commit_id, pointsto=commit_id)
         self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', override)
 
-        new_qa = add_commit_to_branch(self.settings, murdock_path, 'qa')
+        new_qa = add_commit_to_branch(murdock_path, 'qa')
 
         self._jens_update()
 
@@ -462,7 +464,7 @@ class UpdateTest(JensTestCase):
         murdock_path = self._create_fake_hostgroup('murdock', ['qa'])
         commit_id = get_refs(murdock_path + '/.git')['qa']
         override = "{0}{1}".format(COMMIT_PREFIX, commit_id)
-        ensure_environment(self.settings, 'test', None,
+        ensure_environment('test', None,
             hostgroups=["murdock:%s" % override],
             modules=['foo:bar'])
 
@@ -484,7 +486,7 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("test", 'modules/foo', 'bar')
 
     def test_broken_links_if_override_not_present_as_ref(self):
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=['murdock:aijens_etcd'])
         self._create_fake_hostgroup('murdock', ['qa'])
 
@@ -505,7 +507,7 @@ class UpdateTest(JensTestCase):
 
         commit_id = "deadbeef" * 5
         override = "{0}{1}".format(COMMIT_PREFIX, commit_id)
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=["murdock:%s" % override])
 
         # Commits are always expanded, there's no check to verify
@@ -519,7 +521,7 @@ class UpdateTest(JensTestCase):
         self._create_fake_module('useful', ['qa'])
         self._jens_update()
 
-        ensure_environment(self.settings, 'test', 'qa',
+        ensure_environment('test', 'qa',
             modules=['lost:foo'], hostgroups=['miss:rats'])
 
         self._jens_update()
@@ -538,7 +540,7 @@ class UpdateTest(JensTestCase):
         prefix = prefix[0:len(prefix)/2] + \
             prefix[len(prefix)/2:len(prefix)].upper()
         override = "{0}{1}".format(prefix, commit_id)
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=["murdock:%s" % override])
 
         self._jens_update()
@@ -549,7 +551,7 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', override)
 
     def test_override_not_deleted_if_shared(self):
-        ensure_environment(self.settings, 'test', 'master')
+        ensure_environment('test', 'master')
         self._create_fake_hostgroup('murdock', ['qa', 'aijens_etcd'])
         sonic_path = self._create_fake_module('sonic', ['qa'])
         commit_id = get_refs(sonic_path + '/.git')['qa']
@@ -561,10 +563,10 @@ class UpdateTest(JensTestCase):
 
         # ----- Add two environments needing the same override
 
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             modules=['sonic:%s' % override],
             hostgroups=['murdock:aijens_etcd'])
-        ensure_environment(self.settings, 'test2', 'master',
+        ensure_environment('test2', 'master',
             modules=['sonic:%s' % override],
             hostgroups=['murdock:aijens_etcd'])
 
@@ -583,7 +585,7 @@ class UpdateTest(JensTestCase):
 
         # ----- Destroy one of them
 
-        destroy_environment(self.settings, 'test2')
+        destroy_environment('test2')
 
         self._jens_update()
 
@@ -595,17 +597,16 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("test", 'modules/sonic', override)
 
     def test_branch_is_added_after_initial_expand_and_removed_if_not_nec(self):
-        ensure_environment(self.settings, 'test', 'master')
+        ensure_environment('test', 'master')
         murdock_path = self._create_fake_hostgroup('murdock', ['qa'])
 
         self._jens_update()
 
         # --- Add override
 
-        add_branch_to_repo(self.settings, murdock_path, 'foo')
-        destroy_environment(self.settings, 'test')
-        ensure_environment(self.settings, 'test', 'master',
-            hostgroups=['murdock:foo'])
+        add_branch_to_repo(murdock_path, 'foo')
+        destroy_environment('test')
+        ensure_environment('test', 'master', hostgroups=['murdock:foo'])
 
         self._jens_update()
 
@@ -618,8 +619,8 @@ class UpdateTest(JensTestCase):
 
         # --- Remove it
 
-        destroy_environment(self.settings, 'test')
-        ensure_environment(self.settings, 'test', 'master')
+        destroy_environment('test')
+        ensure_environment('test', 'master')
 
         self._jens_update()
 
@@ -631,7 +632,7 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', 'master')
 
     def test_broken_link_if_branch_disappears(self):
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             modules=['foo:bar'])
         foo_path = self._create_fake_module('foo', ['qa', 'bar'])
 
@@ -643,7 +644,7 @@ class UpdateTest(JensTestCase):
 
         # ---- Remove branch (a broken link should be kept)
 
-        remove_branch_from_repo(self.settings, foo_path, 'bar')
+        remove_branch_from_repo(foo_path, 'bar')
 
         self._jens_update()
 
@@ -653,7 +654,7 @@ class UpdateTest(JensTestCase):
 
         # ---- Add it again (link should be ok again)
 
-        add_branch_to_repo(self.settings, foo_path, 'bar')
+        add_branch_to_repo(foo_path, 'bar')
 
         self._jens_update()
 
@@ -665,7 +666,7 @@ class UpdateTest(JensTestCase):
         guy_path = self._create_fake_module('guy', ['qa'])
         commit_id = get_refs(guy_path + '/.git')['qa']
         override = "{0}{1}".format(COMMIT_PREFIX, commit_id)
-        ensure_environment(self.settings, 'test', None,
+        ensure_environment('test', None,
             modules=["guy:%s" % override])
 
         self._jens_update()
@@ -699,9 +700,9 @@ class UpdateTest(JensTestCase):
         self._create_fake_hostgroup('h1', ['qa', 'lol'])
         self._create_fake_hostgroup('h2', ['qa', 'lol'])
 
-        ensure_environment(self.settings, 'test', None,
+        ensure_environment('test', None,
             modules=["m1:lol"], hostgroups=["h1:lol"])
-        ensure_environment(self.settings, 'test2', None)
+        ensure_environment('test2', None)
 
         self._jens_update()
 
@@ -733,9 +734,9 @@ class UpdateTest(JensTestCase):
         self._create_fake_module('guy2', ['qa'])
         commit_id = get_refs(guy_path + '/.git')['qa']
         override = "{0}{1}".format(COMMIT_PREFIX, commit_id)
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             modules=["guy:%s" % override])
-        ensure_environment(self.settings, 'test2', None,
+        ensure_environment('test2', None,
             modules=["guy:%s" % override])
 
         self._jens_update()
@@ -753,7 +754,7 @@ class UpdateTest(JensTestCase):
 
         # -- The deleted module shouldn't be present in any  env.
 
-        del_repository(self.settings, 'modules', 'guy')
+        del_repository('modules', 'guy')
 
         repositories_deltas = self._jens_update()
 
@@ -774,7 +775,7 @@ class UpdateTest(JensTestCase):
         guy_path = self._create_fake_module('guy', ['qa'])
         commit_id = get_refs(guy_path + '/.git')['qa']
         override = "{0}{1}".format(COMMIT_PREFIX, commit_id)
-        ensure_environment(self.settings, 'test', None,
+        ensure_environment('test', None,
             modules=["guy:%s" % override])
 
         self._jens_update()
@@ -786,10 +787,10 @@ class UpdateTest(JensTestCase):
 
         # ---- Point the override to a different commit
 
-        destroy_environment(self.settings, 'test')
+        destroy_environment('test')
         commit_id = get_refs(guy_path + '/.git')['master']
         override = "{0}{1}".format(COMMIT_PREFIX, commit_id)
-        ensure_environment(self.settings, 'test', None,
+        ensure_environment('test', None,
             modules=["guy:%s" % override])
 
         self._jens_update()
@@ -803,7 +804,7 @@ class UpdateTest(JensTestCase):
         self._jens_update()
 
         path = "/tmp/foobroken"
-        add_repository(self.settings, 'modules', 'broken', path)
+        add_repository('modules', 'broken', path)
         self._create_fake_module('newguy', ['qa'])
 
         repositories_deltas = self._jens_update(errorsExpected=True,
@@ -822,9 +823,9 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("production", 'modules/newguy', 'master')
 
     def test_malformed_environments_are_not_processed(self):
-        ensure_environment(self.settings, 'ok1', 'master', hostgroups=['flik:flak'])
-        ensure_environment(self.settings, 'ok2', 'qa', modules=['stop:here'])
-        ensure_environment(self.settings, 'ok3', None)
+        ensure_environment('ok1', 'master', hostgroups=['flik:flak'])
+        ensure_environment('ok2', 'qa', modules=['stop:here'])
+        ensure_environment('ok3', None)
         self._create_fake_hostgroup('flik', ['qa', 'flak', 'dontexpand'])
         self._create_fake_module('stop', ['qa', 'here', 'dontexpand'])
 
@@ -884,8 +885,8 @@ class UpdateTest(JensTestCase):
 
         # ---- Bring it back
         shutil.move("%s/goat" % yi_path_bare, "%s/refs" % yi_path_bare)
-        add_branch_to_repo(self.settings, yi_path, 'lol')
-        ensure_environment(self.settings, 'test', 'qa',
+        add_branch_to_repo(yi_path, 'lol')
+        ensure_environment('test', 'qa',
             hostgroups=['yi:lol'])
 
         self._jens_update()
@@ -916,7 +917,7 @@ class UpdateTest(JensTestCase):
     def test_clone_is_updated_if_remotes_history_is_mangled(self):
         h1_path = self._create_fake_hostgroup('h1', ['qa', 'boom'])
 
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=['h1:boom'])
 
         self._jens_update()
@@ -925,15 +926,14 @@ class UpdateTest(JensTestCase):
 
         bombs = []
         for x in range(0,4):
-            bombs.append(add_commit_to_branch(self.settings, h1_path, 'boom'))
+            bombs.append(add_commit_to_branch(h1_path, 'boom'))
 
         self._jens_update()
 
         self.assertClone('hostgroups/h1/boom', pointsto=bombs[-1])
 
-        reset_branch_to(self.settings, h1_path, "boom", bombs[0])
-        new_commit = add_commit_to_branch(self.settings,
-            h1_path, 'boom', force=True)
+        reset_branch_to(h1_path, "boom", bombs[0])
+        new_commit = add_commit_to_branch(h1_path, 'boom', force=True)
 
         self._jens_update()
 
@@ -942,7 +942,7 @@ class UpdateTest(JensTestCase):
     def test_environment_completely_deleted_even_if_conf_file_is_present(self):
         self.settings.DIRECTORY_ENVIRONMENTS = True
         self._create_fake_hostgroup('murdock', ['qa', 'foo'])
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=["murdock:foo"])
 
         self._jens_update()
@@ -954,7 +954,7 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentLinks("test")
         self.assertEnvironmentHasAConfigFile("test")
 
-        destroy_environment(self.settings, 'test')
+        destroy_environment('test')
 
         # ----- This should destroy all, including the configuration file
 
@@ -966,15 +966,14 @@ class UpdateTest(JensTestCase):
         self.settings.MODE = "ONDEMAND"
         murdock_path = self._create_fake_hostgroup('murdock', ['qa'])
         old_qa = get_refs(murdock_path + '/.git')['qa']
-        ensure_environment(self.settings, 'test', 'master',
-            hostgroups=["murdock:qa"])
+        ensure_environment('test', 'master', hostgroups=["murdock:qa"])
 
         self._jens_update()
 
         self.assertClone('hostgroups/murdock/qa', pointsto=old_qa)
         self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', 'qa')
 
-        new_qa = add_commit_to_branch(self.settings, murdock_path, 'qa')
+        new_qa = add_commit_to_branch(murdock_path, 'qa')
 
         self._jens_update(hints={'hostgroups': ['other']})
 
@@ -992,17 +991,16 @@ class UpdateTest(JensTestCase):
         old_qa = get_refs(murdock_path + '/.git')['qa']
         old_site_qa = get_refs(self.site_user + '/.git')['qa']
         old_hieradata_qa = get_refs(self.hieradata_user + '/.git')['qa']
-        ensure_environment(self.settings, 'test', 'master',
-            modules=["murdock:qa"])
+        ensure_environment('test', 'master', modules=["murdock:qa"])
 
         self._jens_update()
 
         self.assertClone('modules/murdock/qa', pointsto=old_qa)
         self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
 
-        new_qa = add_commit_to_branch(self.settings, murdock_path, 'qa')
-        new_site_qa = add_commit_to_branch(self.settings, self.site_user, 'qa')
-        new_hieradata_qa = add_commit_to_branch(self.settings, self.hieradata_user, 'qa')
+        new_qa = add_commit_to_branch(murdock_path, 'qa')
+        new_site_qa = add_commit_to_branch(self.site_user, 'qa')
+        new_hieradata_qa = add_commit_to_branch(self.hieradata_user, 'qa')
 
         # Test that it actually intersects existing and hints
         self._jens_update(hints={'modules': ['foo']})
@@ -1027,8 +1025,7 @@ class UpdateTest(JensTestCase):
         self.settings.MODE = "ONDEMAND"
         murdock_path = self._create_fake_module('murdock', ['qa'])
         old_qa = get_refs(murdock_path + '/.git')['qa']
-        ensure_environment(self.settings, 'test', 'master',
-            modules=["murdock:qa"])
+        ensure_environment('test', 'master', modules=["murdock:qa"])
 
         self._jens_update()
 
@@ -1036,7 +1033,7 @@ class UpdateTest(JensTestCase):
         self.assertClone('modules/murdock/qa', pointsto=old_qa)
         self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
 
-        new_qa = add_commit_to_branch(self.settings, murdock_path, 'qa')
+        new_qa = add_commit_to_branch(murdock_path, 'qa')
 
         self._jens_update(hints={'hostgroups': ['foo']})
 
@@ -1047,7 +1044,7 @@ class UpdateTest(JensTestCase):
         murdock_path = self._create_fake_module('murdock', ['qa'])
         steve_path = self._create_fake_hostgroup('steve', ['qa'])
         old_qa = get_refs(murdock_path + '/.git')['qa']
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             modules=["murdock:qa"])
 
         self._jens_update(hints={'hostgroups': ['foo']})
@@ -1063,7 +1060,7 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("test", 'modules/murdock', 'qa')
         self.assertEnvironmentOverride("test", 'hostgroups/hg_steve', 'master')
 
-        del_repository(self.settings, 'modules', 'murdock')
+        del_repository('modules', 'murdock')
 
         repositories_deltas = self._jens_update(hints={'hostgroups': ['foo']})
 
@@ -1082,9 +1079,9 @@ class UpdateTest(JensTestCase):
 
         self._jens_update()
 
-        ensure_environment(self.settings, 'test', 'master',
+        ensure_environment('test', 'master',
             hostgroups=['h1:boom'], modules=['m1:boom'])
-        new_h1_qa = add_commit_to_branch(self.settings, h1_path, 'qa')
+        new_h1_qa = add_commit_to_branch(h1_path, 'qa')
 
         self._jens_update(hints={'hostgroups': ['other']})
 
@@ -1111,14 +1108,14 @@ class UpdateTest(JensTestCase):
         self.assertBare('hostgroups/yi')
         self.assertClone('hostgroups/yi/qa')
 
-        new_yi_qa = add_commit_to_branch(self.settings, yi_path, 'qa')
+        new_yi_qa = add_commit_to_branch(yi_path, 'qa')
 
         # ---- Make it temporary unavailable
         shutil.move("%s/refs" % yi_path_bare, "%s/goat" % yi_path_bare)
 
-        self.assertEqual(0, count_pending_hints(self.settings))
+        self.assertEqual(0, count_pending_hints())
         self._jens_update(hints={'hostgroups': ['yi']}, errorsExpected=True)
-        self.assertEqual(1, count_pending_hints(self.settings))
+        self.assertEqual(1, count_pending_hints())
 
         self.assertBare('hostgroups/yi')
         self.assertClone('hostgroups/yi/qa', pointsto=old_yi_qa)
@@ -1129,11 +1126,32 @@ class UpdateTest(JensTestCase):
         self._jens_update(hints={'hostgroups': ['yi']})
         self.assertClone('hostgroups/yi/qa', pointsto=new_yi_qa)
 
+    @mock.patch('jens.repos.enqueue_hint', side_effect=JensMessagingError())
+    def test_hint_readded_to_the_queue_if_fetch_fails_enqueuing_error(self, mock):
+        self.settings.MODE = "ONDEMAND"
+        yi_path = self._create_fake_hostgroup('yi', ['qa'])
+        old_yi_qa = get_refs(yi_path + '/.git')['qa']
+        yi_path_bare = yi_path.replace('/user/', '/bare/')
+
+        self._jens_update()
+
+        self.assertBare('hostgroups/yi')
+        self.assertClone('hostgroups/yi/qa')
+
+        new_yi_qa = add_commit_to_branch(yi_path, 'qa')
+
+        # ---- Make it temporary unavailable
+        shutil.move("%s/refs" % yi_path_bare, "%s/goat" % yi_path_bare)
+
+        self.assertEqual(0, count_pending_hints())
+        self._jens_update(hints={'hostgroups': ['yi']}, errorsExpected=True)
+        self.assertEqual(0, count_pending_hints())
+
     def test_directory_environments_parser_modes(self):
         self.settings.DIRECTORY_ENVIRONMENTS = True
-        ensure_environment(self.settings, 'noparser', 'qa')
-        ensure_environment(self.settings, 'parserfuture', 'qa', parser='future')
-        ensure_environment(self.settings, 'parsercurrent', 'qa', parser='current')
+        ensure_environment('noparser', 'qa')
+        ensure_environment('parserfuture', 'qa', parser='future')
+        ensure_environment('parsercurrent', 'qa', parser='current')
         self._jens_update()
 
         self.assertEnvironmentLinks('noparser')
@@ -1147,6 +1165,6 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentHasAConfigFileAndParserSet('parsercurrent', 'current')
 
     def test_directory_environments_parser_modes_bad_value(self):
-        ensure_environment(self.settings, 'parserbroken', 'qa', parser='broken')
+        ensure_environment('parserbroken', 'qa', parser='broken')
         self._jens_update(errorsExpected=True)
         self.assertEnvironmentDoesntExist('parserbroken')
