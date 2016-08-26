@@ -45,7 +45,7 @@ and are therefore available to generate environments.
 With all this information, Jens produces a set of environments that can be used
 by Puppet masters to compile Puppet catalogs. Two types of environments are
 supported: dynamic and static. The former update automatically as new commits
-arrive to the concerned repositories whereas the latter keep static pointing
+arrive to the concerned repositories whereas the latter remain static pointing
 to the specified commits to implement the concept of "configuration snapshot"
 (read the environments section for more information).
 
