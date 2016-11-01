@@ -11,6 +11,6 @@ setup(name='jens',
       package_dir= {'': 'src'},
       packages=['jens', 'jens.webapps'],
       scripts=['bin/jens-update', 'bin/jens-stats',
-        'bin/jens-gitlab-producer-runner',
+        'bin/jens-gitlab-producer-runner', 'bin/jens-purge-queue',
         'bin/jens-reset', 'bin/jens-gc', 'bin/jens-config'],
      )

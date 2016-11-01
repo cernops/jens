@@ -1,7 +1,6 @@
 language: python
 sudo: false
 python:
-  - "2.6"
   - "2.7"
 addons:
   apt:
@@ -17,4 +16,5 @@ install:
 before_script:
   - git config --global user.email "noreply@cern.ch"
   - git config --global user.name "Travis CI"
+  - pip list
 script: nosetests

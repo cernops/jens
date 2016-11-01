@@ -65,6 +65,14 @@ def count_pending_hints():
     except OSError, error:
         raise JensMessagingError("Failed to create Queue object (%s)" % error)
 
+def purge_queue():
+    settings = Settings()
+    try:
+        queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
+        return queue.purge()
+    except OSError, error:
+        raise JensMessagingError("Failed to purge Queue object (%s)" % error)
+
 def _fetch_all_messages():
     settings = Settings()
     try:
