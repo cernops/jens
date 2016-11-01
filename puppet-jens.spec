@@ -1,6 +1,6 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
-Version: 0.17
+Version: 0.18
 Release: 1%{?dist}
 
 License: GPL
@@ -66,6 +66,9 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 %config(noreplace) %{_sysconfdir}/jens/main.conf
 
 %changelog
+* Tue Nov 01 2016 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.18-1
+- Add jens-purge-queue.
+
 * Wed Jul 27 2016 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.17-1
 - Transform the Settings class into a Borg.
 - Add an option to set GIT_SSH (fixes AI-4385).
