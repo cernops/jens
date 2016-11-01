@@ -1,0 +1,39 @@
+.TH JENS-PURGE-QUEUE "1" "November 2016" "PUPPET-JENS" "User Commands"
+.SH NAME
+jens-purge-queue \- cleans up the message queues
+.SH SYNOPSIS
+.B jens-purge-queue
+[\fIOPTION\fR]...
+.SH DESCRIPTION
+.PP
+This program calls purge() on the queues used to share information between
+jens-gitlab-producer and jens-update, removing obsolete (and usually empty)
+directories in the queue directory. This CLI should be called regularly.
+.TP
+\fB\-c\fR, \fB\-\-config\fR
+Path to Jens' configuration file (defaults to /etc/jens/main.conf)
+.TP
+\fB\-\-help\fR
+display this help and exit
+.SS "Exit status:"
+.TP
+0
+if OK,
+.TP
+2
+if there's any problem with the configuration file,
+.TP
+10
+if there are errors purging the queue,
+.SH AUTHOR
+Written by Nacho Barrientos <nacho.barrientos@cern.ch>
+.SH "REPORTING BUGS"
+Report bugs directly on Github.
+.SH COPYRIGHT
+Copyright \(co 2016 CERN.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+.br
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+.SH "SEE ALSO"
+jens-stats (1), jens-update (1), jens-reset (1)

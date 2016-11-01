@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+# Copyright (C) 2016, CERN
+# This software is distributed under the terms of the GNU General Public
+# Licence version 3 (GPL Version 3), copied verbatim in the file "COPYING".
+# In applying this license, CERN does not waive the privileges and immunities
+# granted to it by virtue of its status as Intergovernmental Organization
+# or submit itself to any jurisdiction.
+
+import sys
+import logging
+import optparse
+
+from jens.errors import JensConfigError
+from jens.errors import JensMessagingError
+from jens.settings import Settings
+from jens.messaging import purge_queue
+
+def parse_cmdline_args():
+    """Parses command line parameters."""
+    parser = optparse.OptionParser()
+    parser.add_option('-c', '--config',
+        help="Configuration file path (defaults to '/etc/jens/main.conf'",
+        default="/etc/jens/main.conf")
+    opts, args = parser.parse_args()
+    return opts
+
+def main():
+    """Application entrypoint."""
+    opts = parse_cmdline_args()
+
+    settings = Settings("jens-purge-queue")
+    try:
+        settings.parse_config(opts.config)
+    except JensConfigError, error:
+        logging.error(error)
+        return 2
+
+    try:
+        logging.info("Purging %s..." % settings.MESSAGING_QUEUEDIR)
+        purge_queue()
+    except JensMessagingError, error:
+        logging.error(error)
+        return 10
+
+    logging.info("Done")
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main())

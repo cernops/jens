@@ -14,7 +14,7 @@ from dirq.queue import QueueError
 
 from jens.messaging import _validate_and_merge_messages, _fetch_all_messages
 from jens.messaging import fetch_update_hints, count_pending_hints
-from jens.messaging import enqueue_hint
+from jens.messaging import enqueue_hint, purge_queue
 from jens.errors import JensMessagingError
 from jens.test.tools import init_repositories
 from jens.test.tools import add_repository, del_repository
@@ -87,6 +87,10 @@ class MessagingTest(JensTestCase):
     def test_fetch_all_messages_queuedir_cannot_be_created(self):
         self.settings.MESSAGING_QUEUEDIR = "/oops"
         self.assertRaises(JensMessagingError, _fetch_all_messages)
+
+    def test_purge_queue_queuedir_does_not_exist(self):
+        self.settings.MESSAGING_QUEUEDIR = "/oops"
+        self.assertRaises(JensMessagingError, purge_queue)
 
     def test_fetch_all_messages_ununpickable(self):
         create_hostgroup_event('bar')
