@@ -60,6 +60,7 @@ class Settings():
         self.DIRECTORY_ENVIRONMENTS = config["main"]["directory_environments"]
         self.COMMON_HIERADATA_ITEMS = config["main"]["common_hieradata_items"]
         self.MODE = config["main"]["mode"]
+        self.PROTECTED_ENVIRONMENTS = config["main"]["protectedenvironments"]
 
         # [lock]
         self.LOCK_TYPE = config["lock"]["type"]

@@ -490,6 +490,28 @@ Where `/mnt/puppetdata` is the mountpoint of the NFS share.
 At the time of writing, our Jens instances are taking care of
 260 modules, 150 hostgroups and 160 environments :)
 
+## Protected environments
+
+It's possible to set a list of environments that won't ever be deleted from
+disk, even if the declaration is removed from the metadata. This is useful to
+protect delicate environments like production. To achieve this, set the
+following option in the configuration file:
+
+```
+[main]
+protectedenvironments = production, qa
+```
+
+It's not recommended to add environments that have overrides to the list as
+they might end up incomplete if they're removed.
+
+We recommend though to use this only as an extra safety feature and make sure
+that changes to environments are validated either manually or using a CI
+process.
+
+The default value is an empty list, which means that no environment is
+protected.
+
 ## Miscellanea
 
 If you wanted to know in detail what Jens does in every run, changing the debug
