@@ -401,6 +401,66 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentOverride("test2", 'hostgroups/hg_murdock', 'aijens_etcd')
         self.assertEnvironmentOverride("test2", 'modules/foo', 'master')
 
+
+    def test_protected_environment_is_not_deleted(self):
+        self.settings.PROTECTED_ENVIRONMENTS = ['production', 'qa', 'test']
+        ensure_environment('test', 'master',
+            hostgroups=['murdock:aijens_etcd'])
+        ensure_environment('test2', 'master')
+        self._create_fake_hostgroup('murdock', ['qa', 'aijens_etcd'])
+
+        self._jens_update()
+
+        self.assertBare('hostgroups/murdock')
+        self.assertClone('hostgroups/murdock/aijens_etcd')
+        self.assertEnvironmentLinks("production")
+        self.assertEnvironmentLinks("qa")
+        self.assertEnvironmentLinks("test")
+        self.assertEnvironmentLinks("test2")
+
+        os.remove("%s/test.yaml" % self.settings.ENV_METADATADIR)
+        os.remove("%s/production.yaml" % self.settings.ENV_METADATADIR)
+        os.remove("%s/qa.yaml" % self.settings.ENV_METADATADIR)
+        os.remove("%s/test2.yaml" % self.settings.ENV_METADATADIR)
+
+        self._jens_update()
+
+        # The assert that's commented out below would not pass because
+        # murdock/aijens_etcd wouldn't be expanded anymore as Jens thinks
+        # that's not needed ('test' is in theory gone), Hence, the environment
+        # will still be there but it will have broken overrides.
+        # self.assertEnvironmentLinks("test")
+        self.assertEnvironmentOverrideExistsButBroken("test",
+          'hostgroups/hg_murdock', 'aijens_etcd')
+        self.assertEnvironmentLinks("production")
+        self.assertEnvironmentLinks("qa")
+        self.assertEnvironmentDoesntExist("test2")
+
+        self._jens_update()
+
+    def test_protected_environments_can_be_disabled(self):
+        self.settings.PROTECTED_ENVIRONMENTS = []
+        ensure_environment('test2', 'master')
+
+        self._jens_update()
+
+        self.assertEnvironmentLinks("production")
+        self.assertEnvironmentLinks("qa")
+        self.assertEnvironmentLinks("test2")
+
+        os.remove("%s/production.yaml" % self.settings.ENV_METADATADIR)
+        os.remove("%s/qa.yaml" % self.settings.ENV_METADATADIR)
+        os.remove("%s/test2.yaml" % self.settings.ENV_METADATADIR)
+
+        self._jens_update()
+
+        self.assertEnvironmentDoesntExist("production")
+        self.assertEnvironmentDoesntExist("qa")
+        self.assertEnvironmentDoesntExist("test2")
+
+        self._jens_update()
+
+
     def test_override_to_mandatory_branch_with_new_repo(self):
         ensure_environment('test', 'master',
             hostgroups=['murdock:qa'], modules=['foo:qa'])

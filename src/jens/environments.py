@@ -89,8 +89,12 @@ def _recreate_changed_environments(environments, inventory):
         _create_new_environment(environment, inventory)
 
 def _purge_deleted_environments(environments):
+    settings = Settings()
     for environment in environments:
-        _purge_deleted_environment(environment)
+        if environment not in settings.PROTECTED_ENVIRONMENTS:
+            _purge_deleted_environment(environment)
+        else:
+            logging.warn("Refusing to delete '%s' as it's protected" % environment)
 
 def _purge_deleted_environment(environment):
     settings = Settings()
