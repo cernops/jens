@@ -7,6 +7,7 @@
 
 import os
 import jens.git_wrapper as git_wrapper
+from mock import patch
 from jens.test.testcases import JensTestCase
 from jens.errors import JensGitError
 from jens.test.tools import *
@@ -61,6 +62,12 @@ class GitWrapperTest(JensTestCase):
     def test_fetch_existing_repository(self):
         (bare, user) = create_fake_repository(self.sandbox_path, ['qa'])
         git_wrapper.fetch(user)
+
+    @patch('git.remote.Remote.fetch')
+    def test_fetch_fails_when_assertion_error_is_raised(self, stub):
+        (bare, user) = create_fake_repository(self.sandbox_path, ['qa'])
+        stub.side_effect = AssertionError()
+        self.assertRaises(JensGitError, git_wrapper.fetch, user, prune=True)
 
     def test_fetch_existing_bare_repository_and_prune(self):
         (bare, user) = create_fake_repository(self.sandbox_path, ['qa', 'f'])
