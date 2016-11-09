@@ -48,6 +48,8 @@ def git_exec(f):
             raise JensGitError("No such path %s" % e)
         except InvalidGitRepositoryError as e:
             raise JensGitError("Not a git repository: %s" % e)
+        except AssertionError as e:
+            raise JensGitError("Git operation failed: %s" % e)
         return res
 
     return wrapper
