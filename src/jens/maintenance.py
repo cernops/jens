@@ -25,6 +25,7 @@ def validate_directories():
                    settings.CLONEDIR,
                    settings.CACHEDIR,
                    settings.CACHEDIR + "/environments",
+                   settings.ENVIRONMENTSDIR,
                    settings.REPO_METADATADIR,
                    settings.ENV_METADATADIR]
 
