@@ -299,6 +299,8 @@ def _expand_clones(partition, name, inventory, inventory_lock, new_refs,
             # mid-flight.
             git.fetch(clone_path)
             git.reset(clone_path, "origin/%s" % refname, hard=True)
+            logging.info("Updated ref '%s' (%s)" % (clone_path,
+                git.get_head(clone_path, short=True)))
         except JensGitError, error:
             logging.error("Unable to refresh clone '%s' (%s)" %
                           (clone_path, error))
