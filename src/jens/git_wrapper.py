@@ -99,6 +99,7 @@ def rev_parse(repository_path, ref, short=None):
 def get_head(repository_path, short=False):
     args = []
     kwargs = {}
+    logging.debug("Getting HEAD of %s" % repository_path)
 
     @git_exec
     def get_head_exec(*args, **kwargs):
