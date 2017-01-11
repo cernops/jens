@@ -1,6 +1,6 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
-Version: 0.20
+Version: 0.21
 Release: 1%{?dist}
 
 License: GPL
@@ -66,6 +66,11 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 %config(noreplace) %{_sysconfdir}/jens/main.conf
 
 %changelog
+* Wed Jan 11 2017 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.21-1
+- Make sure that settings.ENVIRONMENTSDIR exists.
+- Add the process ID to the log messages.
+- Show the new HEAD when a clone has been updated.
+
 * Wed Nov 09 2016 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.20-1
 - Handle AssertionError when doing Git ops
 
