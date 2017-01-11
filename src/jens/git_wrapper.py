@@ -84,3 +84,29 @@ def get_refs(repository_path):
         return dict((h.name, h.commit.hexsha) for h in repo.heads)
 
     return get_refs_exec(name='show-ref', args=args, kwargs=kwargs)
+
+def rev_parse(repository_path, ref, short=False):
+    args = [ref]
+    kwargs = {"short": short}
+
+    @git_exec
+    def rev_parse_exec(*args, **kwargs):
+        repo = git.Repo(repository_path, odbt=git.GitCmdObjectDB)
+        return repo.git.rev_parse(*args, **kwargs)
+
+    return rev_parse_exec(name='rev-parse', args=args, kwargs=kwargs)
+
+def get_head(repository_path, short=False):
+    args = []
+    kwargs = {}
+    logging.debug("Getting HEAD of %s" % repository_path)
+
+    @git_exec
+    def get_head_exec(*args, **kwargs):
+        repo = git.Repo(repository_path, odbt=git.GitCmdObjectDB)
+        sha = repo.head.commit.hexsha
+        if short:
+            sha = rev_parse(repository_path, sha, short=True)
+        return sha
+
+    return get_head_exec(name='get-head', args=args, kwargs=kwargs)

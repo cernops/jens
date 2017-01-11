@@ -154,3 +154,24 @@ class GitWrapperTest(JensTestCase):
     def test_get_refs_not_repository(self):
         not_repo_path = create_folder_not_repository(self.sandbox_path)
         self.assertRaises(JensGitError, git_wrapper.get_refs, not_repo_path)
+
+    def test_get_head_existing_repository(self):
+        (bare, user) = create_fake_repository(self.sandbox_path, ['qa'])
+        jens_clone = "%s/_clone" % self.settings.CLONEDIR
+        git_wrapper.clone(jens_clone, bare, bare=False, branch='qa')
+        commit_id = add_commit_to_branch(user, 'qa')
+        git_wrapper.fetch(jens_clone)
+        git_wrapper.reset(jens_clone, 'origin/qa', hard=True)
+        self.assertEquals(git_wrapper.get_head(jens_clone),
+                          commit_id)
+        self.assertEquals(git_wrapper.get_head(jens_clone, short=False),
+                          commit_id)
+        self.assertEquals(git_wrapper.get_head(jens_clone, short=True),
+                          commit_id[0:7])
+
+    def test_get_head_non_existing_repository(self):
+        self.assertRaises(JensGitError, git_wrapper.get_head, '/tmp/37d8s8e3')
+
+    def test_get_head_not_repository(self):
+        not_repo_path = create_folder_not_repository(self.sandbox_path)
+        self.assertRaises(JensGitError, git_wrapper.get_head, not_repo_path)
