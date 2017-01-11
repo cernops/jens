@@ -85,7 +85,7 @@ def get_refs(repository_path):
 
     return get_refs_exec(name='show-ref', args=args, kwargs=kwargs)
 
-def rev_parse(repository_path, ref, short=None):
+def rev_parse(repository_path, ref, short=False):
     args = [ref]
     kwargs = {"short": short}
 
