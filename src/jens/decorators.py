@@ -14,18 +14,18 @@ from time import time
 from jens.errors import JensGitError
 from jens.settings import Settings
 
-def timed(f):
-    @wraps(f)
+def timed(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         start = time()
-        result = f(*args, **kwargs)
+        result = func(*args, **kwargs)
         elapsed = time() - start
-        logging.info("Executed '%s' in %.2f ms" % (f.__name__, elapsed*1000))
+        logging.info("Executed '%s' in %.2f ms" % (func.__name__, elapsed*1000))
         return result
     return wrapper
 
-def git_exec(f):
-    @wraps(f)
+def git_exec(func):
+    @wraps(func)
     def wrapper(*w_args, **w_kwargs):
         settings = Settings()
         ssh_cmd_path = settings.SSH_CMD_PATH
@@ -40,16 +40,16 @@ def git_exec(f):
         logging.debug("Executing git %s %s %s" % (name, args, kwargs))
 
         try:
-            res = f(*args, **kwargs)
-        except (git.exc.GitCommandError, git.exc.GitCommandNotFound) as e:
+            res = func(*args, **kwargs)
+        except (git.exc.GitCommandError, git.exc.GitCommandNotFound) as error:
             raise JensGitError("Couldn't execute %s (%s)" %
-                               (e.command, e.stderr))
-        except git.exc.NoSuchPathError as e:
-            raise JensGitError("No such path %s" % e)
-        except git.exc.InvalidGitRepositoryError as e:
-            raise JensGitError("Not a git repository: %s" % e)
-        except AssertionError as e:
-            raise JensGitError("Git operation failed: %s" % e)
+                               (error.command, error.stderr))
+        except git.exc.NoSuchPathError as error:
+            raise JensGitError("No such path %s" % error)
+        except git.exc.InvalidGitRepositoryError as error:
+            raise JensGitError("Not a git repository: %s" % error)
+        except AssertionError as error:
+            raise JensGitError("Git operation failed: %s" % error)
         return res
 
     return wrapper
