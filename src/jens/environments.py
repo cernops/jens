@@ -392,8 +392,8 @@ def _remove_environment_annotation(environment):
 def get_names_of_declared_environments():
     settings = Settings()
     environments = os.listdir(settings.ENV_METADATADIR)
-    environments = filter(lambda x: re.match("^.+?\.yaml$", x), environments)
-    return map(lambda x: re.sub("\.yaml$", "", x), environments)
+    environments = filter(lambda x: re.match(r"^.+?\.yaml$", x), environments)
+    return map(lambda x: re.sub(r"\.yaml$", "", x), environments)
 
 def _calculate_delta():
     settings = Settings()
