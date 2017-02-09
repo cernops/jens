@@ -20,7 +20,7 @@ def timed(func):
         start = time()
         result = func(*args, **kwargs)
         elapsed = time() - start
-        logging.info("Executed '%s' in %.2f ms" % (func.__name__, elapsed*1000))
+        logging.info("Executed '%s' in %.2f ms", func.__name__, elapsed*1000)
         return result
     return wrapper
 
@@ -37,7 +37,7 @@ def git_exec(func):
         kwargs = w_kwargs["kwargs"]
         name = w_kwargs["name"]
 
-        logging.debug("Executing git %s %s %s" % (name, args, kwargs))
+        logging.debug("Executing git %s %s %s", name, args, kwargs)
 
         try:
             res = func(*args, **kwargs)
