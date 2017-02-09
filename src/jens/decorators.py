@@ -26,7 +26,7 @@ def timed(func):
 
 def git_exec(func):
     @wraps(func)
-    def wrapper(*w_args, **w_kwargs):
+    def wrapper(**w_kwargs):
         settings = Settings()
         ssh_cmd_path = settings.SSH_CMD_PATH
 
