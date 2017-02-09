@@ -201,13 +201,13 @@ def read_environment_definition(environment):
                 raise JensEnvironmentsError("Missing '%s' in environemnt '%s'" %
                                             (key, environment))
         if 'overrides' in environment and environment['overrides'] is None:
-                raise JensEnvironmentsError("Lacking overrides in environment '%s'" %
-                                            environment)
+            raise JensEnvironmentsError("Lacking overrides in environment '%s'" %
+                                        environment)
         if 'parser' in environment and \
             environment['parser'] not in DIRECTORY_ENVIRONMENTS_CONF_PARSER_VALUES:
-                raise JensEnvironmentsError("Environment '%s' has an invalid "
-                        "value for the parser option: %s" % (environment,
-                        environment['parser']))
+            raise JensEnvironmentsError("Environment '%s' has an invalid "
+                                        "value for the parser option: %s" %
+                                        (environment, environment['parser']))
         # What about checking that default in settings.mandatory_branches?
         return environment
     except yaml.YAMLError:
@@ -261,7 +261,7 @@ def _link_hostgroup(hostgroup, environment, definition):
              (settings.CLONEDIR, hostgroup, branch)
     link_name = _generate_hostgroup_env_code_path(hostgroup, environment)
     target = os.path.relpath(target,
-        os.path.abspath(os.path.join(link_name, os.pardir)))
+                             os.path.abspath(os.path.join(link_name, os.pardir)))
     logging.debug("Linking %s to %s" % (link_name, target))
     try:
         os.symlink(target, link_name)
@@ -273,8 +273,8 @@ def _link_hostgroup(hostgroup, environment, definition):
     # TARGET: $clonedir/hostgroups/$hostgroup/$branch/data/hostgroup
     target = "%s/hostgroups/%s/%s/data/hostgroup" % \
              (settings.CLONEDIR, hostgroup, branch)
-    link_name = \
-        _generate_hostgroup_env_hieradata_hostgroup_path(hostgroup, environment)
+    link_name = _generate_hostgroup_env_hieradata_hostgroup_path(hostgroup,
+                                                                 environment)
     target = os.path.relpath(target,
                              os.path.abspath(os.path.join(link_name, os.pardir)))
     logging.debug("Linking %s to %s" % (link_name, target))
@@ -444,7 +444,7 @@ def _link_site(environment, definition):
     target = settings.CLONEDIR + "/common/site/%s/code" % branch
     link_name = settings.ENVIRONMENTSDIR + "/%s/site" % environment
     target = os.path.relpath(target,
-        os.path.abspath(os.path.join(link_name, os.pardir)))
+                             os.path.abspath(os.path.join(link_name, os.pardir)))
     logging.debug("Linking %s to %s" % (link_name, target))
     try:
         os.symlink(target, link_name)
@@ -476,7 +476,7 @@ def _add_configuration_file(environment, definition):
     settings = Settings()
     conf_file_path = "%s/%s/%s" % \
         (settings.ENVIRONMENTSDIR, environment,
-        DIRECTORY_ENVIRONMENTS_CONF_FILENAME)
+         DIRECTORY_ENVIRONMENTS_CONF_FILENAME)
     config = ConfigObj(conf_file_path)
     config['modulepath'] = "modules:hostgroups"
     config['manifest'] = "site/site.pp"
