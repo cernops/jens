@@ -8,9 +8,9 @@
 import logging
 
 import os
+import git.exc
 from functools import wraps
 from time import time
-from git.exc import *
 from jens.errors import JensGitError
 from jens.settings import Settings
 
@@ -41,12 +41,12 @@ def git_exec(f):
 
         try:
             res = f(*args, **kwargs)
-        except (GitCommandError, GitCommandNotFound) as e:
+        except (git.exc.GitCommandError, git.exc.GitCommandNotFound) as e:
             raise JensGitError("Couldn't execute %s (%s)" %
                                (e.command, e.stderr))
-        except NoSuchPathError as e:
+        except git.exc.NoSuchPathError as e:
             raise JensGitError("No such path %s" % e)
-        except InvalidGitRepositoryError as e:
+        except git.exc.InvalidGitRepositoryError as e:
             raise JensGitError("Not a git repository: %s" % e)
         except AssertionError as e:
             raise JensGitError("Git operation failed: %s" % e)
