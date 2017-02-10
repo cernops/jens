@@ -79,7 +79,7 @@ def _fetch_all_messages():
     except OSError, error:
         raise JensMessagingError("Failed to create Queue object (%s)" % error)
     msgs = []
-    for i, name in enumerate(queue):
+    for _, name in enumerate(queue):
         try:
             item = queue.dequeue(name)
         except QueueLockError, error:
