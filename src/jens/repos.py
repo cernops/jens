@@ -132,8 +132,7 @@ def _refresh_repositories(existing_repositories, partition,
     data = [{'settings': settings, 'partition': partition,
              'repository': repository, 'inventory': inventory_proxy,
              'inventory_lock': inventory_lock, 'desired': desired,
-             'hints': hints}
-                            for repository in existing_repositories]
+             'hints': hints} for repository in existing_repositories]
     pool = Pool(processes=int(math.ceil(cpu_count()*1.5)))
     pool.map(_refresh_repository, data)
     pool.close()
@@ -299,7 +298,7 @@ def _expand_clones(partition, name, inventory, inventory_lock, new_refs,
             git.fetch(clone_path)
             git.reset(clone_path, "origin/%s" % refname, hard=True)
             logging.info("Updated ref '%s' (%s)", clone_path,
-                git.get_head(clone_path, short=True))
+                         git.get_head(clone_path, short=True))
         except JensGitError, error:
             logging.error("Unable to refresh clone '%s' (%s)",
                           clone_path, error)
