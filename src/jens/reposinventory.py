@@ -7,7 +7,6 @@
 
 import os
 import logging
-import re
 import pickle
 
 from jens.settings import Settings
