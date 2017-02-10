@@ -39,7 +39,7 @@ class MessagingTest(JensTestCase):
             create_module_event(module)
         for hg in hgs:
             create_hostgroup_event(hg)
-        hints = fetch_update_hints(self.lock)
+        hints = fetch_update_hints()
         for m in modules:
             self.assertTrue(m in hints['modules'])
         for h in hgs:
@@ -48,7 +48,7 @@ class MessagingTest(JensTestCase):
         self.assertEquals(0, len(hints['common']))
         create_module_event('m1')
         create_common_event('baz')
-        hints = fetch_update_hints(self.lock)
+        hints = fetch_update_hints()
         self.assertTrue('hostgroups' in hints)
         self.assertEquals(0, len(hints['hostgroups']))
         self.assertTrue('baz' in hints['common'])
@@ -58,11 +58,11 @@ class MessagingTest(JensTestCase):
     def test_update_hints_no_dups(self):
         create_module_event('foo')
         create_module_event('foo')
-        hints = fetch_update_hints(self.lock)
+        hints = fetch_update_hints()
         self.assertEquals(1, len(hints['modules']))
 
     def test_update_hints_no_messages(self):
-        hints = fetch_update_hints(self.lock)
+        hints = fetch_update_hints()
         self.assertTrue('modules' in hints)
         self.assertEquals(0, len(hints['hostgroups']))
         self.assertTrue('hostgroups' in hints)
@@ -191,7 +191,7 @@ class MessagingTest(JensTestCase):
         enqueue_hint('common', 'site')
         # If they are malformed fetch_update_hints
         # will ignore them
-        hints = fetch_update_hints(self.lock)
+        hints = fetch_update_hints()
         self.assertEquals(1, len(hints['common']))
         self.assertEquals(2, len(hints['hostgroups']))
         self.assertEquals(3, len(hints['modules']))
@@ -203,7 +203,7 @@ class MessagingTest(JensTestCase):
         enqueue_hint('hostgroups', 'hg1')
         enqueue_hint('hostgroups', 'hg2')
         enqueue_hint('common', 'site')
-        hints = fetch_update_hints(self.lock)
+        hints = fetch_update_hints()
         self.assertEquals(1, len(hints['common']))
         self.assertEquals(2, len(hints['hostgroups']))
         self.assertEquals(3, len(hints['modules']))

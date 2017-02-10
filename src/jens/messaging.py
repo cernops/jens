@@ -24,7 +24,7 @@ MSG_SCHEMA = {'time': 'string', 'data': 'binary'}
 # {'time': '2015-12-10T14:06:35.339550', 'data': {'modules': ['m1']}}
 
 @timed
-def fetch_update_hints(lock):
+def fetch_update_hints():
     hints = {}
     logging.info("Getting and processing hints...")
     try:
