@@ -7,7 +7,6 @@
 
 import logging
 import time
-from urllib3.exceptions import TimeoutError
 from jens.settings import Settings
 
 from jens.errors import JensLockError, JensLockExistsError
