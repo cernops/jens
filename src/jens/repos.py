@@ -315,7 +315,9 @@ def _expand_clones(partition, name, inventory, inventory_lock, new_refs,
             if refname in inventory[name]:
                 if inventory_lock:
                     inventory_lock.acquire()
-                t = inventory[name]; t.remove(refname); inventory[name] = t
+                element = inventory[name]
+                element.remove(refname)
+                inventory[name] = element
                 if inventory_lock:
                     inventory_lock.release()
                 logging.info("%s/%s deleted from inventory", name, refname)
