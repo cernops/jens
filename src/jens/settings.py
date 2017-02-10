@@ -14,7 +14,7 @@ from validate import Validator
 from jens.errors import JensConfigError
 from jens.configfile import CONFIG_GRAMMAR
 
-class Settings():
+class Settings(object):
     __shared_state = {}
 
     def __init__(self, logfile=None):
