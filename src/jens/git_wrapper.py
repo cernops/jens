@@ -12,7 +12,7 @@ from jens.decorators import git_exec
 def hash_object(path):
     args = [path]
     kwargs = {}
-    logging.debug("Hashing object %s" % path)
+    logging.debug("Hashing object %s", path)
 
     @git_exec
     def hash_object_exec(*args, **kwargs):
@@ -20,10 +20,12 @@ def hash_object(path):
 
     return hash_object_exec(name='hash-object', args=args, kwargs=kwargs)
 
-def gc(repository_path, aggressive=False, bare=False):
+# pylint: disable=invalid-name
+# (too short but all match Git command names)
+def gc(repository_path, aggressive=False):
     args = []
     kwargs = {"quiet": True, "aggressive": aggressive}
-    logging.debug("Collecting garbage in %s" % repository_path)
+    logging.debug("Collecting garbage in %s", repository_path)
 
     @git_exec
     def gc_exec(*args, **kwargs):
@@ -36,7 +38,7 @@ def clone(repository_path, url, bare=False, shared=False, branch=None):
     args = [url, repository_path]
     kwargs = {"no-hardlinks": True, "shared": shared,
               "odbt": git.GitCmdObjectDB}
-    logging.debug("Cloning from %s to %s" % (url, repository_path))
+    logging.debug("Cloning from %s to %s", url, repository_path)
     if bare is True:
         kwargs["bare"] = True
         kwargs["mirror"] = True
@@ -52,7 +54,7 @@ def clone(repository_path, url, bare=False, shared=False, branch=None):
 def fetch(repository_path, prune=False):
     args = []
     kwargs = {"no-tags": True, "prune": prune}
-    logging.debug("Fetching new refs in %s" % repository_path)
+    logging.debug("Fetching new refs in %s", repository_path)
 
     @git_exec
     def fetch_exec(*args, **kwargs):
@@ -64,7 +66,7 @@ def fetch(repository_path, prune=False):
 def reset(repository_path, treeish, hard=False):
     args = [treeish]
     kwargs = {"hard": hard}
-    logging.debug("Resetting %s to %s" % (repository_path, treeish))
+    logging.debug("Resetting %s to %s", repository_path, treeish)
 
     @git_exec
     def reset_exec(*args, **kwargs):
@@ -98,7 +100,7 @@ def rev_parse(repository_path, ref, short=False):
 def get_head(repository_path, short=False):
     args = []
     kwargs = {}
-    logging.debug("Getting HEAD of %s" % repository_path)
+    logging.debug("Getting HEAD of %s", repository_path)
 
     @git_exec
     def get_head_exec(*args, **kwargs):
