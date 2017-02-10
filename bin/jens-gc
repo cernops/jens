@@ -92,7 +92,7 @@ def main():
         return 3
 
     try:
-        with JensLockFactory.makeLock(tries=10, waittime=10) as lock:
+        with JensLockFactory.make_lock(tries=10, waittime=10) as lock:
             if opts.bare or opts.all:
                 logging.info("GCing bare repositories...")
                 processed_count = gc_bares(opts)

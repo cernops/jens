@@ -55,7 +55,7 @@ def main():
         settings.MODE = 'POLL'
 
     try:
-        with JensLockFactory.makeLock() as lock:
+        with JensLockFactory.make_lock() as lock:
             # Update metadata
             logging.info("Refreshing metadata...")
             try:

@@ -73,7 +73,7 @@ class JensTestCase(unittest.TestCase):
         self.settings = Settings("jens-test")
         self.settings.parse_config(self.config_file_path)
 
-        self.lock = JensLockFactory.makeLock(self.settings)
+        self.lock = JensLockFactory.make_lock(self.settings)
 
     def tearDown(self):
         if self.keep_sandbox:

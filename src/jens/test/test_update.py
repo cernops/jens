@@ -44,7 +44,7 @@ class UpdateTest(JensTestCase):
         add_repository('common', 'hieradata', bare)
         self.hieradata_user = user
 
-        self.lock = JensLockFactory.makeLock()
+        self.lock = JensLockFactory.make_lock()
 
     def _create_fake_module(self, modulename, branches=[]):
         (bare, user) = create_fake_repository(self.sandbox_path, branches)

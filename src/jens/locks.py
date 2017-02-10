@@ -14,7 +14,7 @@ from jens.errors import JensLockError, JensLockExistsError
 
 class JensLockFactory(object):
     @staticmethod
-    def makeLock(tries=1, waittime=10):
+    def make_lock(tries=1, waittime=10):
         settings = Settings()
         if settings.LOCK_TYPE == 'FILE':
             return JensFileLock(tries, waittime)
