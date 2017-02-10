@@ -105,8 +105,8 @@ def _create_new_repositories(new_repositories, partition,
             # Expand only the mandatory and available requested branches
             # commits will always be attempted to be expanded
             new = set(settings.MANDATORY_BRANCHES)
-            new = new.union(filter(lambda x: ref_is_commit(x) or x in refs,
-                                   desired.get(repository, [])))
+            new = new.union([ref for ref in desired.get(repository, [])
+                             if ref_is_commit(ref) or ref in refs])
             inventory[repository] = []
             _expand_clones(partition, repository, inventory, None, new, [], [])
             created.append(repository)
@@ -215,7 +215,7 @@ def _compare_refs(old_refs, new_refs, inventory, desired):
     # New: What we need minus what we have...
     new = list(desired.difference(inventory))
     # ...but only refs that exist or commits
-    new = filter(lambda x: ref_is_commit(x) or x in new_refs, new)
+    new = [ref for ref in new if ref_is_commit(ref) or ref in new_refs]
 
     # Deleted: what we have that we don't need anymore
     deleted = list(set(inventory).difference(desired))
