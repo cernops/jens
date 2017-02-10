@@ -59,7 +59,7 @@ def main():
             # Update metadata
             logging.info("Refreshing metadata...")
             try:
-                refresh_metadata(lock)
+                refresh_metadata()
             except JensError, error:
                 logging.error(error)
                 return 20
