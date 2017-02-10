@@ -32,7 +32,7 @@ def fetch_update_hints(lock):
     except Exception, error:
         raise JensMessagingError("Could not retrieve messages (%s)" % error)
 
-    logging.info("%d messages found" % len(messages))
+    logging.info("%d messages found", len(messages))
     hints = _validate_and_merge_messages(messages)
     return hints
 
@@ -43,7 +43,7 @@ def enqueue_hint(partition, name):
             'data': pickle.dumps({partition: [name]})}
 
     _queue_item(hint)
-    logging.info("Hint '%s/%s' added to the queue" % (partition, name))
+    logging.info("Hint '%s/%s' added to the queue", partition, name)
 
 def _queue_item(item):
     settings = Settings()
@@ -84,17 +84,17 @@ def _fetch_all_messages():
         try:
             item = queue.dequeue(name)
         except QueueLockError, error:
-            logging.warn("Element %s was locked when dequeuing" % name)
+            logging.warn("Element %s was locked when dequeuing", name)
             continue
         except OSError, error:
-            logging.error("I/O error when getting item %s" % name)
+            logging.error("I/O error when getting item %s", name)
             continue
         try:
             item['data'] = pickle.loads(item['data'])
         except (pickle.PickleError, EOFError), error:
-            logging.debug("Couldn't unpickle item %s. Will be ignored." % name)
+            logging.debug("Couldn't unpickle item %s. Will be ignored.", name)
             continue
-        logging.debug("Message %s extracted and unpickled" % name)
+        logging.debug("Message %s extracted and unpickled", name)
         msgs.append(item)
 
     return msgs
@@ -107,22 +107,22 @@ def _validate_and_merge_messages(messages):
             return acc
         time = element['time']
         if 'data' not in element or type(element['data']) != dict:
-            logging.warn("Discarding message (%s): Bad data section" % time)
+            logging.warn("Discarding message (%s): Bad data section", time)
             return acc
         for k, v in element['data'].iteritems():
             if k not in hints:
-                logging.warn("Discarding message (%s): Unknown partition '%s'" % (time, k))
+                logging.warn("Discarding message (%s): Unknown partition '%s'", time, k)
                 continue
             if type(v) != list:
-                logging.warn("Discarding message (%s): Value '%s' is not a list" % (time, v))
+                logging.warn("Discarding message (%s): Value '%s' is not a list", time, v)
                 continue
             for item in v:
                 if type(item) == str:
-                    logging.debug("Accepted message %s:%s created at %s" %
-                                  (k, v, element['time']))
+                    logging.debug("Accepted message %s:%s created at %s",
+                                  k, v, element['time'])
                     acc[k].add(item)
                 else:
-                    logging.warn("Discarding item '%s' in (%s - %s:%s): not a str"
-                                 "not a str" % (item, time, k, v))
+                    logging.warn("Discarding item '%s' in (%s - %s:%s): not a str",
+                                 item, time, k, v)
         return acc
     return reduce(_merger, messages, hints)
