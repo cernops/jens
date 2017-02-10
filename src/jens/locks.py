@@ -57,6 +57,15 @@ class JensLock(object):
                      self.settings.LOCK_NAME, ttl)
         self.renew_lock(ttl)
 
+    def obtain_lock(self):
+        raise NotImplementedError('You are not meant to instantiate this class')
+
+    def release_lock(self):
+        raise NotImplementedError('You are not meant to instantiate this class')
+
+    def renew_lock(self, ttl):
+        raise NotImplementedError('You are not meant to instantiate this class')
+
 class JensFileLock(JensLock):
     def obtain_lock(self):
         lockfile_path = self.__get_lock_file_path()
