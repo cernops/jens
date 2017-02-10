@@ -78,10 +78,10 @@ class Settings(object):
 
         if self.logfile:
             logging.basicConfig(
-                level = getattr(logging, self.DEBUG_LEVEL),
-                format = '%(asctime)s [%(process)d] %(levelname)s %(message)s',
-                filename = "%s/%s.log" % (self.LOGDIR, self.logfile))
+                level=getattr(logging, self.DEBUG_LEVEL),
+                format='%(asctime)s [%(process)d] %(levelname)s %(message)s',
+                filename="%s/%s.log" % (self.LOGDIR, self.logfile))
         else:
             logging.basicConfig(
-                level = getattr(logging, self.DEBUG_LEVEL),
-                format = '%(message)s')
+                level=getattr(logging, self.DEBUG_LEVEL),
+                format='%(message)s')
