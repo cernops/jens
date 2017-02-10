@@ -59,7 +59,7 @@ class UpdateTest(JensTestCase):
     def _jens_update(self, errorsExpected=False, errorRegexp=None, hints=None):
         repositories_deltas, inventory = \
             refresh_repositories(self.lock, hints=hints)
-        refresh_environments(self.lock, repositories_deltas, inventory)
+        refresh_environments(repositories_deltas, inventory)
         if errorsExpected:
             self.assertLogErrors(errorRegexp)
         else:

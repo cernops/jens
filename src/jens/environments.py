@@ -23,7 +23,7 @@ DIRECTORY_ENVIRONMENTS_CONF_FILENAME = "environment.conf"
 DIRECTORY_ENVIRONMENTS_CONF_PARSER_VALUES = ('current', 'future')
 
 @timed
-def refresh_environments(lock, repositories_deltas, inventory):
+def refresh_environments(repositories_deltas, inventory):
     logging.debug("Calculating delta...")
     delta = _calculate_delta()
     logging.info("New environments: %s", delta['new'])

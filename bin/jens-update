@@ -85,8 +85,7 @@ def main():
             # Update environments
             logging.info("Refreshing environments...")
             try:
-                refresh_environments(lock,
-                    repositories_deltas, inventory)
+                refresh_environments(repositories_deltas, inventory)
             except JensRepositoriesError, error:
                 logging.error("Failed (%s)" % error)
                 return 40
