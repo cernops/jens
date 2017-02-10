@@ -11,8 +11,8 @@ from configobj import ConfigObj, flatten_errors
 from configobj import ConfigObjError
 from validate import Validator
 
-from errors import JensConfigError
-from configfile import CONFIG_GRAMMAR
+from jens.errors import JensConfigError
+from jens.configfile import CONFIG_GRAMMAR
 
 class Settings():
     __shared_state = {}
