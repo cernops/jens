@@ -217,7 +217,7 @@ def read_environment_definition(environment):
 
 def _link_module(module, environment, definition):
     settings = Settings()
-    branch, overridden = _resolve_branch('modules', module, definition)
+    branch, _ = _resolve_branch('modules', module, definition)
     logging.debug("Adding module '%s' (%s) to environment '%s'",
                   module, branch, environment)
 
@@ -251,7 +251,7 @@ def _link_module(module, environment, definition):
 
 def _link_hostgroup(hostgroup, environment, definition):
     settings = Settings()
-    branch, overridden = _resolve_branch('hostgroups', hostgroup, definition)
+    branch, _ = _resolve_branch('hostgroups', hostgroup, definition)
     logging.debug("Adding hostgroup '%s' (%s) to environment '%s'",
                   hostgroup, branch, environment)
     # 1. Hostgroup's code directory
@@ -440,7 +440,7 @@ def _link_site(environment, definition):
     # LINK_NAME: $environment/site
     # TARGET: $clonedir/common/site/$branch/code
     settings = Settings()
-    branch, overridden = _resolve_branch('common', 'site', definition)
+    branch, _ = _resolve_branch('common', 'site', definition)
     target = settings.CLONEDIR + "/common/site/%s/code" % branch
     link_name = settings.ENVIRONMENTSDIR + "/%s/site" % environment
     target = os.path.relpath(target,
@@ -457,7 +457,7 @@ def _link_common_hieradata(environment, definition):
     # {settings.COMMON_HIERADATA_ITEMS}
     # TARGET: $clonedir/common/hieradata/$branch/data/{ditto}
     settings = Settings()
-    branch, overridden = _resolve_branch('common', 'hieradata', definition)
+    branch, _ = _resolve_branch('common', 'hieradata', definition)
     base_target = settings.CLONEDIR + "/common/hieradata/%s/data" % branch
     base_link_name = settings.ENVIRONMENTSDIR + "/%s/hieradata" % environment
 
