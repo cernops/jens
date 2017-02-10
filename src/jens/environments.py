@@ -108,6 +108,7 @@ def _create_new_environments(environments, inventory):
     for environment in environments:
         _create_new_environment(environment, inventory)
 
+#pylint: disable=too-many-branches, too-many-statements
 def _create_new_environment(environment, inventory):
     settings = Settings()
     logging.info("Creating new environment '%s'", environment)

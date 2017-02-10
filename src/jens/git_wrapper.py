@@ -7,7 +7,6 @@
 
 import git
 import logging
-import re
 from jens.decorators import git_exec
 
 def hash_object(path):
