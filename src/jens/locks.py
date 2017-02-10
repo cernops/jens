@@ -32,8 +32,8 @@ class JensLock(object):
 
     def __enter__(self):
         for attempt in range(1, self.tries+1):
-            logging.info("Obtaining lock '%s' (attempt: %d)..." %
-                         (self.settings.LOCK_NAME, attempt))
+            logging.info("Obtaining lock '%s' (attempt: %d)...",
+                         self.settings.LOCK_NAME, attempt)
             try:
                 self.obtain_lock()
                 logging.debug("Lock acquired")
@@ -42,20 +42,20 @@ class JensLock(object):
                 if attempt == self.tries:
                     raise error
                 else:
-                    logging.debug("Couldn't lock (%s). Sleeping for %d seconds..." %
-                                  (error, self.waittime))
+                    logging.debug("Couldn't lock (%s). Sleeping for %d seconds...",
+                                  error, self.waittime)
                     time.sleep(self.waittime)
 
     def __exit__(self, type, value, traceback):
-        logging.info("Releasing lock '%s'..." % self.settings.LOCK_NAME)
+        logging.info("Releasing lock '%s'...", self.settings.LOCK_NAME)
         self.release_lock()
 
     def renew(self, ttl=10):
         if ttl <= 0:
             logging.warn("Invalid new TTL, resetting to 1 by default")
             ttl = 1
-        logging.info("Setting '%s' lock TTL to %d secs..." %
-                     (self.settings.LOCK_NAME, ttl))
+        logging.info("Setting '%s' lock TTL to %d secs...",
+                     self.settings.LOCK_NAME, ttl)
         self.renew_lock(ttl)
 
 class JensFileLock(JensLock):
