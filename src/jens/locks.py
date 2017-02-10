@@ -45,7 +45,7 @@ class JensLock(object):
                                   error, self.waittime)
                     time.sleep(self.waittime)
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, e_type, e_value, e_traceback):
         logging.info("Releasing lock '%s'...", self.settings.LOCK_NAME)
         self.release_lock()
 
