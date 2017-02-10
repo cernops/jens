@@ -37,8 +37,9 @@ class Settings(object):
                 section_list, key, _ = error
                 section_string = '.'.join(section_list)
                 if key is not None:
-                    raise JensConfigError("Missing/not valid mandatory configuration key %s in section %s"
-                                          % (key, section_string))
+                    raise JensConfigError("Missing/not valid mandatory "
+                                          "configuration key %s in section %s",
+                                          key, section_string)
                 else:
                     raise JensConfigError("Section '%s' is missing" % section_string)
 
