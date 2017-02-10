@@ -67,6 +67,10 @@ class JensLock(object):
         raise NotImplementedError('You are not meant to instantiate this class')
 
 class JensFileLock(JensLock):
+    def __init__(self, tries, waittime):
+        super(JensFileLock, self).__init__(tries, waittime)
+        self.lockfile = None
+
     def obtain_lock(self):
         lockfile_path = self.__get_lock_file_path()
         try:
