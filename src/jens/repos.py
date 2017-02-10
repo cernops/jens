@@ -26,7 +26,7 @@ from jens.tools import ref_is_commit
 from jens.tools import refname_to_dirname
 
 @timed
-def refresh_repositories(lock, hints=None):
+def refresh_repositories(hints=None):
     settings = Settings()
     try:
         logging.debug("Reading metadata from %s", settings.REPO_METADATA)
