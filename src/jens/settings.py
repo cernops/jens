@@ -34,7 +34,7 @@ class Settings(object):
 
         if results is not True:
             for error in flatten_errors(config, results):
-                section_list, key, msg = error
+                section_list, key, _ = error
                 section_string = '.'.join(section_list)
                 if key is not None:
                     raise JensConfigError("Missing/not valid mandatory configuration key %s in section %s"
