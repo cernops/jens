@@ -134,9 +134,9 @@ def main():
         environments['declared'] = get_environments_in_metadata()
         environments['cached'] = get_environments_in_cache()
 
-        for type, list in environments.iteritems():
-            logging.info("There are %d %s environments", len(list), type)
-            for environment in sorted(list):
+        for _type, _list in environments.iteritems():
+            logging.info("There are %d %s environments", len(_list), _type)
+            for environment in sorted(_list):
                 logging.info("\t - %s ", environment)
 
     if opts.inventory or opts.all:
