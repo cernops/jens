@@ -71,7 +71,7 @@ def get_size(partition, element, branch):
     path = "%s/%s/%s/%s" % \
         (settings.CLONEDIR, partition, element, branch)
     size = 0
-    for path, dirs, files in os.walk(path):
+    for path, _, files in os.walk(path):
         for _file in files:
             fullpath = os.path.join(path, _file)
             if os.path.isfile(fullpath):
