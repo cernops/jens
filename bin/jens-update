@@ -48,7 +48,7 @@ def main():
     try:
         validate_directories()
     except JensError, error:
-        logging.error("Failed to validate directories (%s)" % error)
+        logging.error("Failed to validate directories (%s)", error)
         return 3
 
     if opts.poll:
@@ -79,7 +79,7 @@ def main():
                 repositories_deltas, inventory = \
                     refresh_repositories(hints)
             except JensRepositoriesError, error:
-                logging.error("Failed (%s)" % error)
+                logging.error("Failed (%s)", error)
                 return 30
 
             # Update environments
@@ -87,13 +87,13 @@ def main():
             try:
                 refresh_environments(repositories_deltas, inventory)
             except JensRepositoriesError, error:
-                logging.error("Failed (%s)" % error)
+                logging.error("Failed (%s)", error)
                 return 40
     except JensLockExistsError, error:
-        logging.info("Locking failed (%s)" % error)
+        logging.info("Locking failed (%s)", error)
         return 50
     except JensLockError, error:
-        logging.error("Locking failed (%s)" % error)
+        logging.error("Locking failed (%s)", error)
         return 51
 
     logging.info("Done")
