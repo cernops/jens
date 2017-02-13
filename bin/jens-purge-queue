@@ -37,7 +37,7 @@ def main():
         return 2
 
     try:
-        logging.info("Purging %s..." % settings.MESSAGING_QUEUEDIR)
+        logging.info("Purging %s...", settings.MESSAGING_QUEUEDIR)
         purge_queue()
     except JensMessagingError, error:
         logging.error(error)
