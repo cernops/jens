@@ -9,7 +9,6 @@ import re
 from jens.settings import Settings
 
 def refname_to_dirname(refname):
-    settings = Settings()
     match = ref_is_commit(refname)
     if match:
         return ".%s" % match.group(1)
