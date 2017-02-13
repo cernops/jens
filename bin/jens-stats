@@ -41,7 +41,7 @@ def parse_cmdline_args():
     parser.add_option('-a', '--all',
                       action="store_true",
                       help="Shows everything")
-    opts, args = parser.parse_args()
+    opts, _ = parser.parse_args()
     return opts
 
 def get_bare_repositories():
