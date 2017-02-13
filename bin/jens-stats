@@ -75,18 +75,18 @@ def get_size(partition, element, branch):
         for file in files:
             fullpath = os.path.join(path, file)
             if os.path.isfile(fullpath):
-                size +=  os.path.getsize(fullpath)
+                size += os.path.getsize(fullpath)
     return fmt_bytes(size)
 
 # http://stackoverflow.com/questions/1094841/
 # reusable-library-to-get-human-readable-version-of-file-size
 def fmt_bytes(num):
-    for x in ['B','KiB','MiB','GiB']:
+    for x in ['B', 'KiB', 'MiB', 'GiB']:
         if num < 1024.0:
             return "%3.1f%s" % (num, x)
         num /= 1024.0
     return "%3.1f%s" % (num, 'TB')
-    
+
 def get_puppet_environments():
     settings = Settings()
     return os.listdir(settings.ENVIRONMENTSDIR)
@@ -123,17 +123,17 @@ def main():
         bares = get_bare_repositories()
         logging.info("There are %d modules:" % len(bares['modules']))
         for module in bares['modules']:
-            logging.info( "\t- %s" % module)
+            logging.info("\t- %s" % module)
         logging.info("There are %d hostgroups:" % len(bares['hostgroups']))
         for hostgroup in bares['hostgroups']:
-            logging.info( "\t- %s" % hostgroup)
+            logging.info("\t- %s" % hostgroup)
 
     if opts.environment or opts.all:
         environments = {}
         environments['synchronized'] = get_puppet_environments()
         environments['declared'] = get_environments_in_metadata()
         environments['cached'] = get_environments_in_cache()
-    
+
         for type, list in environments.iteritems():
             logging.info("There are %d %s environments" % (len(list), type))
             for environment in sorted(list):
