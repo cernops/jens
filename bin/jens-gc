@@ -50,7 +50,7 @@ def gc_bares(opts):
         for repository in os.listdir(base_path):
             try:
                 repository_path = base_path + "/%s" % repository
-                git.gc(repository_path, aggressive=opts.aggressive, bare=True)
+                git.gc(repository_path, aggressive=opts.aggressive)
                 processed = processed + 1
             except JensGitError, error:
                 logging.error("Failed run git-gc on bare repo %s (%s)",
