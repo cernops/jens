@@ -141,8 +141,8 @@ def main():
 
     if opts.inventory or opts.all:
         inventory = get_inventory()
-        pp = pprint.PrettyPrinter()
-        pp.pprint(inventory)
+        pprinter = pprint.PrettyPrinter()
+        pprinter.pprint(inventory)
 
     if opts.queues or opts.all:
         try:
