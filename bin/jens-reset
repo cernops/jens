@@ -28,7 +28,7 @@ def parse_cmdline_args():
     parser.add_option('-y', '--yes',
                       action="store_true",
                       help="Please do it")
-    opts, args = parser.parse_args()
+    opts, _ = parser.parse_args()
     return opts
 
 def remove_bares():
