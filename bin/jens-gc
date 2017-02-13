@@ -53,8 +53,8 @@ def gc_bares(opts):
                 git.gc(repository_path, aggressive=opts.aggressive, bare=True)
                 processed = processed + 1
             except JensGitError, error:
-                logging.error("Failed run git-gc on bare repo %s (%s)" % \
-                    (repository, error))
+                logging.error("Failed run git-gc on bare repo %s (%s)",
+                              repository, error)
     return processed
 
 @timed
@@ -71,8 +71,8 @@ def gc_clones(opts):
                     git.gc(branch_path, aggressive=opts.aggressive)
                     processed = processed + 1
                 except JensGitError, error:
-                    logging.error("Failed run git-gc on clone %s (%s)" % \
-                        (branch_path, error))
+                    logging.error("Failed run git-gc on clone %s (%s)",
+                                  branch_path, error)
     return processed
 
 def main():
@@ -89,7 +89,7 @@ def main():
     try:
         validate_directories()
     except JensError, error:
-        logging.error("Failed to validate directories (%s)" % error)
+        logging.error("Failed to validate directories (%s)", error)
         return 3
 
     try:
@@ -97,14 +97,14 @@ def main():
             if opts.bare or opts.all:
                 logging.info("GCing bare repositories...")
                 processed_count = gc_bares(opts)
-                logging.info("Done (%d repositories cleaned up)" % processed_count)
+                logging.info("Done (%d repositories cleaned up)", processed_count)
 
             if opts.clones or opts.all:
                 logging.info("GCing clones...")
                 processed_count = gc_clones(opts)
-                logging.info("Done (%d repositories cleaned up)" % processed_count)
+                logging.info("Done (%d repositories cleaned up)", processed_count)
     except JensLockError, error:
-        logging.error("Locking failed (%s)" % error)
+        logging.error("Locking failed (%s)", error)
         return 50
 
     logging.info("Done")
