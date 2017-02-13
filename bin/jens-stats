@@ -116,17 +116,17 @@ def main():
     try:
         validate_directories()
     except JensError, error:
-        logging.error("Failed to validate directories (%s)" % error)
+        logging.error("Failed to validate directories (%s)", error)
         return 3
 
     if opts.repositories or opts.all:
         bares = get_bare_repositories()
-        logging.info("There are %d modules:" % len(bares['modules']))
+        logging.info("There are %d modules:", len(bares['modules']))
         for module in bares['modules']:
-            logging.info("\t- %s" % module)
-        logging.info("There are %d hostgroups:" % len(bares['hostgroups']))
+            logging.info("\t- %s", module)
+        logging.info("There are %d hostgroups:", len(bares['hostgroups']))
         for hostgroup in bares['hostgroups']:
-            logging.info("\t- %s" % hostgroup)
+            logging.info("\t- %s", hostgroup)
 
     if opts.environment or opts.all:
         environments = {}
@@ -135,9 +135,9 @@ def main():
         environments['cached'] = get_environments_in_cache()
 
         for type, list in environments.iteritems():
-            logging.info("There are %d %s environments" % (len(list), type))
+            logging.info("There are %d %s environments", len(list), type)
             for environment in sorted(list):
-                logging.info("\t - %s " % environment)
+                logging.info("\t - %s ", environment)
 
     if opts.inventory or opts.all:
         inventory = get_inventory()
@@ -147,7 +147,7 @@ def main():
     if opts.queues or opts.all:
         try:
             count = count_pending_hints()
-            logging.info("There are '%d' messages in the hints queue" % count)
+            logging.info("There are '%d' messages in the hints queue", count)
         except JensMessagingError, error:
             logging.error(error)
 
