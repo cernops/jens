@@ -81,7 +81,7 @@ def main():
     try:
         validate_directories()
     except JensError, error:
-        logging.error("Failed to validate directories (%s)" % error)
+        logging.error("Failed to validate directories (%s)", error)
         return 3
 
     if not opts.yes:
@@ -100,7 +100,7 @@ def main():
             logging.info("Removing all environments' cache...")
             remove_cache()
     except JensLockError, error:
-        logging.error("Locking failed (%s)" % error)
+        logging.error("Locking failed (%s)", error)
         return 50
 
     logging.info("Done -- Jens is sad now")
