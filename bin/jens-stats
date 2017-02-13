@@ -81,9 +81,9 @@ def get_size(partition, element, branch):
 # http://stackoverflow.com/questions/1094841/
 # reusable-library-to-get-human-readable-version-of-file-size
 def fmt_bytes(num):
-    for x in ['B', 'KiB', 'MiB', 'GiB']:
+    for unit in ['B', 'KiB', 'MiB', 'GiB']:
         if num < 1024.0:
-            return "%3.1f%s" % (num, x)
+            return "%3.1f%s" % (num, unit)
         num /= 1024.0
     return "%3.1f%s" % (num, 'TB')
 
