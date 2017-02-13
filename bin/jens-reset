@@ -89,7 +89,7 @@ def main():
         return 10
 
     try:
-        with JensLockFactory.make_lock() as lock:
+        with JensLockFactory.make_lock():
             logging.info("Cleaning everything up...")
             logging.info("Removing bare repositories...")
             remove_bares()
