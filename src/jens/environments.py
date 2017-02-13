@@ -191,6 +191,9 @@ def _create_new_environment(environment, inventory):
 
     _annotate_environment(environment)
 
+# This function guarantees that if keys are defined they contain things that
+# make sense. If there's overrides defined then the partitions are in the list
+# of known ones and they contain a dictionary.
 def read_environment_definition(environment):
     settings = Settings()
     try:
@@ -199,16 +202,44 @@ def read_environment_definition(environment):
         environment = yaml.load(open(path, 'r'))
         for key in ('notifications',):
             if key not in environment:
-                raise JensEnvironmentsError("Missing '%s' in environemnt '%s'" %
+                raise JensEnvironmentsError("Missing '%s' in environment '%s'" %
                                             (key, environment))
-        if 'overrides' in environment and environment['overrides'] is None:
-            raise JensEnvironmentsError("Lacking overrides in environment '%s'" %
-                                        environment)
+
+        if 'default' in environment and type(environment['default']) != str:
+            raise JensEnvironmentsError("Default declared but it is not a "
+                                        "string in environment '%s'" % environment)
+
+        if 'overrides' in environment:
+            if environment['overrides'] is None:
+                raise JensEnvironmentsError("Overrides declared but nothing "
+                                            "overriden in environment '%s'" %
+                                            environment)
+            elif type(environment['overrides']) != dict:
+                raise JensEnvironmentsError("Overrides declared but what's inside "
+                                            "does not look like a dict in environment '%s'" %
+                                            environment)
+            else:
+                for partition in environment['overrides'].iterkeys():
+                    if partition in ("modules", "hostgroups", "common"):
+                        if environment['overrides'][partition] is None:
+                            raise JensEnvironmentsError("Overrides declared but nothing "
+                                                        "overriden in environment %s" %
+                                                        environment)
+                        if type(environment['overrides'][partition]) != dict:
+                            raise JensEnvironmentsError("Overrides declared but they don't "
+                                                        "look like a dict in environment %s" %
+                                                        environment)
+                    else:
+                        raise JensEnvironmentsError("Unknown partition to override (%s) in "
+                                                    "environment %s" %
+                                                    (partition, environment))
+
         if 'parser' in environment and \
             environment['parser'] not in DIRECTORY_ENVIRONMENTS_CONF_PARSER_VALUES:
             raise JensEnvironmentsError("Environment '%s' has an invalid "
                                         "value for the parser option: %s" %
                                         (environment, environment['parser']))
+
         # What about checking that default in settings.mandatory_branches?
         return environment
     except yaml.YAMLError:

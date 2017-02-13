@@ -86,7 +86,6 @@ def _read_desired_inventory():
     for environmentname in environments:
         try:
             environment = read_environment_definition(environmentname)
-            # TODO: what if overrides empty? what if overrides,partition empty?
             if 'overrides' in environment:
                 for partition in environment['overrides'].iterkeys():
                     if partition in ("modules", "hostgroups", "common"):
