@@ -97,12 +97,14 @@ def main():
             if opts.bare or opts.all:
                 logging.info("GCing bare repositories...")
                 processed_count = gc_bares(opts)
-                logging.info("Done (%d repositories cleaned up)", processed_count)
+                logging.info("Done (%d repositories cleaned up)",
+                             processed_count)
 
             if opts.clones or opts.all:
                 logging.info("GCing clones...")
                 processed_count = gc_clones(opts)
-                logging.info("Done (%d repositories cleaned up)", processed_count)
+                logging.info("Done (%d repositories cleaned up)",
+                             processed_count)
     except JensLockError, error:
         logging.error("Locking failed (%s)", error)
         return 50
