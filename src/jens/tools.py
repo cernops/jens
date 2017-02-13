@@ -17,12 +17,12 @@ def refname_to_dirname(refname):
 
 def dirname_to_refname(dirname):
     settings = Settings()
-    match = re.match("^\.([^\.]+)", dirname)
+    match = re.match(r'^\.([^\.]+)', dirname)
     if match:
         return "%s%s" % (settings.HASHPREFIX, match.group(1))
     return dirname
 
 def ref_is_commit(refname):
     settings = Settings()
-    return re.match("^%s([0-9A-Fa-f]+)" % settings.HASHPREFIX,
+    return re.match(r'^%s([0-9A-Fa-f]+)' % settings.HASHPREFIX,
                     refname, re.IGNORECASE)
