@@ -19,9 +19,10 @@ def parse_cmdline_args():
     """Parses command line parameters."""
     parser = optparse.OptionParser()
     parser.add_option('-c', '--config',
-        help="Configuration file path (defaults to '/etc/jens/main.conf'",
-        default="/etc/jens/main.conf")
-    opts, args = parser.parse_args()
+                      help="Configuration file path "
+                           "(defaults to '/etc/jens/main.conf'",
+                      default="/etc/jens/main.conf")
+    opts, _ = parser.parse_args()
     return opts
 
 def main():
