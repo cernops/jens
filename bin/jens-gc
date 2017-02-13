@@ -38,7 +38,7 @@ def parse_cmdline_args():
     parser.add_option('-a', '--all',
                       action="store_true",
                       help="Clean up everything")
-    opts, args = parser.parse_args()
+    opts, _ = parser.parse_args()
     return opts
 
 @timed
