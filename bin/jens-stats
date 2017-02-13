@@ -100,7 +100,8 @@ def get_environments_in_metadata():
     return __listdir_nohidden(settings.ENV_METADATADIR)
 
 def __listdir_nohidden(directory):
-    return filter(lambda x: not x.startswith("."), os.listdir(directory))
+    return [_file for _file in os.listdir(directory)
+            if not _file.startswith(".")]
 
 def main():
     """Application entrypoint."""
