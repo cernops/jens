@@ -205,7 +205,7 @@ def read_environment_definition(environment):
                 raise JensEnvironmentsError("Missing '%s' in environment '%s'" %
                                             (key, environment))
 
-        if 'default' in environment and type(environment['default']) != str:
+        if 'default' in environment and not isinstance(environment['default'], str):
             raise JensEnvironmentsError("Default declared but it is not a "
                                         "string in environment '%s'" % environment)
 
@@ -214,7 +214,7 @@ def read_environment_definition(environment):
                 raise JensEnvironmentsError("Overrides declared but nothing "
                                             "overriden in environment '%s'" %
                                             environment)
-            elif type(environment['overrides']) != dict:
+            elif not isinstance(environment['overrides'], dict):
                 raise JensEnvironmentsError("Overrides declared but what's inside "
                                             "does not look like a dict in environment '%s'" %
                                             environment)
@@ -225,7 +225,7 @@ def read_environment_definition(environment):
                             raise JensEnvironmentsError("Overrides declared but nothing "
                                                         "overriden in environment %s" %
                                                         environment)
-                        if type(environment['overrides'][partition]) != dict:
+                        if not isinstance(environment['overrides'][partition], dict):
                             raise JensEnvironmentsError("Overrides declared but they don't "
                                                         "look like a dict in environment %s" %
                                                         environment)
