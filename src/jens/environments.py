@@ -418,7 +418,7 @@ def _remove_environment_annotation(environment):
     # This shouldn't ever happen unless someone deleted the file or
     # changed its permissions externally
     except OSError, error:
-        logging.error("Couldn't remove cached hash for environemnt '%s' (%s)",
+        logging.error("Couldn't remove cached hash for environment '%s' (%s)",
                       environment, error)
 
 def get_names_of_declared_environments():
