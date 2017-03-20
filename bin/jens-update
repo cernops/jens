@@ -26,12 +26,14 @@ def parse_cmdline_args():
     """Parses command line parameters."""
     parser = optparse.OptionParser()
     parser.add_option('-c', '--config',
-        help="Configuration file path (defaults to '/etc/jens/main.conf'",
-        default="/etc/jens/main.conf")
+                      help="Configuration file path "
+                           "(defaults to '/etc/jens/main.conf'",
+                      default="/etc/jens/main.conf")
     parser.add_option('-p', '--poll',
-        help="Force POLL mode, regardless of what's in the config file",
-        action='store_true')
-    opts, args = parser.parse_args()
+                      help="Force POLL mode, regardless of what's "
+                           "in the config file",
+                      action='store_true')
+    opts, _ = parser.parse_args()
     return opts
 
 def main():
@@ -48,25 +50,25 @@ def main():
     try:
         validate_directories()
     except JensError, error:
-        logging.error("Failed to validate directories (%s)" % error)
+        logging.error("Failed to validate directories (%s)", error)
         return 3
 
     if opts.poll:
         settings.MODE = 'POLL'
 
     try:
-        with JensLockFactory.makeLock() as lock:
+        with JensLockFactory.make_lock():
             # Update metadata
             logging.info("Refreshing metadata...")
             try:
-                refresh_metadata(lock)
+                refresh_metadata()
             except JensError, error:
                 logging.error(error)
                 return 20
 
             if settings.MODE == 'ONDEMAND':
                 try:
-                    hints = fetch_update_hints(lock)
+                    hints = fetch_update_hints()
                 except JensMessagingError, error:
                     logging.error(error)
                     return 25
@@ -77,24 +79,23 @@ def main():
             logging.info("Refreshing repositories...")
             try:
                 repositories_deltas, inventory = \
-                    refresh_repositories(lock, hints)
+                    refresh_repositories(hints)
             except JensRepositoriesError, error:
-                logging.error("Failed (%s)" % error)
+                logging.error("Failed (%s)", error)
                 return 30
 
             # Update environments
             logging.info("Refreshing environments...")
             try:
-                refresh_environments(lock,
-                    repositories_deltas, inventory)
+                refresh_environments(repositories_deltas, inventory)
             except JensRepositoriesError, error:
-                logging.error("Failed (%s)" % error)
+                logging.error("Failed (%s)", error)
                 return 40
     except JensLockExistsError, error:
-        logging.info("Locking failed (%s)" % error)
+        logging.info("Locking failed (%s)", error)
         return 50
     except JensLockError, error:
-        logging.error("Locking failed (%s)" % error)
+        logging.error("Locking failed (%s)", error)
         return 51
 
     logging.info("Done")

@@ -41,7 +41,7 @@ class MetadataTest(JensTestCase):
             branch='master')
 
     def _jens_refresh_metadata(self, errorsExpected=False, errorRegexp=None):
-        refresh_metadata(self.lock)
+        refresh_metadata()
         if errorsExpected:
             self.assertLogErrors(errorRegexp)
         else:

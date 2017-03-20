@@ -9,7 +9,6 @@
 import os
 import sys
 import optparse
-import re
 import logging
 import pprint
 
@@ -24,24 +23,25 @@ def parse_cmdline_args():
     """Parses command line parameters."""
     parser = optparse.OptionParser()
     parser.add_option('-c', '--config',
-        help="Configuration file path (defaults to '/etc/jens/main.conf'",
-        default="/etc/jens/main.conf")
+                      help="Configuration file path "
+                           "(defaults to '/etc/jens/main.conf'",
+                      default="/etc/jens/main.conf")
     parser.add_option('-r', '--repositories',
-        action="store_true",
-        help="Shows stats about repositories")
+                      action="store_true",
+                      help="Shows stats about repositories")
     parser.add_option('-e', '--environment',
-        action="store_true",
-        help="Shows stats about environments")
+                      action="store_true",
+                      help="Shows stats about environments")
     parser.add_option('-i', '--inventory',
-        action="store_true",
-        help="Shows inventory")
+                      action="store_true",
+                      help="Shows inventory")
     parser.add_option('-q', '--queues',
-        action="store_true",
-        help="Shows stats about queues")
+                      action="store_true",
+                      help="Shows stats about queues")
     parser.add_option('-a', '--all',
-        action="store_true",
-        help="Shows everything")
-    opts, args = parser.parse_args()
+                      action="store_true",
+                      help="Shows everything")
+    opts, _ = parser.parse_args()
     return opts
 
 def get_bare_repositories():
@@ -71,22 +71,22 @@ def get_size(partition, element, branch):
     path = "%s/%s/%s/%s" % \
         (settings.CLONEDIR, partition, element, branch)
     size = 0
-    for path, dirs, files in os.walk(path):
-        for file in files:
-            fullpath = os.path.join(path, file)
+    for path, _, files in os.walk(path):
+        for _file in files:
+            fullpath = os.path.join(path, _file)
             if os.path.isfile(fullpath):
-                size +=  os.path.getsize(fullpath)
+                size += os.path.getsize(fullpath)
     return fmt_bytes(size)
 
 # http://stackoverflow.com/questions/1094841/
 # reusable-library-to-get-human-readable-version-of-file-size
 def fmt_bytes(num):
-    for x in ['B','KiB','MiB','GiB']:
+    for unit in ['B', 'KiB', 'MiB', 'GiB']:
         if num < 1024.0:
-            return "%3.1f%s" % (num, x)
+            return "%3.1f%s" % (num, unit)
         num /= 1024.0
     return "%3.1f%s" % (num, 'TB')
-    
+
 def get_puppet_environments():
     settings = Settings()
     return os.listdir(settings.ENVIRONMENTSDIR)
@@ -99,8 +99,9 @@ def get_environments_in_metadata():
     settings = Settings()
     return __listdir_nohidden(settings.ENV_METADATADIR)
 
-def __listdir_nohidden(dir):
-    return filter(lambda x: not x.startswith("."), os.listdir(dir))
+def __listdir_nohidden(directory):
+    return [_file for _file in os.listdir(directory)
+            if not _file.startswith(".")]
 
 def main():
     """Application entrypoint."""
@@ -116,38 +117,38 @@ def main():
     try:
         validate_directories()
     except JensError, error:
-        logging.error("Failed to validate directories (%s)" % error)
+        logging.error("Failed to validate directories (%s)", error)
         return 3
 
     if opts.repositories or opts.all:
         bares = get_bare_repositories()
-        logging.info("There are %d modules:" % len(bares['modules']))
+        logging.info("There are %d modules:", len(bares['modules']))
         for module in bares['modules']:
-            logging.info( "\t- %s" % module)
-        logging.info("There are %d hostgroups:" % len(bares['hostgroups']))
+            logging.info("\t- %s", module)
+        logging.info("There are %d hostgroups:", len(bares['hostgroups']))
         for hostgroup in bares['hostgroups']:
-            logging.info( "\t- %s" % hostgroup)
+            logging.info("\t- %s", hostgroup)
 
     if opts.environment or opts.all:
         environments = {}
         environments['synchronized'] = get_puppet_environments()
         environments['declared'] = get_environments_in_metadata()
         environments['cached'] = get_environments_in_cache()
-    
-        for type, list in environments.iteritems():
-            logging.info("There are %d %s environments" % (len(list), type))
-            for environment in sorted(list):
-                logging.info("\t - %s " % environment)
+
+        for _type, _list in environments.iteritems():
+            logging.info("There are %d %s environments", len(_list), _type)
+            for environment in sorted(_list):
+                logging.info("\t - %s ", environment)
 
     if opts.inventory or opts.all:
         inventory = get_inventory()
-        pp = pprint.PrettyPrinter()
-        pp.pprint(inventory)
+        pprinter = pprint.PrettyPrinter()
+        pprinter.pprint(inventory)
 
     if opts.queues or opts.all:
         try:
             count = count_pending_hints()
-            logging.info("There are '%d' messages in the hints queue" % count)
+            logging.info("There are '%d' messages in the hints queue", count)
         except JensMessagingError, error:
             logging.error(error)
 

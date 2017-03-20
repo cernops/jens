@@ -23,21 +23,22 @@ def parse_cmdline_args():
     """Parses command line parameters."""
     parser = optparse.OptionParser()
     parser.add_option('-c', '--config',
-        help="Configuration file path (defaults to '/etc/jens/main.conf'",
-        default="/etc/jens/main.conf")
+                      help="Configuration file path "
+                           "(defaults to '/etc/jens/main.conf'",
+                      default="/etc/jens/main.conf")
     parser.add_option('-g', '--aggressive',
-        action="store_true",
-        help="Do it aggressively")
+                      action="store_true",
+                      help="Do it aggressively")
     parser.add_option('-b', '--bare',
-        action="store_true",
-        help="Clean up bare repositories")
+                      action="store_true",
+                      help="Clean up bare repositories")
     parser.add_option('-l', '--clones',
-        action="store_true",
-        help="Clean up repositories clones")
+                      action="store_true",
+                      help="Clean up repositories clones")
     parser.add_option('-a', '--all',
-        action="store_true",
-        help="Clean up everything")
-    opts, args = parser.parse_args()
+                      action="store_true",
+                      help="Clean up everything")
+    opts, _ = parser.parse_args()
     return opts
 
 @timed
@@ -49,11 +50,11 @@ def gc_bares(opts):
         for repository in os.listdir(base_path):
             try:
                 repository_path = base_path + "/%s" % repository
-                git.gc(repository_path, aggressive=opts.aggressive, bare=True)
+                git.gc(repository_path, aggressive=opts.aggressive)
                 processed = processed + 1
             except JensGitError, error:
-                logging.error("Failed run git-gc on bare repo %s (%s)" % \
-                    (repository, error))
+                logging.error("Failed run git-gc on bare repo %s (%s)",
+                              repository, error)
     return processed
 
 @timed
@@ -70,8 +71,8 @@ def gc_clones(opts):
                     git.gc(branch_path, aggressive=opts.aggressive)
                     processed = processed + 1
                 except JensGitError, error:
-                    logging.error("Failed run git-gc on clone %s (%s)" % \
-                        (branch_path, error))
+                    logging.error("Failed run git-gc on clone %s (%s)",
+                                  branch_path, error)
     return processed
 
 def main():
@@ -88,22 +89,24 @@ def main():
     try:
         validate_directories()
     except JensError, error:
-        logging.error("Failed to validate directories (%s)" % error)
+        logging.error("Failed to validate directories (%s)", error)
         return 3
 
     try:
-        with JensLockFactory.makeLock(tries=10, waittime=10) as lock:
+        with JensLockFactory.make_lock(tries=10, waittime=10):
             if opts.bare or opts.all:
                 logging.info("GCing bare repositories...")
                 processed_count = gc_bares(opts)
-                logging.info("Done (%d repositories cleaned up)" % processed_count)
+                logging.info("Done (%d repositories cleaned up)",
+                             processed_count)
 
             if opts.clones or opts.all:
                 logging.info("GCing clones...")
                 processed_count = gc_clones(opts)
-                logging.info("Done (%d repositories cleaned up)" % processed_count)
+                logging.info("Done (%d repositories cleaned up)",
+                             processed_count)
     except JensLockError, error:
-        logging.error("Locking failed (%s)" % error)
+        logging.error("Locking failed (%s)", error)
         return 50
 
     logging.info("Done")

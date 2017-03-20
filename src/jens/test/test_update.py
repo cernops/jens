@@ -44,7 +44,7 @@ class UpdateTest(JensTestCase):
         add_repository('common', 'hieradata', bare)
         self.hieradata_user = user
 
-        self.lock = JensLockFactory.makeLock()
+        self.lock = JensLockFactory.make_lock()
 
     def _create_fake_module(self, modulename, branches=[]):
         (bare, user) = create_fake_repository(self.sandbox_path, branches)
@@ -57,9 +57,8 @@ class UpdateTest(JensTestCase):
         return user
 
     def _jens_update(self, errorsExpected=False, errorRegexp=None, hints=None):
-        repositories_deltas, inventory = \
-            refresh_repositories(self.lock, hints=hints)
-        refresh_environments(self.lock, repositories_deltas, inventory)
+        repositories_deltas, inventory = refresh_repositories(hints=hints)
+        refresh_environments(repositories_deltas, inventory)
         if errorsExpected:
             self.assertLogErrors(errorRegexp)
         else:
@@ -304,33 +303,6 @@ class UpdateTest(JensTestCase):
         self.assertEnvironmentLinks("test")
         self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', 'aijens_etcd')
         self.assertEnvironmentOverride("test", 'modules/foo', 'bar')
-
-    def test_override_to_branch_malformed_override_wrong_partition_name(self):
-        environment = {'notifications': 'higgs@example.org',
-            'default': 'master', 'overrides': {}}
-        # Usual typo
-        environment['overrides']['hostgroup'] = {'murdock': 'aijens_etcd'}
-        environment['overrides']['module'] = {'foo': 'bar'}
-        environment['overrides']['foo'] = {'bar': 'baz'}
-        environment_file = open("%s/test.yaml" % self.settings.ENV_METADATADIR, 'w+')
-        yaml.dump(environment, environment_file, default_flow_style=False)
-        environment_file.close()
-
-        self._create_fake_hostgroup('murdock', ['qa', 'aijens_etcd'])
-        self._create_fake_module('foo', ['qa', 'bar'])
-
-        self._jens_update()
-
-        self.assertBare('hostgroups/murdock')
-        self.assertBare('modules/foo')
-        for branch in MANDATORY_BRANCHES:
-            self.assertClone('hostgroups/murdock/%s' % branch)
-            self.assertClone('modules/foo/%s' % branch)
-        self.assertNotClone('hostgroups/murdock/aijens_etcd')
-        self.assertNotClone('modules/foo/bar')
-        self.assertEnvironmentLinks("test")
-        self.assertEnvironmentOverride("test", 'hostgroups/hg_murdock', 'master')
-        self.assertEnvironmentOverride("test", 'modules/foo', 'master')
 
     def test_environment_with_empty_overrides_is_ignored(self):
         environment = {'notifications': 'higgs@example.org',
@@ -885,28 +857,40 @@ class UpdateTest(JensTestCase):
     def test_malformed_environments_are_not_processed(self):
         ensure_environment('ok1', 'master', hostgroups=['flik:flak'])
         ensure_environment('ok2', 'qa', modules=['stop:here'])
+        # Environments with no default are okay
         ensure_environment('ok3', None)
+        ensure_environment('fail0', {})
         self._create_fake_hostgroup('flik', ['qa', 'flak', 'dontexpand'])
         self._create_fake_module('stop', ['qa', 'here', 'dontexpand'])
 
+        # Totally empty environment
         fail1 = {}
         environment_file = open("%s/%s.yaml" % (self.settings.ENV_METADATADIR, "fail1"), 'w+')
         yaml.dump(fail1, environment_file, default_flow_style=False)
         environment_file.close()
 
-        fail2 = {'notifications': 'foo@bar.com', 'overrides': None}
-        environment_file = open("%s/%s.yaml" % (self.settings.ENV_METADATADIR, "fail2"), 'w+')
-        yaml.dump(fail2, environment_file, default_flow_style=False)
-        environment_file.close()
-
+        # Missing mandatory keys (notifications)
         fail3 = {'overrides': {'hostgroups': {'flik': 'dontexpand'}}}
         environment_file = open("%s/%s.yaml" % (self.settings.ENV_METADATADIR, "fail3"), 'w+')
         yaml.dump(fail3, environment_file, default_flow_style=False)
         environment_file.close()
 
-        fail4 = {'default': 'master', 'overrides': {'hostgroups': None}}
+        # Empty overrides
+        fail2 = {'notifications': 'foo@bar.com', 'overrides': None}
+        environment_file = open("%s/%s.yaml" % (self.settings.ENV_METADATADIR, "fail2"), 'w+')
+        yaml.dump(fail2, environment_file, default_flow_style=False)
+        environment_file.close()
+
+        # Empty overrides in a partition
+        fail4 = {'notifications': 'foo@bar.com', 'default': 'master', 'overrides': {'hostgroups': None}}
         environment_file = open("%s/%s.yaml" % (self.settings.ENV_METADATADIR, "fail4"), 'w+')
         yaml.dump(fail4, environment_file, default_flow_style=False)
+        environment_file.close()
+
+        # Unknown partition 'module'
+        fail5 = {'notifications': 'foo@bar.com', 'default': 'master', 'overrides': {'module': {'foo': 'bar'}}}
+        environment_file = open("%s/%s.yaml" % (self.settings.ENV_METADATADIR, "fail5"), 'w+')
+        yaml.dump(fail5, environment_file, default_flow_style=False)
         environment_file.close()
 
         self._jens_update(errorsExpected=True)
@@ -920,10 +904,12 @@ class UpdateTest(JensTestCase):
         self.assertNotClone('modules/stop/dontexpand')
         self.assertEnvironmentOverride("ok1", 'hostgroups/hg_flik', 'flak')
         self.assertEnvironmentOverride("ok2", 'modules/stop', 'here')
+        self.assertEnvironmentDoesntExist("fail0")
         self.assertEnvironmentDoesntExist("fail1")
         self.assertEnvironmentDoesntExist("fail2")
         self.assertEnvironmentDoesntExist("fail3")
         self.assertEnvironmentDoesntExist("fail4")
+        self.assertEnvironmentDoesntExist("fail5")
 
     def test_clone_and_bare_still_present_if_fetch_fails(self):
         yi_path = self._create_fake_hostgroup('yi', ['qa'])

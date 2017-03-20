@@ -7,14 +7,13 @@
 
 import logging
 import time
-from urllib3.exceptions import TimeoutError
 from jens.settings import Settings
 
 from jens.errors import JensLockError, JensLockExistsError
 
 class JensLockFactory(object):
     @staticmethod
-    def makeLock(tries=1, waittime=10):
+    def make_lock(tries=1, waittime=10):
         settings = Settings()
         if settings.LOCK_TYPE == 'FILE':
             return JensFileLock(tries, waittime)
@@ -32,8 +31,8 @@ class JensLock(object):
 
     def __enter__(self):
         for attempt in range(1, self.tries+1):
-            logging.info("Obtaining lock '%s' (attempt: %d)..." %
-                         (self.settings.LOCK_NAME, attempt))
+            logging.info("Obtaining lock '%s' (attempt: %d)...",
+                         self.settings.LOCK_NAME, attempt)
             try:
                 self.obtain_lock()
                 logging.debug("Lock acquired")
@@ -42,23 +41,36 @@ class JensLock(object):
                 if attempt == self.tries:
                     raise error
                 else:
-                    logging.debug("Couldn't lock (%s). Sleeping for %d seconds..." %
-                                  (error, self.waittime))
+                    logging.debug("Couldn't lock (%s). Sleeping for %d seconds...",
+                                  error, self.waittime)
                     time.sleep(self.waittime)
 
-    def __exit__(self, type, value, traceback):
-        logging.info("Releasing lock '%s'..." % self.settings.LOCK_NAME)
+    def __exit__(self, e_type, e_value, e_traceback):
+        logging.info("Releasing lock '%s'...", self.settings.LOCK_NAME)
         self.release_lock()
 
     def renew(self, ttl=10):
         if ttl <= 0:
             logging.warn("Invalid new TTL, resetting to 1 by default")
             ttl = 1
-        logging.info("Setting '%s' lock TTL to %d secs..." %
-                     (self.settings.LOCK_NAME, ttl))
+        logging.info("Setting '%s' lock TTL to %d secs...",
+                     self.settings.LOCK_NAME, ttl)
         self.renew_lock(ttl)
 
+    def obtain_lock(self):
+        raise NotImplementedError('You are not meant to instantiate this class')
+
+    def release_lock(self):
+        raise NotImplementedError('You are not meant to instantiate this class')
+
+    def renew_lock(self, ttl):
+        raise NotImplementedError('You are not meant to instantiate this class')
+
 class JensFileLock(JensLock):
+    def __init__(self, tries, waittime):
+        super(JensFileLock, self).__init__(tries, waittime)
+        self.lockfile = None
+
     def obtain_lock(self):
         lockfile_path = self.__get_lock_file_path()
         try:

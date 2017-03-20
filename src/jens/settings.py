@@ -11,10 +11,10 @@ from configobj import ConfigObj, flatten_errors
 from configobj import ConfigObjError
 from validate import Validator
 
-from errors import JensConfigError
-from configfile import CONFIG_GRAMMAR
+from jens.errors import JensConfigError
+from jens.configfile import CONFIG_GRAMMAR
 
-class Settings():
+class Settings(object):
     __shared_state = {}
 
     def __init__(self, logfile=None):
@@ -34,7 +34,7 @@ class Settings():
 
         if results is not True:
             for error in flatten_errors(config, results):
-                section_list, key, msg = error
+                section_list, key, _ = error
                 section_string = '.'.join(section_list)
                 if key is not None:
                     raise JensConfigError("Missing/not valid mandatory configuration key %s in section %s"
@@ -77,10 +77,10 @@ class Settings():
 
         if self.logfile:
             logging.basicConfig(
-                level = getattr(logging, self.DEBUG_LEVEL),
-                format = '%(asctime)s [%(process)d] %(levelname)s %(message)s',
-                filename = "%s/%s.log" % (self.LOGDIR, self.logfile))
+                level=getattr(logging, self.DEBUG_LEVEL),
+                format='%(asctime)s [%(process)d] %(levelname)s %(message)s',
+                filename="%s/%s.log" % (self.LOGDIR, self.logfile))
         else:
             logging.basicConfig(
-                level = getattr(logging, self.DEBUG_LEVEL),
-                format = '%(message)s')
+                level=getattr(logging, self.DEBUG_LEVEL),
+                format='%(message)s')

@@ -7,7 +7,6 @@
 
 import os
 import logging
-import re
 import pickle
 
 from jens.settings import Settings
@@ -46,7 +45,7 @@ def _write_inventory_to_disk(inventory):
     except IOError, error:
         raise JensRepositoriesError("Unable to write inventory to disk (%s)" %
                                     error)
-    logging.debug("Writing inventory to %s" % inventory_file_path)
+    logging.debug("Writing inventory to %s", inventory_file_path)
     try:
         pickle.dump(inventory, inventory_file)
     except pickle.PickleError, error:
@@ -87,7 +86,6 @@ def _read_desired_inventory():
     for environmentname in environments:
         try:
             environment = read_environment_definition(environmentname)
-            # TODO: what if overrides empty? what if overrides,partition empty?
             if 'overrides' in environment:
                 for partition in environment['overrides'].iterkeys():
                     if partition in ("modules", "hostgroups", "common"):
@@ -103,7 +101,7 @@ def _read_desired_inventory():
                                 if override not in desired[partition][name]:
                                     desired[partition][name].append(override)
         except JensEnvironmentsError, error:
-            logging.error("Unable to process '%s' definition. Skipping" %
-                          environmentname)
+            logging.error("Unable to process '%s' definition (%s). Skipping",
+                          environmentname, error)
             continue  # Just ignore, as won't be generated later on either.
     return desired

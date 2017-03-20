@@ -26,30 +26,30 @@ from jens.tools import ref_is_commit
 from jens.tools import refname_to_dirname
 
 @timed
-def refresh_repositories(lock, hints=None):
+def refresh_repositories(hints=None):
     settings = Settings()
     try:
-        logging.debug("Reading metadata from %s" % settings.REPO_METADATA)
+        logging.debug("Reading metadata from %s", settings.REPO_METADATA)
         definition = yaml.load(open(settings.REPO_METADATA, 'r'))
     except Exception, error:  # fixme
-        raise JensRepositoriesError("Unable to parse %s" %
-                                    settings.REPO_METADATA)
+        raise JensRepositoriesError("Unable to parse %s (%s)",
+                                    settings.REPO_METADATA, error)
 
     inventory = get_inventory()
     desired = get_desired_inventory()
     deltas = {}
 
-    logging.debug("Initial inventory: %s" % inventory)
-    logging.debug("Needed from overrides: %s" % desired)
+    logging.debug("Initial inventory: %s", inventory)
+    logging.debug("Needed from overrides: %s", desired)
 
     for partition in ("modules", "hostgroups", "common"):
-        logging.info("Refreshing bare repositories (%s)" % partition)
-        logging.debug("Calculating '%s' delta..." % partition)
+        logging.info("Refreshing bare repositories (%s)", partition)
+        logging.debug("Calculating '%s' delta...", partition)
         delta = _calculate_delta(definition['repositories'][partition],
                                  inventory[partition])
-        logging.info("New repositories: %s" % delta['new'])
-        logging.debug("Existing repositories: %s" % delta['existing'])
-        logging.info("Deleted repositories: %s" % delta['deleted'])
+        logging.info("New repositories: %s", delta['new'])
+        logging.debug("Existing repositories: %s", delta['existing'])
+        logging.info("Deleted repositories: %s", delta['deleted'])
 
         logging.info("Cloning and expanding NEW bare repositories...")
         delta['new'] = _create_new_repositories(delta['new'], partition,
@@ -72,7 +72,7 @@ def refresh_repositories(lock, hints=None):
         deltas[partition] = delta
 
     persist_inventory(inventory)
-    logging.debug("Final inventory: %s" % inventory)
+    logging.debug("Final inventory: %s", inventory)
 
     return (deltas, inventory)
 
@@ -81,40 +81,40 @@ def _create_new_repositories(new_repositories, partition,
     settings = Settings()
     created = []
     for repository in new_repositories:
-        logging.info("Cloning and expanding %s/%s..." % (partition, repository))
+        logging.info("Cloning and expanding %s/%s...", partition, repository)
         bare_path = _compose_bare_repository_path(repository, partition)
         bare_url = definition['repositories'][partition][repository]
         try:
             git.clone(bare_path, bare_url, bare=True)
         except JensGitError, error:
-            logging.error("Unable to clone '%s' (%s). Skipping." %
-                          (repository, error))
+            logging.error("Unable to clone '%s' (%s). Skipping.",
+                          repository, error)
             if os.path.exists(bare_path):
                 shutil.rmtree(bare_path)
             continue
         try:
             refs = git.get_refs(bare_path).keys()
         except JensGitError, error:
-            logging.error("Unable to get refs of '%s' (%s). Skipping." %
-                          (repository, error))
+            logging.error("Unable to get refs of '%s' (%s). Skipping.",
+                          repository, error)
             shutil.rmtree(bare_path)
-            logging.debug("Bare repository %s has been removed" % bare_path)
+            logging.debug("Bare repository %s has been removed", bare_path)
             continue
         # Check if the repository has the mandatory branches
         if all([ref in refs for ref in settings.MANDATORY_BRANCHES]):
             # Expand only the mandatory and available requested branches
             # commits will always be attempted to be expanded
             new = set(settings.MANDATORY_BRANCHES)
-            new = new.union(filter(lambda x: ref_is_commit(x) or x in refs,
-                                   desired.get(repository, [])))
+            new = new.union([ref for ref in desired.get(repository, [])
+                             if ref_is_commit(ref) or ref in refs])
             inventory[repository] = []
             _expand_clones(partition, repository, inventory, None, new, [], [])
             created.append(repository)
         else:
-            logging.error("Repository '%s' lacks some of the mandatory branches. Skipping." %
+            logging.error("Repository '%s' lacks some of the mandatory branches. Skipping.",
                           repository)
             shutil.rmtree(bare_path)
-            logging.debug("Bare repository %s has been removed" % bare_path)
+            logging.debug("Bare repository %s has been removed", bare_path)
     return created
 
 # This is the most common operation Jens has to do, git-fetch
@@ -132,8 +132,7 @@ def _refresh_repositories(existing_repositories, partition,
     data = [{'settings': settings, 'partition': partition,
              'repository': repository, 'inventory': inventory_proxy,
              'inventory_lock': inventory_lock, 'desired': desired,
-             'hints': hints}
-                            for repository in existing_repositories]
+             'hints': hints} for repository in existing_repositories]
     pool = Pool(processes=int(math.ceil(cpu_count()*1.5)))
     pool.map(_refresh_repository, data)
     pool.close()
@@ -148,27 +147,27 @@ def _refresh_repository(data):
     inventory_lock = data['inventory_lock']
     desired = data['desired']
     hints = data['hints']
-    logging.debug("Expanding bare and clones of %s/%s..." %
-                  (partition, repository))
+    logging.debug("Expanding bare and clones of %s/%s...",
+                  partition, repository)
     bare_path = _compose_bare_repository_path(repository, partition)
 
     try:
         old_refs = git.get_refs(bare_path)
     except JensGitError, error:
-        logging.error("Unable to get old refs of '%s' (%s)" %
-                      (repository, error))
+        logging.error("Unable to get old refs of '%s' (%s)",
+                      repository, error)
         return
 
     # If we know nothing or we know that we have to fetch
     if hints is None or repository in hints:
         try:
             if settings.MODE == "ONDEMAND":
-                logging.info("Fetching %s/%s upon demand..."
-                             % (partition, repository))
+                logging.info("Fetching %s/%s upon demand...",
+                             partition, repository)
             git.fetch(bare_path, prune=True)
         except JensGitError, error:
-            logging.error("Unable to fetch '%s' from remote (%s)" %
-                          (repository, error))
+            logging.error("Unable to fetch '%s' from remote (%s)",
+                          repository, error)
             if settings.MODE == "ONDEMAND":
                 try:
                     enqueue_hint(partition, repository)
@@ -185,7 +184,7 @@ def _refresh_repository(data):
         # brought the branches back.
         new_refs = git.get_refs(bare_path)
     except JensGitError, error:
-        logging.error("Unable to get new refs of '%s' (%s)" % (repository, error))
+        logging.error("Unable to get new refs of '%s' (%s)", repository, error)
         return
     new, moved, deleted = _compare_refs(old_refs, new_refs, inventory[repository],
                                         desired.get(repository, []))
@@ -194,17 +193,16 @@ def _refresh_repository(data):
 
 def _purge_repositories(deleted_repositories, partition, inventory):
     for repository in deleted_repositories:
-        logging.info("Deleting %s/%s..." % (partition, repository))
+        logging.info("Deleting %s/%s...", partition, repository)
         bare_path = _compose_bare_repository_path(repository, partition)
         # Pass a copy as it will be used as interation set
         refs = inventory[repository][:]
         _expand_clones(partition, repository, inventory, None, [], [], refs)
         clone_path = _compose_clone_repository_path(repository, partition)
         shutil.rmtree(clone_path)
-        logging.debug("Clone repository parent %s has been removed" %
-                      clone_path)
+        logging.debug("Clone repository parent %s has been removed", clone_path)
         shutil.rmtree(bare_path)
-        logging.debug("Bare repository %s has been removed" % bare_path)
+        logging.debug("Bare repository %s has been removed", bare_path)
         inventory.pop(repository, None)
 
 # This function computes the list of refs to be expanded, refreshed or
@@ -217,16 +215,16 @@ def _compare_refs(old_refs, new_refs, inventory, desired):
     # New: What we need minus what we have...
     new = list(desired.difference(inventory))
     # ...but only refs that exist or commits
-    new = filter(lambda x: ref_is_commit(x) or x in new_refs, new)
+    new = [ref for ref in new if ref_is_commit(ref) or ref in new_refs]
 
     # Deleted: what we have that we don't need anymore
     deleted = list(set(inventory).difference(desired))
 
     if new:
-        logging.debug("New refs to be expanded: %s" % new)
+        logging.debug("New refs to be expanded: %s", new)
 
     if deleted:
-        logging.debug("Removed refs: %s" % deleted)
+        logging.debug("Removed refs: %s", deleted)
 
     # Candidates are those that we already have and we still need
     moved = []
@@ -238,17 +236,17 @@ def _compare_refs(old_refs, new_refs, inventory, desired):
         # but has been removed from the repo we mark it as delete.
         # Next run will try to get it again and skip the expansion.
         if ref not in new_refs:
-            logging.info("Ref '%s' still needed but removed from repo" % ref)
+            logging.info("Ref '%s' still needed but removed from repo", ref)
             deleted.append(ref)
             continue
         # The ref is still there and is gonna be kept, check if
         # it has moved.
         if new_refs[ref] != old_refs[ref]:
-            logging.debug("Ref '%s' has moved and points to %s" %
-                          (ref, new_refs[ref]))
+            logging.debug("Ref '%s' has moved and points to %s",
+                          ref, new_refs[ref])
             moved.append(ref)
         else:
-            logging.debug("Ref '%s' is known but didn't move" % ref)
+            logging.debug("Ref '%s' is known but didn't move", ref)
 
     return new, moved, deleted
 
@@ -257,15 +255,15 @@ def _expand_clones(partition, name, inventory, inventory_lock, new_refs,
     settings = Settings()
     bare_path = _compose_bare_repository_path(name, partition)
     if new_refs:
-        logging.debug("Processing new refs of %s/%s (%s)..." %
-                      (partition, name, new_refs))
+        logging.debug("Processing new refs of %s/%s (%s)...",
+                      partition, name, new_refs)
     for refname in new_refs:
         clone_path = _compose_clone_repository_path(name, partition, refname)
-        logging.info("Populating new ref '%s'" % clone_path)
+        logging.info("Populating new ref '%s'", clone_path)
         try:
             if ref_is_commit(refname):
                 commit_id = refname.replace(settings.HASHPREFIX, '')
-                logging.debug("Will create a clone pointing to '%s'" % commit_id)
+                logging.debug("Will create a clone pointing to '%s'", commit_id)
                 git.clone(clone_path, "%s" % bare_path, shared=True)
                 git.reset(clone_path, commit_id, hard=True)
             else:
@@ -282,15 +280,15 @@ def _expand_clones(partition, name, inventory, inventory_lock, new_refs,
         except JensGitError, error:
             if os.path.isdir(clone_path):
                 shutil.rmtree(clone_path)
-            logging.error("Unable to create clone '%s' (%s)" %
-                          (clone_path, error))
+            logging.error("Unable to create clone '%s' (%s)",
+                          clone_path, error)
 
     if moved_refs:
-        logging.debug("Processing moved refs of %s/%s (%s)..." %
-                      (partition, name, moved_refs))
+        logging.debug("Processing moved refs of %s/%s (%s)...",
+                      partition, name, moved_refs)
     for refname in moved_refs:
         clone_path = _compose_clone_repository_path(name, partition, refname)
-        logging.info("Updating ref '%s'" % clone_path)
+        logging.info("Updating ref '%s'", clone_path)
         try:
             # If this fails, the bare would have the correct HEADs
             # but the clone will be out of date and won't ever be
@@ -299,31 +297,33 @@ def _expand_clones(partition, name, inventory, inventory_lock, new_refs,
             # mid-flight.
             git.fetch(clone_path)
             git.reset(clone_path, "origin/%s" % refname, hard=True)
-            logging.info("Updated ref '%s' (%s)" % (clone_path,
-                git.get_head(clone_path, short=True)))
+            logging.info("Updated ref '%s' (%s)", clone_path,
+                         git.get_head(clone_path, short=True))
         except JensGitError, error:
-            logging.error("Unable to refresh clone '%s' (%s)" %
-                          (clone_path, error))
+            logging.error("Unable to refresh clone '%s' (%s)",
+                          clone_path, error)
 
     if deleted_refs:
-        logging.debug("Processing deleted refs of %s/%s (%s)..." %
-                      (partition, name, deleted_refs))
+        logging.debug("Processing deleted refs of %s/%s (%s)...",
+                      partition, name, deleted_refs)
     for refname in deleted_refs:
         clone_path = _compose_clone_repository_path(name, partition, refname)
-        logging.info("Removing %s" % clone_path)
+        logging.info("Removing %s", clone_path)
         try:
             if os.path.isdir(clone_path):
                 shutil.rmtree(clone_path)
             if refname in inventory[name]:
                 if inventory_lock:
                     inventory_lock.acquire()
-                t = inventory[name]; t.remove(refname); inventory[name] = t
+                element = inventory[name]
+                element.remove(refname)
+                inventory[name] = element
                 if inventory_lock:
                     inventory_lock.release()
-                logging.info("%s/%s deleted from inventory" % (name, refname))
+                logging.info("%s/%s deleted from inventory", name, refname)
         except OSError, error:
-            logging.error("Couldn't delete %s/%s/%s (%s)" %
-                          (partition, name, refname, error))
+            logging.error("Couldn't delete %s/%s/%s (%s)",
+                          partition, name, refname, error)
 
 def _compose_bare_repository_path(name, partition):
     settings = Settings()

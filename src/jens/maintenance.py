@@ -15,7 +15,7 @@ from jens.decorators import timed
 from jens.errors import JensError, JensGitError
 
 @timed
-def refresh_metadata(lock):
+def refresh_metadata():
     _refresh_environments()
     _refresh_repositories()
 
