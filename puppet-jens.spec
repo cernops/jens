@@ -1,6 +1,6 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
-Version: 0.21
+Version: 0.22
 Release: 1%{?dist}
 
 License: GPL
@@ -66,6 +66,9 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 %config(noreplace) %{_sysconfdir}/jens/main.conf
 
 %changelog
+* Mon Mar 20 2017 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.22-1
+- A big bunch of Lint fixes, no new functionality nor bugfixes.
+
 * Wed Jan 11 2017 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.21-1
 - Make sure that settings.ENVIRONMENTSDIR exists.
 - Add the process ID to the log messages.
