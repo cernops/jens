@@ -1,12 +1,11 @@
-[![Build Status](https://travis-ci.org/cernops/jens.svg?branch=master)]
-(https://travis-ci.org/cernops/jens)
+[![Build Status](https://travis-ci.org/cernops/jens.svg?branch=master)](https://travis-ci.org/cernops/jens)
 
 ## What's Jens?
 
 Jens is the Puppet modules/hostgroups librarian used by the [CERN IT
-department] (https://cern.ch/it). It is basically a Python toolkit that
-generates [Puppet environments]
-(https://docs.puppetlabs.com/puppet/latest/reference/environments.html)
+department](https://cern.ch/it). It is basically a Python toolkit that
+generates [Puppet environments](
+https://docs.puppetlabs.com/puppet/latest/reference/environments.html)
 dynamically based on some input metadata. Jens is useful in sites where there
 are several administrators taking care of siloed services (mapped to what we
 call top-level "hostgroups", see below) with very service-specific
