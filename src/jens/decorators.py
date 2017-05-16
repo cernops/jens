@@ -6,11 +6,12 @@
 # or submit itself to any jurisdiction.
 
 import logging
-
 import os
-import git.exc
 from functools import wraps
 from time import time
+
+import git.exc
+
 from jens.errors import JensGitError
 from jens.settings import Settings
 
