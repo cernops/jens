@@ -438,7 +438,7 @@ INFO Done
 
 ## Installation, configuration and deployment
 
-See INSTALL.md
+See [INSTALL.md](INSTALL.md)
 
 ## Contributing
 
