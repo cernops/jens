@@ -440,7 +440,7 @@ via a cronjob subsequent runs can't overlap. This is because of our deployment,
 detailed in the following paragraphs.
 
 Currently, the deployment at CERN relies on several Jens instances on top of
-different virtual machines running SLC6 (RH6, basically) with different update
+different virtual machines running CentOS7 with different update
 frequencies writing the `clone` and `environments` data to the same NFS share
 but on different directories (whose name is based on the FQDN of the Jens node
 in question). One is the primary instance that runs jens-update every minute

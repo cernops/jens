@@ -438,7 +438,7 @@ INFO Done
 
 ## Installation, configuration and deployment
 
-See INSTALL.md
+See [INSTALL.md](INSTALL.md)
 
 ## Contributing
 
@@ -452,8 +452,8 @@ Hence, we'd be more than happy to get contributions of any kind! Feel free to
 submit bug reports and pull requests via
 [Github](https://github.com/cernops/jens).
 
-There's also a DEVELOPERS.md that explains how to run the testsuite that is
-available for developers.
+There's also a [DEVELOPERS.md](DEVELOPERS.md) that explains how to run the
+testsuite that is available for developers.
 
 ## Authors
 
