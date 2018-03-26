@@ -5,6 +5,7 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from __future__ import absolute_import
 import logging
 import pickle
 
@@ -16,6 +17,7 @@ from dirq.queue import QueueLockError, QueueError
 from jens.errors import JensMessagingError
 from jens.decorators import timed
 from jens.settings import Settings
+from functools import reduce
 
 MSG_SCHEMA = {'time': 'string', 'data': 'binary'}
 
@@ -28,7 +30,7 @@ def fetch_update_hints():
     logging.info("Getting and processing hints...")
     try:
         messages = _fetch_all_messages()
-    except Exception, error:
+    except Exception as error:
         raise JensMessagingError("Could not retrieve messages (%s)" % error)
 
     logging.info("%d messages found", len(messages))
@@ -48,12 +50,12 @@ def _queue_item(item):
     settings = Settings()
     try:
         queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
-    except OSError, error:
+    except OSError as error:
         raise JensMessagingError("Failed to create Queue object (%s)" % error)
 
     try:
         queue.add(item)
-    except QueueError, error:
+    except QueueError as error:
         raise JensMessagingError("Failed to element (%s)" % error)
 
 def count_pending_hints():
@@ -61,7 +63,7 @@ def count_pending_hints():
     try:
         queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
         return queue.count()
-    except OSError, error:
+    except OSError as error:
         raise JensMessagingError("Failed to create Queue object (%s)" % error)
 
 def purge_queue():
@@ -69,28 +71,28 @@ def purge_queue():
     try:
         queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
         return queue.purge()
-    except OSError, error:
+    except OSError as error:
         raise JensMessagingError("Failed to purge Queue object (%s)" % error)
 
 def _fetch_all_messages():
     settings = Settings()
     try:
         queue = Queue(settings.MESSAGING_QUEUEDIR, schema=MSG_SCHEMA)
-    except OSError, error:
+    except OSError as error:
         raise JensMessagingError("Failed to create Queue object (%s)" % error)
     msgs = []
     for _, name in enumerate(queue):
         try:
             item = queue.dequeue(name)
-        except QueueLockError, error:
+        except QueueLockError as error:
             logging.warn("Element %s was locked when dequeuing", name)
             continue
-        except OSError, error:
+        except OSError as error:
             logging.error("I/O error when getting item %s", name)
             continue
         try:
             item['data'] = pickle.loads(item['data'])
-        except (pickle.PickleError, EOFError), error:
+        except (pickle.PickleError, EOFError) as error:
             logging.debug("Couldn't unpickle item %s. Will be ignored.", name)
             continue
         logging.debug("Message %s extracted and unpickled", name)
@@ -108,7 +110,7 @@ def _validate_and_merge_messages(messages):
         if 'data' not in element or type(element['data']) != dict:
             logging.warn("Discarding message (%s): Bad data section", time)
             return acc
-        for k, v in element['data'].iteritems():
+        for k, v in element['data'].items():
             if k not in hints:
                 logging.warn("Discarding message (%s): Unknown partition '%s'", time, k)
                 continue

@@ -5,6 +5,7 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from __future__ import absolute_import
 import os
 import logging
 import fcntl
@@ -62,7 +63,7 @@ def _refresh_environments():
     try:
         git.fetch(path)
         git.reset(path, "origin/master", hard=True)
-    except JensGitError, error:
+    except JensGitError as error:
         raise JensError("Couldn't refresh environments metadata (%s)" % error)
 
 def _refresh_repositories():
@@ -73,7 +74,7 @@ def _refresh_repositories():
         git.fetch(path)
         try:
             metadata = open(settings.REPO_METADATA, 'r')
-        except IOError, error:
+        except IOError as error:
             raise JensError("Could not open '%s' to put a lock on it" %
                             settings.REPO_METADATA)
         # jens-gitlab-producer collaborates with jens-update asynchronously
@@ -84,7 +85,7 @@ def _refresh_repositories():
             logging.info("Trying to acquire a lock to refresh the metadata...")
             fcntl.flock(metadata, fcntl.LOCK_EX)
             logging.debug("Lock acquired")
-        except IOError, error:
+        except IOError as error:
             metadata.close()
             raise JensError("Could not lock '%s'" % settings.REPO_METADATA)
         git.reset(path, "origin/master", hard=True)
@@ -92,9 +93,9 @@ def _refresh_repositories():
             logging.debug("Trying to release the lock used to refresh the metadata...")
             fcntl.flock(metadata, fcntl.LOCK_UN)
             logging.debug("Lock released")
-        except IOError, error:
+        except IOError as error:
             raise JensError("Could not unlock '%s'" % settings.REPO_METADATA)
         finally:
             metadata.close()
-    except JensGitError, error:
+    except JensGitError as error:
         raise JensError("Couldn't refresh repositories metadata (%s)" % error)

@@ -5,6 +5,7 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from __future__ import absolute_import
 import logging
 
 from configobj import ConfigObj, flatten_errors
@@ -26,7 +27,7 @@ class Settings(object):
         try:
             config = ConfigObj(infile=config_file_path,
                                configspec=CONFIG_GRAMMAR.split("\n"))
-        except ConfigObjError, error:
+        except ConfigObjError as error:
             raise JensConfigError("Config file parsing failed (%s)" % error)
 
         validator = Validator()

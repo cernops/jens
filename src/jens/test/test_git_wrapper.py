@@ -5,6 +5,7 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from __future__ import absolute_import
 import os
 import jens.git_wrapper as git_wrapper
 from mock import patch
