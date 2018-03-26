@@ -81,7 +81,7 @@ class JensTestCase(unittest.TestCase):
 
     def tearDown(self):
         if self.keep_sandbox:
-            print("Sandbox kept in %s" % self.sandbox_path)
+            print("Sandbox kept in", self.sandbox_path)
         else:
             destroy_sandbox(self.sandbox_path)
 
