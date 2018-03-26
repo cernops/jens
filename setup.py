@@ -6,6 +6,11 @@ from distutils.core import setup
 setup(name='jens',
       version='0.22',
       description='Jens is a Puppet modules/hostgroups librarian',
+      classifiers=[
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+      ],
       author='Nacho Barrientos',
       author_email='nacho.barrientos@cern.ch',
       url='https://github.com/cernops/jens',
