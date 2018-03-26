@@ -30,17 +30,17 @@ class GitlabProducerTestCase(JensTestCase):
 
     def test_no_payload(self):
         reply = self.app.post('/gitlab')
-        self.assertEquals(reply.data, 'Malformed request')
+        self.assertEquals(reply.data.decode(), 'Malformed request')
         self.assertEquals(reply.status_code, 400)
 
     def test_wrong_payload(self):
         reply = self.app.post('/gitlab', data={'iam':'wrong'}, content_type='application/json')
-        self.assertEquals(reply.data, 'Malformed request')
+        self.assertEquals(reply.data.decode(), 'Malformed request')
         self.assertEquals(reply.status_code, 400)
 
     def test_wrong_payload2(self):
         reply = self.app.post('/gitlab', data=json.dumps({'repository':'wrong'}), content_type='application/json')
-        self.assertEquals(reply.data, 'Malformed request')
+        self.assertEquals(reply.data.decode(), 'Malformed request')
         self.assertEquals(reply.status_code, 400)
     
     def test_no_content_type(self):
@@ -51,7 +51,7 @@ class GitlabProducerTestCase(JensTestCase):
                          'git_ssh_url': 'http://git.cern.ch/cernpub/it-puppet-hostgroup-playground'
                         }
                     }))
-        self.assertEquals(reply.data, 'Malformed request')
+        self.assertEquals(reply.data.decode(), 'Malformed request')
         self.assertEquals(reply.status_code, 400)
 
     @patch('jens.webapps.gitlabproducer.enqueue_hint')
@@ -76,7 +76,7 @@ class GitlabProducerTestCase(JensTestCase):
                         }
                     }))
         mock_eq.assert_called_once()
-        self.assertEquals(reply.data, 'Queue not accessible')
+        self.assertEquals(reply.data.decode(), 'Queue not accessible')
         self.assertEquals(reply.status_code, 500)
 
     def test_repository_not_found(self):

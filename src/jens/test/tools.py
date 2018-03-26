@@ -197,7 +197,7 @@ def get_repository_head(repo_path):
     args = ["rev-parse", "HEAD"]
     gitdir = "%s/.git" % repo_path
     (out, code) =_git(args, gitdir=gitdir, gitworkingtree=repo_path)
-    return out.strip()
+    return out.strip().decode()
 
 def add_branch_to_repo(repo_path, branch):
     gitdir = "%s/.git" % repo_path

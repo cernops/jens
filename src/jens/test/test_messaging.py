@@ -96,7 +96,7 @@ class MessagingTest(JensTestCase):
     def test_fetch_all_messages_ununpickable(self):
         create_hostgroup_event('bar')
         broken = {'time': datetime.now().isoformat(),
-            'data': '))'}
+            'data': '))'.encode()}
         add_msg_to_queue(broken)
         msgs = _fetch_all_messages()
         self.assertEquals(1, len(msgs))
