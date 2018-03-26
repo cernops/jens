@@ -35,14 +35,14 @@ def get_desired_inventory():
 
 def _read_inventory_from_disk():
     settings = Settings()
-    inventory_file = open(settings.CACHEDIR + "/repositories", "r")
+    inventory_file = open(settings.CACHEDIR + "/repositories", "rb")
     return pickle.load(inventory_file)
 
 def _write_inventory_to_disk(inventory):
     settings = Settings()
     inventory_file_path = settings.CACHEDIR + "/repositories"
     try:
-        inventory_file = open(inventory_file_path, "w+")
+        inventory_file = open(inventory_file_path, "wb")
     except IOError as error:
         raise JensRepositoriesError("Unable to write inventory to disk (%s)" %
                                     error)
