@@ -1,0 +1,6 @@
+pyyaml
+urllib3
+configobj
+dirq
+flask
+gitpython>=1.0.1
