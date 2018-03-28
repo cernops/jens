@@ -5,6 +5,8 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from __future__ import absolute_import
+from __future__ import print_function
 import os
 import unittest
 import logging
@@ -67,8 +69,10 @@ class JensTestCase(unittest.TestCase):
         config_file.close()
 
         root = logging.getLogger()
-        map(root.removeHandler, root.handlers[:])
-        map(root.removeFilter, root.filters[:])
+        for handler in root.handlers[:]:
+            root.removeHandler(handler)
+        for _filter in root.filters[:]:
+            root.removeFilter(_filter)
 
         self.settings = Settings("jens-test")
         self.settings.parse_config(self.config_file_path)
@@ -77,7 +81,7 @@ class JensTestCase(unittest.TestCase):
 
     def tearDown(self):
         if self.keep_sandbox:
-            print "Sandbox kept in %s" % self.sandbox_path
+            print("Sandbox kept in", self.sandbox_path)
         else:
             destroy_sandbox(self.sandbox_path)
 
@@ -121,7 +125,7 @@ class JensTestCase(unittest.TestCase):
         refname = dirname_to_refname(dirname)
         self.assertTrue(refname in inventory[partition][element])
         if pointsto is not None:
-            self.assertEquals(get_repository_head(path),
+            self.assertEqual(get_repository_head(path),
                 pointsto)
 
     def assertCloneFileExists(self, identifier, fname):

@@ -135,7 +135,7 @@ def main():
         environments['declared'] = get_environments_in_metadata()
         environments['cached'] = get_environments_in_cache()
 
-        for _type, _list in environments.iteritems():
+        for _type, _list in environments.items():
             logging.info("There are %d %s environments", len(_list), _type)
             for environment in sorted(_list):
                 logging.info("\t - %s ", environment)

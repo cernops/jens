@@ -5,6 +5,7 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from __future__ import absolute_import
 import os
 import yaml
 import shutil
@@ -569,8 +570,8 @@ class UpdateTest(JensTestCase):
         murdock_path = self._create_fake_hostgroup('murdock', ['qa'])
         commit_id = get_refs(murdock_path + '/.git')['qa']
         prefix = COMMIT_PREFIX
-        prefix = prefix[0:len(prefix)/2] + \
-            prefix[len(prefix)/2:len(prefix)].upper()
+        prefix = prefix[0:len(prefix)//2] + \
+            prefix[len(prefix)//2:len(prefix)].upper()
         override = "{0}{1}".format(prefix, commit_id)
         ensure_environment('test', 'master',
             hostgroups=["murdock:%s" % override])

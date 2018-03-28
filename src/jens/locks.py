@@ -5,6 +5,7 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from __future__ import absolute_import
 import logging
 import time
 from jens.settings import Settings
@@ -37,7 +38,7 @@ class JensLock(object):
                 self.obtain_lock()
                 logging.debug("Lock acquired")
                 return self
-            except JensLockExistsError, error:
+            except JensLockExistsError as error:
                 if attempt == self.tries:
                     raise error
                 else:
@@ -75,13 +76,13 @@ class JensFileLock(JensLock):
         lockfile_path = self.__get_lock_file_path()
         try:
             self.lockfile = open(lockfile_path, "w")
-        except IOError, error:
+        except IOError as error:
             raise JensLockError("Can't open lock file for writing (%s)" % error)
 
         import fcntl
         try:
             fcntl.flock(self.lockfile, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except IOError, error:
+        except IOError as error:
             raise JensLockExistsError("Lock already taken")
 
     def release_lock(self):

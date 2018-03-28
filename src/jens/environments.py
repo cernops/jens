@@ -5,6 +5,7 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from __future__ import absolute_import
 import os
 import logging
 import yaml
@@ -45,7 +46,7 @@ def _refresh_notchanged_environments(environments, repositories_deltas):
         logging.debug("Refreshing environment '%s'...", environment)
         try:
             definition = read_environment_definition(environment)
-        except JensEnvironmentsError, error:
+        except JensEnvironmentsError as error:
             logging.error("Unable to read and parse '%s' definition (%s). Skipping",
                           environment, error)
             return
@@ -57,7 +58,7 @@ def _refresh_notchanged_environments(environments, repositories_deltas):
             for module in repositories_deltas['modules']['new']:
                 try:
                     _link_module(module, environment, definition)
-                except JensEnvironmentsError, error:
+                except JensEnvironmentsError as error:
                     logging.error("Failed to link module '%s' in enviroment '%s' (%s)",
                                   module, environment, error)
 
@@ -73,7 +74,7 @@ def _refresh_notchanged_environments(environments, repositories_deltas):
             for hostgroup in repositories_deltas['hostgroups']['new']:
                 try:
                     _link_hostgroup(hostgroup, environment, definition)
-                except JensEnvironmentsError, error:
+                except JensEnvironmentsError as error:
                     logging.error("Failed to link hostgroup '%s' in enviroment '%s' (%s)",
                                   hostgroup, environment, error)
 
@@ -119,7 +120,7 @@ def _create_new_environment(environment, inventory):
 
     try:
         definition = read_environment_definition(environment)
-    except JensEnvironmentsError, error:
+    except JensEnvironmentsError as error:
         logging.error("Unable to read and parse '%s' definition (%s). Skipping",
                       environment, error)
         return
@@ -139,53 +140,53 @@ def _create_new_environment(environment, inventory):
         os.mkdir("%s/hieradata/%s" % (env_basepath, directory))
 
     logging.info("Processing modules...")
-    modules = inventory['modules'].keys()
+    modules = list(inventory['modules'].keys())
     if 'default' not in definition:
         try:
-            necessary_modules = definition['overrides']['modules'].keys()
+            necessary_modules = list(definition['overrides']['modules'].keys())
         except KeyError:
             necessary_modules = set()
         modules = set(modules).intersection(necessary_modules)
     for module in modules:
         try:
             _link_module(module, environment, definition)
-        except JensEnvironmentsError, error:
+        except JensEnvironmentsError as error:
             logging.error("Failed to link module '%s' in enviroment '%s' (%s)",
                           module, environment, error)
 
     logging.info("Processing hostgroups...")
-    hostgroups = inventory['hostgroups'].keys()
+    hostgroups = list(inventory['hostgroups'].keys())
     if 'default' not in definition:
         try:
-            necessary_hostgroups = definition['overrides']['hostgroups'].keys()
+            necessary_hostgroups = list(definition['overrides']['hostgroups'].keys())
         except KeyError:
             necessary_hostgroups = set()
         hostgroups = set(hostgroups).intersection(necessary_hostgroups)
     for hostgroup in hostgroups:
         try:
             _link_hostgroup(hostgroup, environment, definition)
-        except JensEnvironmentsError, error:
+        except JensEnvironmentsError as error:
             logging.error("Failed to link hostgroup '%s' in enviroment '%s' (%s)",
                           hostgroup, environment, error)
 
     logging.info("Processing site...")
     try:
         _link_site(environment, definition)
-    except JensEnvironmentsError, error:
+    except JensEnvironmentsError as error:
         logging.error("Failed to link site in enviroment '%s' (%s)",
                       environment, error)
 
     logging.info("Processing common Hiera data...")
     try:
         _link_common_hieradata(environment, definition)
-    except JensEnvironmentsError, error:
+    except JensEnvironmentsError as error:
         logging.error("Failed to link common hieradata in enviroment '%s' (%s)",
                       environment, error)
 
     if settings.DIRECTORY_ENVIRONMENTS:
         try:
             _add_configuration_file(environment, definition)
-        except JensEnvironmentsError, error:
+        except JensEnvironmentsError as error:
             logging.error("Failed to generate config file for environment '%s' (%s)",
                           environment, error)
 
@@ -219,7 +220,7 @@ def read_environment_definition(environment):
                                             "does not look like a dict in environment '%s'" %
                                             environment)
             else:
-                for partition in environment['overrides'].iterkeys():
+                for partition in environment['overrides'].keys():
                     if partition in ("modules", "hostgroups", "common"):
                         if environment['overrides'][partition] is None:
                             raise JensEnvironmentsError("Overrides declared but nothing "
@@ -264,7 +265,7 @@ def _link_module(module, environment, definition):
     logging.debug("Linking %s to %s", link_name, target)
     try:
         os.symlink(target, link_name)
-    except OSError, error:
+    except OSError as error:
         raise JensEnvironmentsError(error)
 
     # 2. Module's data directory
@@ -278,7 +279,7 @@ def _link_module(module, environment, definition):
     logging.debug("Linking %s to %s", link_name, target)
     try:
         os.symlink(target, link_name)
-    except OSError, error:
+    except OSError as error:
         raise JensEnvironmentsError(error)
 
 def _link_hostgroup(hostgroup, environment, definition):
@@ -297,7 +298,7 @@ def _link_hostgroup(hostgroup, environment, definition):
     logging.debug("Linking %s to %s", link_name, target)
     try:
         os.symlink(target, link_name)
-    except OSError, error:
+    except OSError as error:
         raise JensEnvironmentsError(error)
 
     # 2. Hostgroup's hostgroup data directory
@@ -312,7 +313,7 @@ def _link_hostgroup(hostgroup, environment, definition):
     logging.debug("Linking %s to %s", link_name, target)
     try:
         os.symlink(target, link_name)
-    except OSError, error:
+    except OSError as error:
         raise JensEnvironmentsError(error)
 
     # 3. Hostgroup's FQDNs data directory
@@ -327,7 +328,7 @@ def _link_hostgroup(hostgroup, environment, definition):
     logging.debug("Linking %s to %s", link_name, target)
     try:
         os.symlink(target, link_name)
-    except OSError, error:
+    except OSError as error:
         raise JensEnvironmentsError(error)
 
 def _unlink_module(module, environment):
@@ -417,7 +418,7 @@ def _remove_environment_annotation(environment):
         os.remove(hash_cache_file)
     # This shouldn't ever happen unless someone deleted the file or
     # changed its permissions externally
-    except OSError, error:
+    except OSError as error:
         logging.error("Couldn't remove cached hash for environment '%s' (%s)",
                       environment, error)
 
@@ -459,7 +460,7 @@ def _resolve_branch(partition, element, definition):
     branch = 'master'
     if 'overrides' in definition:
         if partition in definition['overrides']:
-            if element in definition['overrides'][partition].keys():
+            if element in list(definition['overrides'][partition].keys()):
                 branch = definition['overrides'][partition][element]
                 logging.info("%s '%s' overridden to use treeish '%s'",
                              partition, element, branch)
@@ -480,7 +481,7 @@ def _link_site(environment, definition):
     logging.debug("Linking %s to %s", link_name, target)
     try:
         os.symlink(target, link_name)
-    except OSError, error:
+    except OSError as error:
         raise JensEnvironmentsError(error)
 
 def _link_common_hieradata(environment, definition):
@@ -501,7 +502,7 @@ def _link_common_hieradata(environment, definition):
         logging.debug("Linking %s to %s", link_name, target)
         try:
             os.symlink(target, link_name)
-        except OSError, error:
+        except OSError as error:
             raise JensEnvironmentsError(error)
 
 def _add_configuration_file(environment, definition):

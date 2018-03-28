@@ -5,6 +5,7 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from __future__ import absolute_import
 import os
 import logging
 import pickle
@@ -34,21 +35,21 @@ def get_desired_inventory():
 
 def _read_inventory_from_disk():
     settings = Settings()
-    inventory_file = open(settings.CACHEDIR + "/repositories", "r")
+    inventory_file = open(settings.CACHEDIR + "/repositories", "rb")
     return pickle.load(inventory_file)
 
 def _write_inventory_to_disk(inventory):
     settings = Settings()
     inventory_file_path = settings.CACHEDIR + "/repositories"
     try:
-        inventory_file = open(inventory_file_path, "w+")
-    except IOError, error:
+        inventory_file = open(inventory_file_path, "wb")
+    except IOError as error:
         raise JensRepositoriesError("Unable to write inventory to disk (%s)" %
                                     error)
     logging.debug("Writing inventory to %s", inventory_file_path)
     try:
         pickle.dump(inventory, inventory_file)
-    except pickle.PickleError, error:
+    except pickle.PickleError as error:
         raise JensRepositoriesError("Unable to write inventory to disk (%s)" %
                                     error)
 
@@ -61,7 +62,7 @@ def _generate_inventory():
         baredir = settings.BAREDIR + "/%s" % partition
         try:
             names = os.listdir(baredir)
-        except OSError, error:
+        except OSError as error:
             raise JensRepositoriesError("Unable to list %s (%s)" %
                                         (baredir, error))
         for name in names:
@@ -74,7 +75,7 @@ def _read_list_of_clones(partition, name):
     try:
         clones = os.listdir(settings.CLONEDIR + "/%s/%s" %
                             (partition, name))
-    except OSError, error:
+    except OSError as error:
         raise JensRepositoriesError("Unable to list clones of %s/%s (%s)" %
                                     (partition, name, error))
     return [dirname_to_refname(clone) for clone in clones]
@@ -87,10 +88,10 @@ def _read_desired_inventory():
         try:
             environment = read_environment_definition(environmentname)
             if 'overrides' in environment:
-                for partition in environment['overrides'].iterkeys():
+                for partition in environment['overrides'].keys():
                     if partition in ("modules", "hostgroups", "common"):
                         for name, override in \
-                                environment['overrides'][partition].iteritems():
+                                environment['overrides'][partition].items():
                             # prefixhash is equivalent to PREFIXhash, contrary to
                             # refs (branches, sic) which as case-sensitiive
                             if ref_is_commit(override):
@@ -100,7 +101,7 @@ def _read_desired_inventory():
                             else:
                                 if override not in desired[partition][name]:
                                     desired[partition][name].append(override)
-        except JensEnvironmentsError, error:
+        except JensEnvironmentsError as error:
             logging.error("Unable to process '%s' definition (%s). Skipping",
                           environmentname, error)
             continue  # Just ignore, as won't be generated later on either.

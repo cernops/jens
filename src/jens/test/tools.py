@@ -5,6 +5,7 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from __future__ import absolute_import
 import os
 import yaml
 import tempfile
@@ -60,7 +61,8 @@ def init_sandbox(path):
         "%s/spool" % path,
         "%s/repos/user" % path,
         "%s/repos/bare" % path]
-    map(os.makedirs, dirs)
+    for _dir in dirs:
+        os.makedirs(_dir)
 
 def destroy_sandbox(path):
     shutil.rmtree(path)
@@ -195,7 +197,7 @@ def get_repository_head(repo_path):
     args = ["rev-parse", "HEAD"]
     gitdir = "%s/.git" % repo_path
     (out, code) =_git(args, gitdir=gitdir, gitworkingtree=repo_path)
-    return out.strip()
+    return out.strip().decode()
 
 def add_branch_to_repo(repo_path, branch):
     gitdir = "%s/.git" % repo_path

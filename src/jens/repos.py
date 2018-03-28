@@ -5,6 +5,7 @@
 # granted to it by virtue of its status as Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from __future__ import absolute_import
 import yaml
 import os
 import logging
@@ -31,7 +32,7 @@ def refresh_repositories(hints=None):
     try:
         logging.debug("Reading metadata from %s", settings.REPO_METADATA)
         definition = yaml.load(open(settings.REPO_METADATA, 'r'))
-    except Exception, error:  # fixme
+    except Exception as error:  # fixme
         raise JensRepositoriesError("Unable to parse %s (%s)",
                                     settings.REPO_METADATA, error)
 
@@ -86,15 +87,15 @@ def _create_new_repositories(new_repositories, partition,
         bare_url = definition['repositories'][partition][repository]
         try:
             git.clone(bare_path, bare_url, bare=True)
-        except JensGitError, error:
+        except JensGitError as error:
             logging.error("Unable to clone '%s' (%s). Skipping.",
                           repository, error)
             if os.path.exists(bare_path):
                 shutil.rmtree(bare_path)
             continue
         try:
-            refs = git.get_refs(bare_path).keys()
-        except JensGitError, error:
+            refs = list(git.get_refs(bare_path).keys())
+        except JensGitError as error:
             logging.error("Unable to get refs of '%s' (%s). Skipping.",
                           repository, error)
             shutil.rmtree(bare_path)
@@ -153,7 +154,7 @@ def _refresh_repository(data):
 
     try:
         old_refs = git.get_refs(bare_path)
-    except JensGitError, error:
+    except JensGitError as error:
         logging.error("Unable to get old refs of '%s' (%s)",
                       repository, error)
         return
@@ -165,13 +166,13 @@ def _refresh_repository(data):
                 logging.info("Fetching %s/%s upon demand...",
                              partition, repository)
             git.fetch(bare_path, prune=True)
-        except JensGitError, error:
+        except JensGitError as error:
             logging.error("Unable to fetch '%s' from remote (%s)",
                           repository, error)
             if settings.MODE == "ONDEMAND":
                 try:
                     enqueue_hint(partition, repository)
-                except JensMessagingError, error:
+                except JensMessagingError as error:
                     logging.error(error)
             return
     try:
@@ -183,7 +184,7 @@ def _refresh_repository(data):
         # Executing git fetch --prune by hand in the bare repo
         # brought the branches back.
         new_refs = git.get_refs(bare_path)
-    except JensGitError, error:
+    except JensGitError as error:
         logging.error("Unable to get new refs of '%s' (%s)", repository, error)
         return
     new, moved, deleted = _compare_refs(old_refs, new_refs, inventory[repository],
@@ -277,7 +278,7 @@ def _expand_clones(partition, name, inventory, inventory_lock, new_refs,
             inventory[name] += [refname]
             if inventory_lock:
                 inventory_lock.release()
-        except JensGitError, error:
+        except JensGitError as error:
             if os.path.isdir(clone_path):
                 shutil.rmtree(clone_path)
             logging.error("Unable to create clone '%s' (%s)",
@@ -299,7 +300,7 @@ def _expand_clones(partition, name, inventory, inventory_lock, new_refs,
             git.reset(clone_path, "origin/%s" % refname, hard=True)
             logging.info("Updated ref '%s' (%s)", clone_path,
                          git.get_head(clone_path, short=True))
-        except JensGitError, error:
+        except JensGitError as error:
             logging.error("Unable to refresh clone '%s' (%s)",
                           clone_path, error)
 
@@ -321,7 +322,7 @@ def _expand_clones(partition, name, inventory, inventory_lock, new_refs,
                 if inventory_lock:
                     inventory_lock.release()
                 logging.info("%s/%s deleted from inventory", name, refname)
-        except OSError, error:
+        except OSError as error:
             logging.error("Couldn't delete %s/%s/%s (%s)",
                           partition, name, refname, error)
 
