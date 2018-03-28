@@ -125,7 +125,7 @@ class JensTestCase(unittest.TestCase):
         refname = dirname_to_refname(dirname)
         self.assertTrue(refname in inventory[partition][element])
         if pointsto is not None:
-            self.assertEquals(get_repository_head(path),
+            self.assertEqual(get_repository_head(path),
                 pointsto)
 
     def assertCloneFileExists(self, identifier, fname):

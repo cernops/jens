@@ -46,36 +46,36 @@ class MessagingTest(JensTestCase):
         for h in hgs:
             self.assertTrue(h in hints['hostgroups'])
         self.assertTrue('common' in hints)
-        self.assertEquals(0, len(hints['common']))
+        self.assertEqual(0, len(hints['common']))
         create_module_event('m1')
         create_common_event('baz')
         hints = fetch_update_hints()
         self.assertTrue('hostgroups' in hints)
-        self.assertEquals(0, len(hints['hostgroups']))
+        self.assertEqual(0, len(hints['hostgroups']))
         self.assertTrue('baz' in hints['common'])
-        self.assertEquals(1, len(hints['modules']))
+        self.assertEqual(1, len(hints['modules']))
         self.assertTrue('m1' in hints['modules'])
 
     def test_update_hints_no_dups(self):
         create_module_event('foo')
         create_module_event('foo')
         hints = fetch_update_hints()
-        self.assertEquals(1, len(hints['modules']))
+        self.assertEqual(1, len(hints['modules']))
 
     def test_update_hints_no_messages(self):
         hints = fetch_update_hints()
         self.assertTrue('modules' in hints)
-        self.assertEquals(0, len(hints['hostgroups']))
+        self.assertEqual(0, len(hints['hostgroups']))
         self.assertTrue('hostgroups' in hints)
-        self.assertEquals(0, len(hints['hostgroups']))
+        self.assertEqual(0, len(hints['hostgroups']))
         self.assertTrue('common' in hints)
-        self.assertEquals(0, len(hints['common']))
+        self.assertEqual(0, len(hints['common']))
 
     def test_fetch_all_messages_noerrors(self):
         create_module_event('foo')
         create_hostgroup_event('bar')
         msgs = _fetch_all_messages()
-        self.assertEquals(2, len(msgs))
+        self.assertEqual(2, len(msgs))
 
     def test_fetch_all_messages_no_queuedir_is_created(self):
         self.settings.MESSAGING_QUEUEDIR = "%s/notthere" % \
@@ -83,7 +83,7 @@ class MessagingTest(JensTestCase):
         self.assertFalse(os.path.isdir(self.settings.MESSAGING_QUEUEDIR))
         msgs = _fetch_all_messages()
         self.assertTrue(os.path.isdir(self.settings.MESSAGING_QUEUEDIR))
-        self.assertEquals(0, len(msgs))
+        self.assertEqual(0, len(msgs))
 
     def test_fetch_all_messages_queuedir_cannot_be_created(self):
         self.settings.MESSAGING_QUEUEDIR = "/oops"
@@ -99,13 +99,13 @@ class MessagingTest(JensTestCase):
             'data': '))'.encode()}
         add_msg_to_queue(broken)
         msgs = _fetch_all_messages()
-        self.assertEquals(1, len(msgs))
+        self.assertEqual(1, len(msgs))
 
     @patch.object(Queue, 'dequeue', side_effect=QueueLockError)
     def test_fetch_all_messages_locked_item(self, mock_queue):
         create_module_event('foo')
         msgs = _fetch_all_messages()
-        self.assertEquals(0, len(msgs))
+        self.assertEqual(0, len(msgs))
         mock_queue.assert_called_once()
 
     @patch.object(Queue, 'dequeue', side_effect=OSError)
@@ -114,17 +114,17 @@ class MessagingTest(JensTestCase):
         msgs = _fetch_all_messages()
         self.assertLogErrors()
         mock_queue.assert_called_once()
-        self.assertEquals(0, len(msgs))
+        self.assertEqual(0, len(msgs))
 
     def test_count_no_messages(self):
         count = count_pending_hints()
-        self.assertEquals(0, count)
+        self.assertEqual(0, count)
 
     def test_count_some_messages(self):
         create_hostgroup_event('bar')
         create_module_event('foo')
         count = count_pending_hints()
-        self.assertEquals(2, count)
+        self.assertEqual(2, count)
 
     @patch.object(Queue, 'count', side_effect=OSError)
     def test_count_some_messages_queue_error(self, mock_queue):
@@ -193,9 +193,9 @@ class MessagingTest(JensTestCase):
         # If they are malformed fetch_update_hints
         # will ignore them
         hints = fetch_update_hints()
-        self.assertEquals(1, len(hints['common']))
-        self.assertEquals(2, len(hints['hostgroups']))
-        self.assertEquals(3, len(hints['modules']))
+        self.assertEqual(1, len(hints['common']))
+        self.assertEqual(2, len(hints['hostgroups']))
+        self.assertEqual(3, len(hints['modules']))
 
     def test_enqueue_hint_okay(self):
         enqueue_hint('modules', 'foo1')
@@ -205,9 +205,9 @@ class MessagingTest(JensTestCase):
         enqueue_hint('hostgroups', 'hg2')
         enqueue_hint('common', 'site')
         hints = fetch_update_hints()
-        self.assertEquals(1, len(hints['common']))
-        self.assertEquals(2, len(hints['hostgroups']))
-        self.assertEquals(3, len(hints['modules']))
+        self.assertEqual(1, len(hints['common']))
+        self.assertEqual(2, len(hints['hostgroups']))
+        self.assertEqual(3, len(hints['modules']))
 
 
     @patch.object(Queue, 'add', side_effect=QueueError)

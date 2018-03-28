@@ -125,7 +125,7 @@ class GitWrapperTest(JensTestCase):
         git_wrapper.fetch(jens_bare)
         git_wrapper.fetch(jens_clone)
         git_wrapper.reset(jens_clone, 'origin/qa', hard=True)
-        self.assertEquals(get_repository_head(jens_clone),
+        self.assertEqual(get_repository_head(jens_clone),
                           commit_id)
         self.assertTrue(os.path.isfile("%s/%s" % (jens_clone, fname)))
 
@@ -163,11 +163,11 @@ class GitWrapperTest(JensTestCase):
         commit_id = add_commit_to_branch(user, 'qa')
         git_wrapper.fetch(jens_clone)
         git_wrapper.reset(jens_clone, 'origin/qa', hard=True)
-        self.assertEquals(git_wrapper.get_head(jens_clone),
+        self.assertEqual(git_wrapper.get_head(jens_clone),
                           commit_id)
-        self.assertEquals(git_wrapper.get_head(jens_clone, short=False),
+        self.assertEqual(git_wrapper.get_head(jens_clone, short=False),
                           commit_id)
-        self.assertEquals(git_wrapper.get_head(jens_clone, short=True),
+        self.assertEqual(git_wrapper.get_head(jens_clone, short=True),
                           commit_id[0:7])
 
     def test_get_head_non_existing_repository(self):
