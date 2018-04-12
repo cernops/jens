@@ -21,6 +21,7 @@ def refresh_metadata():
     _refresh_repositories()
 
 def validate_directories():
+    logging.info("Validating directories...")
     settings = Settings()
     directories = [settings.BAREDIR,
                    settings.CLONEDIR,
@@ -49,6 +50,7 @@ def validate_directories():
                         settings.REPO_METADATADIR)
 
 def _validate_directory(directory):
+    logging.debug("Validating directory '%s'...", directory)
     try:
         os.stat(directory)
     except OSError:
