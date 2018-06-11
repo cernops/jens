@@ -8,7 +8,7 @@
 
 import os
 import sys
-import optparse
+import argparse
 import logging
 
 from jens.settings import Settings
@@ -16,16 +16,16 @@ from jens.errors import JensError, JensConfigError
 
 def parse_cmdline_args():
     """Parses command line parameters."""
-    parser = optparse.OptionParser()
-    parser.add_option('-c', '--config',
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--config',
         help="Configuration file path (defaults to '/etc/jens/main.conf'",
         default="/etc/jens/main.conf")
-    parser.add_option('-s', '--section',
+    parser.add_argument('-s', '--section',
         help="Section of the configuration file (defaults to 'main')",
         default="main")
-    parser.add_option('-k', '--key',
+    parser.add_argument('-k', '--key',
         help="Key of the configuration file")
-    opts, args = parser.parse_args()
+    opts = parser.parse_args()
     if opts.key is None:
         raise JensConfigError("--key is mandatory")
     return opts
