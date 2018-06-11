@@ -8,7 +8,7 @@
 
 import sys
 import logging
-import optparse
+import argparse
 
 from jens.errors import JensConfigError
 from jens.errors import JensMessagingError
@@ -17,13 +17,12 @@ from jens.messaging import purge_queue
 
 def parse_cmdline_args():
     """Parses command line parameters."""
-    parser = optparse.OptionParser()
-    parser.add_option('-c', '--config',
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--config',
                       help="Configuration file path "
                            "(defaults to '/etc/jens/main.conf'",
                       default="/etc/jens/main.conf")
-    opts, _ = parser.parse_args()
-    return opts
+    return parser.parse_args()
 
 def main():
     """Application entrypoint."""

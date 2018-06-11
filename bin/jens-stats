@@ -8,7 +8,7 @@
 
 import os
 import sys
-import optparse
+import argparse
 import logging
 import pprint
 
@@ -21,28 +21,27 @@ from jens.messaging import count_pending_hints
 
 def parse_cmdline_args():
     """Parses command line parameters."""
-    parser = optparse.OptionParser()
-    parser.add_option('-c', '--config',
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--config',
                       help="Configuration file path "
                            "(defaults to '/etc/jens/main.conf'",
                       default="/etc/jens/main.conf")
-    parser.add_option('-r', '--repositories',
+    parser.add_argument('-r', '--repositories',
                       action="store_true",
                       help="Shows stats about repositories")
-    parser.add_option('-e', '--environment',
+    parser.add_argument('-e', '--environment',
                       action="store_true",
                       help="Shows stats about environments")
-    parser.add_option('-i', '--inventory',
+    parser.add_argument('-i', '--inventory',
                       action="store_true",
                       help="Shows inventory")
-    parser.add_option('-q', '--queues',
+    parser.add_argument('-q', '--queues',
                       action="store_true",
                       help="Shows stats about queues")
-    parser.add_option('-a', '--all',
+    parser.add_argument('-a', '--all',
                       action="store_true",
                       help="Shows everything")
-    opts, _ = parser.parse_args()
-    return opts
+    return parser.parse_args()
 
 def get_bare_repositories():
     settings = Settings()
