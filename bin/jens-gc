@@ -9,7 +9,7 @@
 import sys
 import os
 import logging
-import optparse
+import argparse
 
 import jens.git_wrapper as git
 from jens.errors import JensError, JensLockError
@@ -21,25 +21,24 @@ from jens.decorators import timed
 
 def parse_cmdline_args():
     """Parses command line parameters."""
-    parser = optparse.OptionParser()
-    parser.add_option('-c', '--config',
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--config',
                       help="Configuration file path "
                            "(defaults to '/etc/jens/main.conf'",
                       default="/etc/jens/main.conf")
-    parser.add_option('-g', '--aggressive',
+    parser.add_argument('-g', '--aggressive',
                       action="store_true",
                       help="Do it aggressively")
-    parser.add_option('-b', '--bare',
+    parser.add_argument('-b', '--bare',
                       action="store_true",
                       help="Clean up bare repositories")
-    parser.add_option('-l', '--clones',
+    parser.add_argument('-l', '--clones',
                       action="store_true",
                       help="Clean up repositories clones")
-    parser.add_option('-a', '--all',
+    parser.add_argument('-a', '--all',
                       action="store_true",
                       help="Clean up everything")
-    opts, _ = parser.parse_args()
-    return opts
+    return parser.parse_args()
 
 @timed
 def gc_bares(opts):
