@@ -1,6 +1,6 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
-Version: 0.23
+Version: 0.24
 Release: 1%{?dist}
 
 License: GPL
@@ -66,6 +66,9 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 %config(noreplace) %{_sysconfdir}/jens/main.conf
 
 %changelog
+* Mon Jun 11 2018 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.24-1
+- Migrate from optparse to argparse.
+
 * Tue Apr 03 2018 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.23-1
 - Python 3.x compatibility.
 - Spelling and broken links in the documentation.
