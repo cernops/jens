@@ -332,8 +332,9 @@ and `qa`, meaning that they will always be expanded by Jens. This behaviour can
 be configured by the `mandatorybranches` configuration key.
 
 As environment definitions are just Yaml files, the files can be easily
-protected from unauthorized/accidental modification via, for instance,
-Gitolite rules :)
+protected from unauthorized/accidental modification via, for instance, Gitolite
+rules. Another option is to receive changes via merge requests that will be
+validated by an external job under the administrator's control.
 
 ### How does an environment look like on disk?
 
