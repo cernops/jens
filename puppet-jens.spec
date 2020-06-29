@@ -112,10 +112,10 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 - Add on-demand mode to jens-update.
 - Add webapps/gitlabproducer.
 
-* Fri Sep 03 2015 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.11-2
+* Thu Sep 03 2015 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.11-2
 - Prevent RPM from replacing the configuration file.
 
-* Fri Sep 03 2015 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.11-1
+* Thu Sep 03 2015 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.11-1
 - Support variable number of elements in common hieradata.
 
 * Wed Nov 19 2014 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.10-1
@@ -138,7 +138,7 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 - No hard timeouts.
 - Shared objects for static clones.
 
-* Fri Mar 10 2014 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.5-1
+* Mon Mar 10 2014 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.5-1
 - Add support for etcd locks.
 - Add support for commits as overrides.
 - Only expand required branches/commits.
@@ -156,5 +156,5 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 * Wed Sep 04 2013 Ben Jones <ben.dylan.jones@cern.ch> - 0.2-1
 - git clones now reset rather than merged
 
-* Tue Jul 09 2012 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.1-1
+* Mon Jul 09 2012 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.1-1
 - Initial release
