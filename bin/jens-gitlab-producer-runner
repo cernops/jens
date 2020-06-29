@@ -33,7 +33,7 @@ def main():
     settings = Settings("jens-gitlab-producer")
     try:
         settings.parse_config(opts.config)
-    except JensConfigError, error:
+    except JensConfigError as error:
         logging.error(error)
         return 2
 

@@ -31,14 +31,14 @@ def main():
     settings = Settings("jens-purge-queue")
     try:
         settings.parse_config(opts.config)
-    except JensConfigError, error:
+    except JensConfigError as error:
         logging.error(error)
         return 2
 
     try:
         logging.info("Purging %s...", settings.MESSAGING_QUEUEDIR)
         purge_queue()
-    except JensMessagingError, error:
+    except JensMessagingError as error:
         logging.error(error)
         return 10
 

@@ -42,13 +42,13 @@ def main():
     settings = Settings("jens-update")
     try:
         settings.parse_config(opts.config)
-    except JensConfigError, error:
+    except JensConfigError as error:
         logging.error(error)
         return 2
 
     try:
         validate_directories()
-    except JensError, error:
+    except JensError as error:
         logging.error("Failed to validate directories (%s)", error)
         return 3
 
@@ -61,14 +61,14 @@ def main():
             logging.info("Refreshing metadata...")
             try:
                 refresh_metadata()
-            except JensError, error:
+            except JensError as error:
                 logging.error(error)
                 return 20
 
             if settings.MODE == 'ONDEMAND':
                 try:
                     hints = fetch_update_hints()
-                except JensMessagingError, error:
+                except JensMessagingError as error:
                     logging.error(error)
                     return 25
             else:
@@ -79,7 +79,7 @@ def main():
             try:
                 repositories_deltas, inventory = \
                     refresh_repositories(hints)
-            except JensRepositoriesError, error:
+            except JensRepositoriesError as error:
                 logging.error("Failed (%s)", error)
                 return 30
 
@@ -87,13 +87,13 @@ def main():
             logging.info("Refreshing environments...")
             try:
                 refresh_environments(repositories_deltas, inventory)
-            except JensRepositoriesError, error:
+            except JensRepositoriesError as error:
                 logging.error("Failed (%s)", error)
                 return 40
-    except JensLockExistsError, error:
+    except JensLockExistsError as error:
         logging.info("Locking failed (%s)", error)
         return 50
-    except JensLockError, error:
+    except JensLockError as error:
         logging.error("Locking failed (%s)", error)
         return 51
 
