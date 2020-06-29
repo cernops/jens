@@ -3,7 +3,7 @@ Name: puppet-jens
 Version: 0.24
 Release: 1%{?dist}
 
-License: GPL
+License: GPLv3
 Group: Applications/System
 URL: http://www.cern.ch/config
 Source: %{name}-%{version}.tar.gz
