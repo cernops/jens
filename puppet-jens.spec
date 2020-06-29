@@ -10,6 +10,8 @@ Source: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 
+BuildRequires: systemd-rpm-macros
+
 Requires: python3-configobj, git, python3-pyyaml, python3-dirq, python3-GitPython
 Requires: python3, python3-flask
 Requires(pre): shadow-utils
@@ -40,10 +42,11 @@ mkdir -m 750 -p %{buildroot}/var/lib/jens/cache/environments
 mkdir -m 750 -p %{buildroot}/var/lib/jens/environments
 mkdir -m 750 -p %{buildroot}/var/lib/jens/metadata
 mkdir -m 750 -p %{buildroot}/var/log/jens/
-mkdir -m 750 -p %{buildroot}/var/lock/jens/
 mkdir -m 750 -p %{buildroot}/var/spool/jens-update/
 mkdir -m 750 -p %{buildroot}/var/www/jens
 %{__install} -D -p -m 755 wsgi/* %{buildroot}/var/www/jens
+mkdir -p %{buildroot}%{_tmpfilesdir}
+install -m 0644 jens-tmpfiles.conf %{buildroot}%{_tmpfilesdir}/%{name}.conf
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -61,9 +64,9 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 %{_bindir}/jens-*
 %attr(750, jens, jens) /var/lib/jens/*
 %attr(750, jens, jens) /var/log/jens
-%attr(750, jens, jens) /var/lock/jens
 %attr(750, jens, jens) /var/spool/jens-update
 %config(noreplace) %{_sysconfdir}/jens/main.conf
+%{_tmpfilesdir}/%{name}.conf
 
 %changelog
 * Mon Jun 29 2020 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.25-1
