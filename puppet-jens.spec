@@ -10,8 +10,8 @@ Source: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 
-Requires: python-configobj, python-argparse, git, PyYAML, python-dirq, GitPython >= 1.0.1
-Requires: python-flask
+Requires: python3-configobj, git, python3-pyyaml, python3-dirq, python3-GitPython
+Requires: python3, python3-flask
 Requires(pre): shadow-utils
 
 %description
@@ -22,11 +22,11 @@ based on files containing metadata.
 %setup -q
 
 %build
-CFLAGS="%{optflags}" %{__python} setup.py build
+CFLAGS="%{optflags}" %{__python3} setup.py build
 
 %install
 %{__rm} -rf %{buildroot}
-%{__python} setup.py install --skip-build --root %{buildroot}
+%{__python3} setup.py install --skip-build --root %{buildroot}
 %{__install} -D -p -m 644 conf/main.conf %{buildroot}/%{_sysconfdir}/jens/main.conf
 mkdir -m 755 -p %{buildroot}/%{_mandir}/man1
 %{__install} -D -p -m 644 man/* %{buildroot}/%{_mandir}/man1
@@ -57,7 +57,7 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 %doc README.md ENVIRONMENTS.md examples
 %{_mandir}/man1/*
 /var/www/jens/*
-%{python_sitelib}/*
+%{python3_sitelib}/*
 %{_bindir}/jens-*
 %attr(750, jens, jens) /var/lib/jens/*
 %attr(750, jens, jens) /var/log/jens
