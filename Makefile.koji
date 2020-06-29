@@ -14,4 +14,7 @@ clean:
 	rm -f $(TARFILE)
 
 rpm: all
-	rpmbuild -ba --define "_sourcedir $(PWD)" $(SPECFILE)
+	rpmbuild -ba --define 'dist $(DIST)' --define "_topdir $(PWD)/build" --define '_sourcedir $(PWD)' $(SPECFILE)
+
+srpm: all
+	rpmbuild -bs --define 'dist $(DIST)' --define "_topdir $(PWD)/build" --define '_sourcedir $(PWD)' $(SPECFILE)
