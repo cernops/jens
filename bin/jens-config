@@ -60,7 +60,7 @@ def main():
         logging.error(str(error) + "\n")
         return 3
 
-    print value
+    print(value)
     return 0
 
 if __name__ == '__main__':
