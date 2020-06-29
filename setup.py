@@ -4,7 +4,7 @@ from __future__ import absolute_import
 from distutils.core import setup
 
 setup(name='jens',
-      version='0.24',
+      version='0.25',
       description='Jens is a Puppet modules/hostgroups librarian',
       classifiers=[
           'Programming Language :: Python :: 2.7',
