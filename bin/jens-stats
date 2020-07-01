@@ -96,11 +96,11 @@ def get_environments_in_cache():
 
 def get_environments_in_metadata():
     settings = Settings()
-    return __listdir_nohidden(settings.ENV_METADATADIR)
+    return __listdir_onlyyaml(settings.ENV_METADATADIR)
 
-def __listdir_nohidden(directory):
+def __listdir_onlyyaml(directory):
     return [_file for _file in os.listdir(directory)
-            if not _file.startswith(".")]
+            if _file.endswith(".yaml")]
 
 def main():
     """Application entrypoint."""
