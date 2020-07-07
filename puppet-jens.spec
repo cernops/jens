@@ -1,6 +1,6 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
-Version: 0.25
+Version: 1.1
 Release: 1%{?dist}
 
 License: GPLv3
@@ -69,6 +69,10 @@ install -m 0644 jens-tmpfiles.conf %{buildroot}%{_tmpfilesdir}/%{name}.conf
 %{_tmpfilesdir}/%{name}.conf
 
 %changelog
+* Tue Jul 07 2020 Nacho Barrientos <nacho.barrientos@cern.ch> - 1.1-1
+- Python3-only compatibility.
+- Use tmpfiles.d to create the lock directory.
+
 * Mon Jun 29 2020 Nacho Barrientos <nacho.barrientos@cern.ch> - 0.25-1
 - Minor fixes to the Spec file.
 
