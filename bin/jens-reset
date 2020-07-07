@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # Copyright (C) 2014, CERN
 # This software is distributed under the terms of the GNU General Public
 # Licence version 3 (GPL Version 3), copied verbatim in the file "COPYING".
@@ -73,13 +73,13 @@ def main():
     settings = Settings()
     try:
         settings.parse_config(opts.config)
-    except JensConfigError, error:
+    except JensConfigError as error:
         logging.error(error)
         return 2
 
     try:
         validate_directories()
-    except JensError, error:
+    except JensError as error:
         logging.error("Failed to validate directories (%s)", error)
         return 3
 
@@ -98,7 +98,7 @@ def main():
             remove_environments()
             logging.info("Removing all environments' cache...")
             remove_cache()
-    except JensLockError, error:
+    except JensLockError as error:
         logging.error("Locking failed (%s)", error)
         return 50
 

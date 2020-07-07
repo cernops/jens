@@ -43,24 +43,24 @@ def main():
     """Application entrypoint."""
     try:
         opts = parse_cmdline_args()
-    except JensError, error:
+    except JensError as error:
         logging.error("Wrong command line args (%s)\n" % error)
         return 1
 
     settings = Settings()
     try:
         settings.parse_config(opts.config)
-    except JensConfigError, error:
+    except JensConfigError as error:
         logging.error(error)
         return 2
 
     try:
         value = get_config(opts.section, opts.key)
-    except JensError, error:
+    except JensError as error:
         logging.error(str(error) + "\n")
         return 3
 
-    print value
+    print(value)
     return 0
 
 if __name__ == '__main__':

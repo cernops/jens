@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # Copyright (C) 2014, CERN
 # This software is distributed under the terms of the GNU General Public
 # Licence version 3 (GPL Version 3), copied verbatim in the file "COPYING".
@@ -109,13 +109,13 @@ def main():
     settings = Settings()
     try:
         settings.parse_config(opts.config)
-    except JensConfigError, error:
+    except JensConfigError as error:
         logging.error(error)
         return 2
 
     try:
         validate_directories()
-    except JensError, error:
+    except JensError as error:
         logging.error("Failed to validate directories (%s)", error)
         return 3
 
@@ -148,7 +148,7 @@ def main():
         try:
             count = count_pending_hints()
             logging.info("There are '%d' messages in the hints queue", count)
-        except JensMessagingError, error:
+        except JensMessagingError as error:
             logging.error(error)
 
     return 0

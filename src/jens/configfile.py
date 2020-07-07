@@ -26,7 +26,7 @@ mode = option('POLL', 'ONDEMAND', default='POLL')
 type = option('DISABLED', 'FILE', default='FILE')
 name = string(default='jens')
 [filelock]
-lockdir = string(default='/var/lock/jens')
+lockdir = string(default='/run/lock/jens')
 [messaging]
 queuedir = string(default='/var/spool/jens-update')
 [git]

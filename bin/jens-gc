@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # Copyright (C) 2014, CERN
 # This software is distributed under the terms of the GNU General Public
 # Licence version 3 (GPL Version 3), copied verbatim in the file "COPYING".
@@ -51,7 +51,7 @@ def gc_bares(opts):
                 repository_path = base_path + "/%s" % repository
                 git.gc(repository_path, aggressive=opts.aggressive)
                 processed = processed + 1
-            except JensGitError, error:
+            except JensGitError as error:
                 logging.error("Failed run git-gc on bare repo %s (%s)",
                               repository, error)
     return processed
@@ -69,7 +69,7 @@ def gc_clones(opts):
                 try:
                     git.gc(branch_path, aggressive=opts.aggressive)
                     processed = processed + 1
-                except JensGitError, error:
+                except JensGitError as error:
                     logging.error("Failed run git-gc on clone %s (%s)",
                                   branch_path, error)
     return processed
@@ -81,13 +81,13 @@ def main():
     settings = Settings("jens-gc")
     try:
         settings.parse_config(opts.config)
-    except JensConfigError, error:
+    except JensConfigError as error:
         logging.error(error)
         return 2
 
     try:
         validate_directories()
-    except JensError, error:
+    except JensError as error:
         logging.error("Failed to validate directories (%s)", error)
         return 3
 
@@ -104,7 +104,7 @@ def main():
                 processed_count = gc_clones(opts)
                 logging.info("Done (%d repositories cleaned up)",
                              processed_count)
-    except JensLockError, error:
+    except JensLockError as error:
         logging.error("Locking failed (%s)", error)
         return 50
 

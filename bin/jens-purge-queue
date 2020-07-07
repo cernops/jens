@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 # Copyright (C) 2016, CERN
 # This software is distributed under the terms of the GNU General Public
 # Licence version 3 (GPL Version 3), copied verbatim in the file "COPYING".
@@ -31,14 +31,14 @@ def main():
     settings = Settings("jens-purge-queue")
     try:
         settings.parse_config(opts.config)
-    except JensConfigError, error:
+    except JensConfigError as error:
         logging.error(error)
         return 2
 
     try:
         logging.info("Purging %s...", settings.MESSAGING_QUEUEDIR)
         purge_queue()
-    except JensMessagingError, error:
+    except JensMessagingError as error:
         logging.error(error)
         return 10
 

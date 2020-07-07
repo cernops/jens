@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 from __future__ import absolute_import
 from distutils.core import setup
@@ -7,8 +7,8 @@ setup(name='jens',
       version='0.25',
       description='Jens is a Puppet modules/hostgroups librarian',
       classifiers=[
-          'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3 :: Only',
           'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
       ],
       author='Nacho Barrientos',
