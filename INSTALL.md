@@ -1,17 +1,11 @@
 ## Building and installation
 
-Clone the source code, build an RPM and install it:
+Use the shipped spec file to create an RPM. The package will install an example
+configuration file and a series of skeletons that can be used to generate
+example repositories. These will be used in the next section to help you to get
+started with the tool.
 
-```
-sudo yum install rpm-build
-git clone https://github.com/cernops/jens.git
-cd jens/
-make -f Makefile.koji rpm
-```
-
-The package will install an example configuration file and a series of
-skeletons that can be used to generate example repositories. These will be used
-in the next section to help you to get started with the tool.
+You can also use distutils and copy the example configuration file by hand.
 
 ## Configuration
 
