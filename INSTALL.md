@@ -327,13 +327,13 @@ example:
 The idea then is to have something producing this type of message. This suite
 also ships a Gitlab listener that understands the payload contained in the
 requests made via [Gitlab push
-webhooks](http://doc.gitlab.com/ce/web_hooks/web_hooks.html) and translates it
-into the format used internally, producing this way the messages required by
-Jens. This listener (and producer) can be run standalone for testing purposes
-via `jens-gitlab-producer-runner` or, much better, on top of a web server
-talking WSGI. For this purpose an example WSGI file is also shipped along the
-software.  The producer has to run on the same host so it has access to the
-local queue.
+webhooks](https://docs.gitlab.com/ce/user/project/integrations/webhooks.html#push-events)
+and translates it into the format used internally, producing this way the
+messages required by Jens. This listener (and producer) can be run standalone
+for testing purposes via `jens-gitlab-producer-runner` or, much better, on top
+of a web server talking WSGI. For this purpose an example WSGI file is also
+shipped along the software. The producer has to run on the same host so it
+has access to the local queue.
 
 When a producer and `jens-update` are cooperating and the on-demand mode is
 enabled, information regarding the update hints consumed and the actions taken
