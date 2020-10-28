@@ -1,6 +1,6 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
-Version: 1.1
+Version: 1.2
 Release: 1%{?dist}
 
 License: GPLv3
@@ -74,6 +74,9 @@ install -p -m 644 systemd/jens-purge-queue.service %{buildroot}%{_unitdir}/jens-
 %{_unitdir}/jens-purge-queue.service
 
 %changelog
+* Wed Oct 28 2020 Nacho Barrientos <nacho.barrientos@cern.ch> - 1.2-1
+- Ship systemd service unit files for jens-update and jens-purge-queue.
+
 * Tue Jul 07 2020 Nacho Barrientos <nacho.barrientos@cern.ch> - 1.1-1
 - Python3-only compatibility.
 - Use tmpfiles.d to create the lock directory.
