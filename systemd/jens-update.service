@@ -1,0 +1,14 @@
+[Unit]
+Description=jens-update cycle to update modules, hostgroups and environments
+
+[Service]
+ExecStart=/usr/bin/jens-update
+WorkingDirectory=/var/lib/jens
+Restart=no
+SyslogIdentifier=jens-update
+User=jens
+Group=jens
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target

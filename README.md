@@ -385,12 +385,12 @@ key `environmentsdir`.
 
 ## What's a Jens run?
 
-It's an execution of jens-update, which is normally trigged by a cronjob. It
-will determine what's new, what branches have to be updated and what
-environments have to be created/modified/deleted. The following is an example
-of what's typically found in the log files after a run where there was not much
-to do (a hostgroup got new code in the QA branch and a new environment was
-created):
+It's an execution of jens-update, which is normally trigged by a cronjob or a
+systemd timer triggering `jens-update.service`. It will determine what's new,
+what branches have to be updated and what environments have to be
+created/modified/deleted. The following is an example of what's typically found
+in the log files after a run where there was not much to do (a hostgroup got
+new code in the QA branch and a new environment was created):
 
 ```
 INFO Obtaining lock 'aijens' (attempt: 1)...

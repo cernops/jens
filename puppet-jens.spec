@@ -47,6 +47,9 @@ mkdir -m 750 -p %{buildroot}/var/www/jens
 %{__install} -D -p -m 755 wsgi/* %{buildroot}/var/www/jens
 mkdir -p %{buildroot}%{_tmpfilesdir}
 install -m 0644 jens-tmpfiles.conf %{buildroot}%{_tmpfilesdir}/%{name}.conf
+mkdir -p $RPM_BUILD_ROOT%{_unitdir}
+install -p -m 644 systemd/jens-update.service $RPM_BUILD_ROOT%{_unitdir}/jens-update.service
+install -p -m 644 systemd/jens-purge-queue.service $RPM_BUILD_ROOT%{_unitdir}/jens-purge-queue.service
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -67,6 +70,8 @@ install -m 0644 jens-tmpfiles.conf %{buildroot}%{_tmpfilesdir}/%{name}.conf
 %attr(750, jens, jens) /var/spool/jens-update
 %config(noreplace) %{_sysconfdir}/jens/main.conf
 %{_tmpfilesdir}/%{name}.conf
+%{_unitdir}/jens-update.service
+%{_unitdir}/jens-purge-queue.service
 
 %changelog
 * Tue Jul 07 2020 Nacho Barrientos <nacho.barrientos@cern.ch> - 1.1-1
