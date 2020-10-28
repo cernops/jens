@@ -1,0 +1,14 @@
+[Unit]
+Description=jens-purge-queue cycle to clean dead messages in the hints queue
+
+[Service]
+ExecStart=/usr/bin/jens-purge-queue
+WorkingDirectory=/var/lib/jens
+Restart=no
+SyslogIdentifier=jens-purge-queue
+User=jens
+Group=jens
+Type=oneshot
+
+[Install]
+WantedBy=multi-user.target
