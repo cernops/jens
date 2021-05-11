@@ -1,7 +1,7 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
 Version: 1.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 License: GPLv3
 Group: Applications/System
@@ -74,6 +74,9 @@ install -p -m 644 systemd/jens-purge-queue.service %{buildroot}%{_unitdir}/jens-
 %{_unitdir}/jens-purge-queue.service
 
 %changelog
+* Tue May 11 2021 Nacho Barrientos <nacho.barrientos@cern.ch> - 1.2-2
+- Rebuild for CentOS Stream 8
+
 * Wed Oct 28 2020 Nacho Barrientos <nacho.barrientos@cern.ch> - 1.2-1
 - Ship systemd service unit files for jens-update and jens-purge-queue.
 
