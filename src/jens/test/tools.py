@@ -112,7 +112,7 @@ def init_repositories():
 def add_repository(partition, name, url):
     settings = Settings()
     repositories_file = open(settings.REPO_METADATA, 'r')
-    data = yaml.load(repositories_file)
+    data = yaml.safe_load(repositories_file)
     repositories_file.close()
     data['repositories'][partition][name] = 'file://' + url
     repositories_file = open(settings.REPO_METADATA, 'w+')
@@ -122,7 +122,7 @@ def add_repository(partition, name, url):
 def del_repository(partition, name):
     settings = Settings()
     repositories_file = open(settings.REPO_METADATA, 'r')
-    data = yaml.load(repositories_file)
+    data = yaml.safe_load(repositories_file)
     repositories_file.close()
     del data['repositories'][partition][name]
     repositories_file = open(settings.REPO_METADATA, 'w+')
