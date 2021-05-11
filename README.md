@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/cernops/jens.svg?branch=master)](https://travis-ci.org/cernops/jens)
+[![](https://github.com/cernops/jens/workflows/Build/badge.svg)](https://github.com/cernops/jens/actions?query=workflow%3ABuild)
 
 ## What's Jens?
 
