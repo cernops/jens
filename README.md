@@ -332,7 +332,7 @@ and `qa`, meaning that they will always be expanded by Jens. This behaviour can
 be configured by the `mandatorybranches` configuration key.
 
 As environment definitions are just Yaml files, the files can be easily
-protected from unauthorized/accidental modification via, for instance, Gitolite
+protected from unauthorised/accidental modification via, for instance, Gitolite
 rules. Another option is to receive changes via merge requests that will be
 validated by an external job under the administrator's control.
 
@@ -385,7 +385,7 @@ key `environmentsdir`.
 
 ## What's a Jens run?
 
-It's an execution of jens-update, which is normally trigged by a cronjob or a
+It's an execution of jens-update, which is normally triggered by a cronjob or a
 systemd timer triggering `jens-update.service`. It will determine what's new,
 what branches have to be updated and what environments have to be
 created/modified/deleted. The following is an example of what's typically found

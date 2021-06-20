@@ -11,7 +11,7 @@ You can also use distutils and copy the example configuration file by hand.
 
 Jens consumes a single configuration file that is located by default in
 `/etc/jens/main.conf`. Apart from tweaking this file, it's also necessary to
-initialize and make available the metadata repositories that are needed by
+initialise and make available the metadata repositories that are needed by
 Jens. The RPM ships examples for all the bits that are required to get
 started with the tool, so in this section we will use all of them to get
 a basic working configuration where you can start from.
@@ -19,7 +19,7 @@ a basic working configuration where you can start from.
 The RPM creates a system user called `jens` and sets the permissions of
 the directories specified in the default configuration file for you.
 
-So, let's put our hands on it. Firstly, we're going to initialize in `/tmp` a
+So, let's put our hands on it. Firstly, we're going to initialise in `/tmp` a
 bunch of Git repositories for which, as mentioned previously, there are example
 skeletons shipped by the package. This should be enough to get a clean
 jens-update run that does something useful. However, if you already know how
@@ -27,7 +27,7 @@ Jens works you can safely forget about all these dummy repositories and plug-in
 existing stuff.
 
 The example configuration file installed by the package in `/etc/jens` should
-suffice for the time being. So, let's initialize the metadata repositories, a
+suffice for the time being. So, let's initialise the metadata repositories, a
 module, a hostgroup and some Hiera data, based on the examples provided by the
 package. It's recommended to run the commands below as `jens` as the rest of the
 tutorial relies on this account, however feel free to proceed as you see fit as
@@ -358,7 +358,7 @@ INFO 2015-12-10T14:43:01.705468 - hostgroups/foo - '0000003c/56698165ac7909' add
 
 ### Setting a timeout for Git operations via SSH
 
-To protect Jens from hanging indefinetely in case of a lack of response from
+To protect Jens from hanging indefinitely in case of a lack of response from
 the remote, it's possible to override the SSH command and put a timeout in
 between so the Git operations don't run forever. This only applies if the
 traffic to the remotes is transported via SSH.
@@ -506,7 +506,7 @@ process.
 The default value is an empty list, which means that no environment is
 protected.
 
-## Miscellanea
+## Miscellaneous
 
 If you wanted to know in detail what Jens does in every run, changing the debug
 level to DEBUG (in `/etc/jens/main.conf`) might be a good idea :)

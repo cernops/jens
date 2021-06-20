@@ -111,7 +111,7 @@ exceptions:
 However, the same way as dynamic environments:
 
 * If a module/hostgroup is removed from the library, it will be removed from
-  all the shapshots too, as if they were dynamic environments.
+  all the snapshots too, as if they were dynamic environments.
 
 ## Parser type
 
