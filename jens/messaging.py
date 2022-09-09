@@ -85,7 +85,7 @@ def _fetch_all_messages():
         try:
             item = queue.dequeue(name)
         except QueueLockError as error:
-            logging.warn("Element %s was locked when dequeuing", name)
+            logging.warning("Element %s was locked when dequeuing", name)
             continue
         except OSError as error:
             logging.error("I/O error when getting item %s", name)
@@ -104,18 +104,18 @@ def _validate_and_merge_messages(messages):
     hints = {'modules': set(), 'hostgroups': set(), 'common': set()}
     def _merger(acc, element):
         if 'time' not in element:
-            logging.warn("Discarding message: No timestamp")
+            logging.warning("Discarding message: No timestamp")
             return acc
         time = element['time']
         if 'data' not in element or type(element['data']) != dict:
-            logging.warn("Discarding message (%s): Bad data section", time)
+            logging.warning("Discarding message (%s): Bad data section", time)
             return acc
         for k, v in element['data'].items():
             if k not in hints:
-                logging.warn("Discarding message (%s): Unknown partition '%s'", time, k)
+                logging.warning("Discarding message (%s): Unknown partition '%s'", time, k)
                 continue
             if type(v) != list:
-                logging.warn("Discarding message (%s): Value '%s' is not a list", time, v)
+                logging.warning("Discarding message (%s): Value '%s' is not a list", time, v)
                 continue
             for item in v:
                 if type(item) == str:
@@ -123,7 +123,7 @@ def _validate_and_merge_messages(messages):
                                   k, v, element['time'])
                     acc[k].add(item)
                 else:
-                    logging.warn("Discarding item '%s' in (%s - %s:%s): not a str",
+                    logging.warning("Discarding item '%s' in (%s - %s:%s): not a str",
                                  item, time, k, v)
         return acc
     return reduce(_merger, messages, hints)

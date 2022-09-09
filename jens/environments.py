@@ -95,7 +95,7 @@ def _purge_deleted_environments(environments):
         if environment not in settings.PROTECTED_ENVIRONMENTS:
             _purge_deleted_environment(environment)
         else:
-            logging.warn("Refusing to delete '%s' as it's protected", environment)
+            logging.warning("Refusing to delete '%s' as it's protected", environment)
 
 def _purge_deleted_environment(environment):
     settings = Settings()
