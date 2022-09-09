@@ -68,18 +68,26 @@ class JensTestCase(unittest.TestCase):
             mandatory_branches=','.join(JensTestCase.MANDATORY_BRANCHES)))
         config_file.close()
 
-        root = logging.getLogger()
-        for handler in root.handlers[:]:
-            root.removeHandler(handler)
-        for _filter in root.filters[:]:
-            root.removeFilter(_filter)
-
         self.settings = Settings("jens-test")
         self.settings.parse_config(self.config_file_path)
 
         self.lock = JensLockFactory.make_lock(self.settings)
 
     def tearDown(self):
+        logging.shutdown()
+
+        # Remove the logger that writes to the log file of this test
+        # so when the next test setUp()s a new handler with a new log
+        # file is configured.
+        root = logging.getLogger()
+        for handler in root.handlers[:]:
+            root.removeHandler(handler)
+        for _filter in root.filters[:]:
+            root.removeFilter(_filter)
+
+        if hasattr(self, 'log'):
+            self.log.close()
+
         if self.keep_sandbox:
             print("Sandbox kept in", self.sandbox_path)
         else:

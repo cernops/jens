@@ -7,17 +7,17 @@ Jens is shipped with a bunch of functional tests which live in
 ## Running the tests with a human-readable output
 
 ```
-$ python -W ignore:ResourceWarning -m unittest -v
+$ python -m unittest -v
 ```
 
 ### Just a single test
 
 ```
-$ python -W ignore:ResourceWarning -m unittest jens.test.test_update.UpdateTest.test_base -v
+$ python -m unittest jens.test.test_update.UpdateTest.test_base -v
 ```
 
 ### And keeping the sandbox in disk
 
 ```
-$ JENS_TEST_KEEP_SANDBOX=1 python -W ignore:ResourceWarning -m unittest jens.test.test_update.UpdateTest.test_base -v
+$ JENS_TEST_KEEP_SANDBOX=1 python -m unittest jens.test.test_update.UpdateTest.test_base -v
 ```
