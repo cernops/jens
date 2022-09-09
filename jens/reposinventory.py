@@ -23,7 +23,7 @@ def get_inventory():
     try:
         return _read_inventory_from_disk()
     except (IOError, pickle.PickleError):
-        logging.warn("Inventory on disk not found or corrupt, generating...")
+        logging.warning("Inventory on disk not found or corrupt, generating...")
         return _generate_inventory()
 
 def persist_inventory(inventory):

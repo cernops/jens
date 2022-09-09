@@ -19,7 +19,7 @@ class JensLockFactory(object):
         if settings.LOCK_TYPE == 'FILE':
             return JensFileLock(tries, waittime)
         elif settings.LOCK_TYPE == 'DISABLED':
-            logging.warn("Danger zone: no locking has been configured!")
+            logging.warning("Danger zone: no locking has been configured!")
             return JensDumbLock(tries, waittime)
         else:  # Shouldn't ever happen, config is validated
             raise JensLockError("Unknown lock type '%s'", settings.LOCK_TYPE)
@@ -52,7 +52,7 @@ class JensLock(object):
 
     def renew(self, ttl=10):
         if ttl <= 0:
-            logging.warn("Invalid new TTL, resetting to 1 by default")
+            logging.warning("Invalid new TTL, resetting to 1 by default")
             ttl = 1
         logging.info("Setting '%s' lock TTL to %d secs...",
                      self.settings.LOCK_NAME, ttl)
