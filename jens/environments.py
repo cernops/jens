@@ -200,7 +200,8 @@ def read_environment_definition(environment):
     try:
         path = settings.ENV_METADATADIR + "/%s.yaml" % environment
         logging.debug("Reading environment from %s", path)
-        environment = yaml.safe_load(open(path, 'r'))
+        with open(path, 'r') as environment_fd:
+            environment = yaml.safe_load(environment_fd)
         for key in ('notifications',):
             if key not in environment:
                 raise JensEnvironmentsError("Missing '%s' in environment '%s'" %

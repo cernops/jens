@@ -27,4 +27,4 @@ jobs:
         git config --global user.name "Github actions"
     - name: Test
       run: |
-        python -W ignore:ResourceWarning -m unittest -v
+        python -m unittest -v

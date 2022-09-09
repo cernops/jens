@@ -31,7 +31,8 @@ def refresh_repositories(hints=None):
     settings = Settings()
     try:
         logging.debug("Reading metadata from %s", settings.REPO_METADATA)
-        definition = yaml.safe_load(open(settings.REPO_METADATA, 'r'))
+        with open(settings.REPO_METADATA, 'r') as definition_fh:
+            definition = yaml.safe_load(definition_fh)
     except Exception as error:  # fixme
         raise JensRepositoriesError("Unable to parse %s (%s)",
                                     settings.REPO_METADATA, error)
