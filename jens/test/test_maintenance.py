@@ -46,30 +46,30 @@ class MaintenanceTest(JensTestCase):
 
     def test_no_bares_dir(self):
         shutil.rmtree(self.settings.BAREDIR)
-        self.assertRaisesRegexp(JensError,
+        self.assertRaisesRegex(JensError,
             self.settings.BAREDIR, validate_directories)
 
     def test_no_cache_dir(self):
         shutil.rmtree(self.settings.CACHEDIR)
-        self.assertRaisesRegexp(JensError,
+        self.assertRaisesRegex(JensError,
             self.settings.CACHEDIR, validate_directories)
 
     def test_no_clones_dir(self):
         shutil.rmtree(self.settings.CLONEDIR)
-        self.assertRaisesRegexp(JensError,
+        self.assertRaisesRegex(JensError,
             self.settings.CLONEDIR, validate_directories)
 
     def test_no_environments_dir(self):
         shutil.rmtree(self.settings.ENVIRONMENTSDIR)
-        self.assertRaisesRegexp(JensError,
+        self.assertRaisesRegex(JensError,
             self.settings.ENVIRONMENTSDIR, validate_directories)
 
     def test_no_repometadata_dir(self):
         shutil.rmtree(self.settings.REPO_METADATADIR)
-        self.assertRaisesRegexp(JensError,
+        self.assertRaisesRegex(JensError,
             self.settings.REPO_METADATADIR, validate_directories)
 
     def test_no_envmetadata_dir(self):
         shutil.rmtree(self.settings.ENV_METADATADIR)
-        self.assertRaisesRegexp(JensError,
+        self.assertRaisesRegex(JensError,
             self.settings.ENV_METADATADIR, validate_directories)
