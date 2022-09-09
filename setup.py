@@ -14,7 +14,6 @@ setup(name='jens',
       author='Nacho Barrientos',
       author_email='nacho.barrientos@cern.ch',
       url='https://github.com/cernops/jens',
-      package_dir={'': 'src'},
       packages=[
           'jens', 'jens.webapps'
       ],
