@@ -356,6 +356,20 @@ are enqueued:
 INFO 2015-12-10T14:43:01.705468 - hostgroups/foo - '0000003c/56698165ac7909' added to the queue
 ```
 
+Requests can be authenticated using a [secret
+token](https://docs.gitlab.com/ee/user/project/integrations/webhooks.html#validate-payloads-by-using-a-secret-token)
+which has to be configured both on the Gitlab side (via the group or
+repository settings) and on the Jens side via:
+
+```ini
+[gitlabproducer]
+secret_token = your_token_here
+```
+
+If there's no token set (default) then all requests will be accepted
+regardless of the presence or the value of the header
+`X-Gitlab-Token`.
+
 ### Setting a timeout for Git operations via SSH
 
 To protect Jens from hanging indefinitely in case of a lack of response from
