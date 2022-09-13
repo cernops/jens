@@ -94,18 +94,14 @@ class JensTestCase(unittest.TestCase):
             destroy_sandbox(self.sandbox_path)
 
     def assertLogNoErrors(self):
-        try:
-            self.log
-        except AttributeError:
+        if not hasattr(self, 'log'):
             self.log = open("%s/jens-test.log" % self.settings.LOGDIR)
         for line in self.log.readlines():
             if re.match(r'.+ERROR.+', line):
                 raise AssertionError(line)
 
     def assertLogErrors(self, errorRegexp=None):
-        try:
-            self.log
-        except AttributeError:
+        if not hasattr(self, 'log'):
             self.log = open("%s/jens-test.log" % self.settings.LOGDIR)
         found = False
         regexp = r'.+ERROR.+'
