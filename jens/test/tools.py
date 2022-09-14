@@ -109,12 +109,13 @@ def init_repositories():
     yaml.dump(data, repositories_file, default_flow_style=False)
     repositories_file.close()
 
-def add_repository(partition, name, url):
+def add_repository(partition, name, url, local=True):
     settings = Settings()
     repositories_file = open(settings.REPO_METADATA, 'r')
     data = yaml.safe_load(repositories_file)
     repositories_file.close()
-    data['repositories'][partition][name] = 'file://' + url
+    data['repositories'][partition][name] = \
+        'file://' + url if local else url
     repositories_file = open(settings.REPO_METADATA, 'w+')
     yaml.dump(data, repositories_file, default_flow_style=False)
     repositories_file.close()

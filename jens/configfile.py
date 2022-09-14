@@ -31,4 +31,6 @@ lockdir = string(default='/run/lock/jens')
 queuedir = string(default='/var/spool/jens-update')
 [git]
 ssh_cmd_path = string(default=None)
+[gitlabproducer]
+fuzzy_url_prefixes = list(default=list())
 """

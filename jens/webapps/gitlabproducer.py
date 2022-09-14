@@ -9,6 +9,7 @@
 from __future__ import absolute_import
 import fcntl
 import json
+import re
 import logging
 import yaml
 
@@ -18,6 +19,25 @@ from jens.errors import JensError, JensMessagingError
 from jens.messaging import enqueue_hint
 
 app = Flask(__name__)
+
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/regex.rb#L262
+REPO_URL_NAMESPACE_AND_REPO = r'[-+\w.]+/[-+\w.]+$'
+
+def __git_url_match_fuzzy(hook_url, metadata_url):
+    settings = current_app.config['settings']
+    for prefix in settings.GITLAB_PRODUCER_FUZZY_URL_PREFIXES:
+        if hook_url.startswith(prefix):
+            hook_match = re.search(REPO_URL_NAMESPACE_AND_REPO, hook_url)
+            metadata_match = re.search(REPO_URL_NAMESPACE_AND_REPO, metadata_url)
+            if hook_match and metadata_match:
+                return hook_match.group(0) == metadata_match.group(0)
+    return False
+
+def git_url_match(hook_url, metadata_url):
+    """Compare the URL repository URLs. Return True if they're similar enough."""
+    if hook_url == metadata_url:
+        return True
+    return __git_url_match_fuzzy(hook_url, metadata_url)
 
 @app.route('/gitlab', methods=['POST'])
 def hello_gitlab():
@@ -44,7 +64,7 @@ def hello_gitlab():
 
         for _partition, _mapping in repositories.items():
             for _name, _url in _mapping.items():
-                if _url == url:
+                if git_url_match(url, _url):
                     partition, name = _partition, _name
 
         enqueue_hint(partition, name)
@@ -59,4 +79,3 @@ def hello_gitlab():
     except Exception as error:
         logging.error("Unexpected error (%s)" % repr(error))
         return 'Internal Server Error!', 500
-

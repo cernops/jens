@@ -356,6 +356,23 @@ are enqueued:
 INFO 2015-12-10T14:43:01.705468 - hostgroups/foo - '0000003c/56698165ac7909' added to the queue
 ```
 
+For the hints to be produced, the URL in the `git_ssh_url` field of
+the payload sent by Gitlab has to be an exact match to the URL of the
+repository configured in the metadata repositories (see setting
+`repositorymetadata`).
+
+However, there's a way to configure the Gitlab producer so a more
+lightweight way of matching is performed. When the configuration
+option `fuzzy_url_prefixes` (in section `[gitlabproducer]`) is set
+(list of strings), each element will be considered a valid prefix for
+the URL reported by Gitlab to start with and then only the
+`namespace/repo.git` part will be actually compared against the data
+in the metadata repositories. This stupid "feature" is just to work
+around a [Gitlab
+bug](https://gitlab.com/gitlab-org/gitlab/-/issues/373793) so it's
+likely you can simply forget about it. If you ever need this, use it
+carefully as bad values could lead to unexpected behaviour.
+
 ### Setting a timeout for Git operations via SSH
 
 To protect Jens from hanging indefinitely in case of a lack of response from
