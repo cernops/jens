@@ -24,7 +24,7 @@ class GitlabProducerTestCase(JensTestCase):
         self.site_bare = bare
         gitlabproducer.config['settings'] = Settings()
         self.app = gitlabproducer.test_client()
-   
+
     def test_get(self):
         self.assertEqual(self.app.get('/gitlab').status_code, 405)
 
@@ -42,10 +42,10 @@ class GitlabProducerTestCase(JensTestCase):
         reply = self.app.post('/gitlab', data=json.dumps({'repository':'wrong'}), content_type='application/json')
         self.assertEqual(reply.data.decode(), 'Malformed request')
         self.assertEqual(reply.status_code, 400)
-    
+
     def test_no_content_type(self):
         reply = self.app.post('/gitlab',
-                    data=json.dumps({'repository': 
+                    data=json.dumps({'repository':
                         {
                          'name': 'it-puppet-hostgroup-playground',
                          'git_ssh_url': 'http://git.cern.ch/cernpub/it-puppet-hostgroup-playground'
