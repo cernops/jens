@@ -15,7 +15,7 @@ class GitlabProducerTestCase(JensTestCase):
     def setUp(self):
         super().setUp()
         init_repositories()
-        (bare, user) = create_fake_repository(self.sandbox_path, ['qa'])
+        (bare, _) = create_fake_repository(self.sandbox_path, ['qa'])
         add_repository('common', 'site', bare)
         self.site_bare = bare
         gitlabproducer.config['settings'] = Settings()
