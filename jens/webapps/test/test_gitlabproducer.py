@@ -13,7 +13,7 @@ from jens.settings import Settings
 class GitlabProducerTestCase(JensTestCase):
 
     def setUp(self):
-        super(GitlabProducerTestCase, self).setUp()
+        super().setUp()
         init_repositories()
         (bare, user) = create_fake_repository(self.sandbox_path, ['qa'])
         add_repository('common', 'site', bare)
