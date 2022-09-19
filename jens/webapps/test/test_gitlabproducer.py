@@ -1,14 +1,10 @@
 from __future__ import absolute_import
 import json
-import unittest
-import os
-import yaml
 from mock import patch
-from dirq.queue import Queue, QueueLockError
 
 from jens.errors import JensMessagingError
 from jens.test.tools import init_repositories
-from jens.test.tools import add_repository, del_repository
+from jens.test.tools import add_repository
 from jens.test.tools import create_fake_repository
 from jens.test.testcases import JensTestCase
 from jens.webapps.gitlabproducer import app as gitlabproducer
