@@ -56,7 +56,7 @@ class GitlabProducerTestCase(JensTestCase):
                     data=json.dumps({'repository':
                         {
                          'name': 'it-puppet-site',
-                         'git_ssh_url': "file://%s" % self.site_bare
+                         'git_ssh_url': f"file://{self.site_bare}"
                         }
                     }))
         mock_eq.assert_called_once_with('common', 'site')
@@ -68,7 +68,7 @@ class GitlabProducerTestCase(JensTestCase):
                     data=json.dumps({'repository':
                         {
                          'name': 'it-puppet-site',
-                         'git_ssh_url': "file://%s" % self.site_bare
+                         'git_ssh_url': f"file://{self.site_bare}"
                         }
                     }))
         mock_eq.assert_called_once()
