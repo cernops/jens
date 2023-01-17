@@ -84,3 +84,62 @@ class GitlabProducerTestCase(JensTestCase):
                         }
                     }))
         self.assertEqual(reply.status_code, 404)
+
+    @patch('jens.webapps.gitlabproducer.enqueue_hint')
+    def test_secret_token_ignored_if_not_configured(self, mock_eq):
+        self.settings.GITLAB_PRODUCER_SECRET_TOKEN = None
+        _payload = {
+            'repository': {
+                'name': 'it-puppet-site',
+                'git_ssh_url': "file://%s" % self.site_bare
+            }
+        }
+        reply = self.app.post('/gitlab',
+                              content_type='application/json',
+                              headers={'X-Gitlab-Token': 'tokenvalue'},
+                              data=json.dumps(_payload))
+        mock_eq.assert_called_once_with('common', 'site')
+        self.assertEqual(reply.status_code, 200)
+
+    def test_wrong_secret_token(self):
+        self.settings.GITLAB_PRODUCER_SECRET_TOKEN = 'expected'
+        _payload = {
+            'repository': {
+                'name': 'it-puppet-site',
+                'git_ssh_url': "file://%s" % self.site_bare
+            }
+        }
+        reply = self.app.post('/gitlab',
+                              content_type='application/json',
+                              data=json.dumps(_payload))
+        self.assertEqual(reply.status_code, 401)
+
+    def test_secret_token_configured_wrong_token(self):
+        self.settings.GITLAB_PRODUCER_SECRET_TOKEN = 'expected'
+        _payload = {
+            'repository': {
+                'name': 'it-puppet-site',
+                'git_ssh_url': "file://%s" % self.site_bare
+            }
+        }
+        reply = self.app.post('/gitlab',
+                              content_type='application/json',
+                              headers={'X-Gitlab-Token': 'tokenvalue'},
+                              data=json.dumps(_payload))
+        self.assertEqual(reply.status_code, 401)
+
+    @patch('jens.webapps.gitlabproducer.enqueue_hint')
+    def test_secret_token_configured_good_token(self, mock_eq):
+        self.settings.GITLAB_PRODUCER_SECRET_TOKEN = 'expected'
+        _payload = {
+            'repository': {
+                'name': 'it-puppet-site',
+                'git_ssh_url': "file://%s" % self.site_bare
+            }
+        }
+        reply = self.app.post('/gitlab',
+                              content_type='application/json',
+                              headers={'X-Gitlab-Token': 'expected'},
+                              data=json.dumps(_payload))
+        mock_eq.assert_called_once_with('common', 'site')
+        self.assertEqual(reply.status_code, 200)

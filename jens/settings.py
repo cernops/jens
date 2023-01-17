@@ -76,6 +76,9 @@ class Settings(object):
         # [git]
         self.SSH_CMD_PATH = config["git"]["ssh_cmd_path"]
 
+        # [gitlabproducer]
+        self.GITLAB_PRODUCER_SECRET_TOKEN = config["gitlabproducer"]["secret_token"]
+
         if self.logfile:
             logging.basicConfig(
                 level=getattr(logging, self.DEBUG_LEVEL),

@@ -27,6 +27,13 @@ def hello_gitlab():
         payload = request.get_json(silent=True) or {}
         if payload:
             logging.debug('Incoming request with payload: %s' % str(payload))
+
+        if settings.GITLAB_PRODUCER_SECRET_TOKEN:
+            server_token = request.headers.get('X-Gitlab-Token')
+            if server_token != settings.GITLAB_PRODUCER_SECRET_TOKEN:
+                logging.error("Bad Gitlab Token (%s)", server_token)
+                return 'Unauthorised', 401
+
         try:
             url = payload['repository']['git_ssh_url']
         except (KeyError, TypeError) as error:
