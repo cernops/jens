@@ -67,8 +67,8 @@ modules and hostgroups available to generate environments. Apart from that,
 it's also used to define the paths to two special Git repositories containing
 what's called around here _the common Hiera data_ and the site manifest.
 
-This is all set up via two configuration keys: `repositorymetadata` (which is
-the directory containing a clone of the repository) and `repositorymetadatadir`
+This is all set up via two configuration keys: `repositorymetadatadir` (which is
+the directory containing a clone of the repository) and `repositorymetadata`
 (the file itself).
 
 The following is how a skeleton of the file looks like:
