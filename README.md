@@ -293,8 +293,9 @@ overrides:
     apache: dev34
 ```
 
-See ENVIRONMENTS.md for further details on this subject, including how to
-create configuration snapshots instead of dynamic environments :)
+See [ENVIRONMENTS.md](ENVIRONMENTS.md) for further details on this
+subject, including how to create configuration snapshots instead of
+dynamic environments :)
 
 ### "Golden" environments
 
