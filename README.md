@@ -153,11 +153,11 @@ type, operatingsystem and datacentre. It's useful to define very top-level keys.
 Working examples of both repositories (used during the installation tutorial
 later on) can be found in the following locations
 
-  * examples/example-repositories/common-hieradata
-  * examples/example-repositories/site
+  * `examples/example-repositories/common-hieradata`
+  * `examples/example-repositories/site`
 
 Also, an example of a Hiera hierarchy configuration file that matches this
-structure is available on examples/hiera.yaml.
+structure is available on `examples/hiera.yaml`.
 
 ### Modules: Code and data directories
 
@@ -276,7 +276,7 @@ path to a clone of the Git repository containing the environment definitions
 (configuration key `environmentsmetadatadir`). Each file with .yaml extension
 is a candidate environment and will be considered by Jens during the update cycle.
 
-An example of a very simple one can be located in examples/environments.
+An example of a very simple one can be located in `examples/environments`.
 
 That said, environments are mostly useful for development, for instance to
 validate the effect of a change in an specific module using the stable version
