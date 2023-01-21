@@ -96,7 +96,7 @@ is needed this file gets populated with the corresponding clone URLs of
 the repositories. Jens will add new elements to all the environments
 that are entitled to get them during the next run of jens-update.
 
-Another example is available in examples/repositories/repositories.yaml.
+Another example is available in `examples/repositories/repositories.yaml`.
 
 ### Common Hiera data and Site
 
