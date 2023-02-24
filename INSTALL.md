@@ -448,15 +448,15 @@ via a cronjob subsequent runs can't overlap. This is because of our deployment,
 detailed in the following paragraphs.
 
 Currently, the deployment at CERN relies on several Jens instances on
-top of different virtual machines running CentOS Stream 8 with
-different update frequencies writing the `clone` and `environments`
-data to the same NFS share but on different directories (whose name is
-based on the FQDN of the Jens node in question). One is the primary
-instance that runs jens-update every minute and the rest are satellite
-instances that do it less often (frequently enough to not to overload
-our internal Git service and to have a relatively up-to-date tree of
-environments that could be taken to the "HEAD" state quickly if a node
-had to take over).
+top of different virtual machines running CentOS Stream 8 and
+AlmaLinux 8 with different update frequencies writing the `clone` and
+`environments` data to the same NFS share but on different directories
+(whose name is based on the FQDN of the Jens node in question). One is
+the primary instance that runs jens-update every minute and the rest
+are satellite instances that do it less often (frequently enough to
+not to overload our internal Git service and to have a relatively
+up-to-date tree of environments that could be taken to the "HEAD"
+state quickly if a node had to take over).
 
 This allows a relatively quick but manual fail over mechanism in case of
 primary node failure, which consists of: electing a new primary node so the new
