@@ -83,7 +83,7 @@ class GitlabProducerTestCase(JensTestCase):
                          'git_ssh_url': "file://foo"
                         }
                     }))
-        self.assertEqual(reply.status_code, 404)
+        self.assertEqual(reply.status_code, 200)
 
     @patch('jens.webapps.gitlabproducer.enqueue_hint')
     def test_secret_token_ignored_if_not_configured(self, mock_eq):

@@ -62,7 +62,7 @@ def hello_gitlab():
         return 'Queue not accessible', 500
     except NameError as error:
         logging.error("'%s' couldn't be found in repositories" % (url))
-        return 'Repository not found', 404
+        return 'Repository not found', 200
     except Exception as error:
         logging.error("Unexpected error (%s)" % repr(error))
         return 'Internal Server Error!', 500
