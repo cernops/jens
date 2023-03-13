@@ -1,6 +1,6 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
-Version: 1.3.0
+Version: 1.4.0
 Release: 1%{?dist}
 
 License: GPLv3
@@ -74,6 +74,10 @@ install -p -m 644 systemd/jens-purge-queue.service %{buildroot}%{_unitdir}/jens-
 %{_unitdir}/jens-purge-queue.service
 
 %changelog
+* Mon Mar 13 2023 Nacho Barrientos <nacho.barrientos@cern.ch> - 1.4.0-1
+- Gitlab producer: Return 201 if the hint can be enqueued.
+- Gitlab producer: Return 200 if the hinted repository is not part of the library.
+
 * Tue Jan 17 2023 Nacho Barrientos <nacho.barrientos@cern.ch> - 1.3.0-1
 - Switch to semanting versioning.
 - Add support for Gitlab webhook tokens.
