@@ -55,7 +55,7 @@ def hello_gitlab():
                     partition, name = _partition, _name
 
         enqueue_hint(partition, name)
-        return 'OK'
+        return 'OK', 201
     except JensMessagingError as error:
         logging.error("%s/%s couldn't be added to the queue (%s)" %
             (partition, name, str(error)))

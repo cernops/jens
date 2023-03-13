@@ -60,7 +60,7 @@ class GitlabProducerTestCase(JensTestCase):
                         }
                     }))
         mock_eq.assert_called_once_with('common', 'site')
-        self.assertEqual(reply.status_code, 200)
+        self.assertEqual(reply.status_code, 201)
 
     @patch('jens.webapps.gitlabproducer.enqueue_hint', side_effect=JensMessagingError)
     def test_queue_error(self, mock_eq):
@@ -99,7 +99,7 @@ class GitlabProducerTestCase(JensTestCase):
                               headers={'X-Gitlab-Token': 'tokenvalue'},
                               data=json.dumps(_payload))
         mock_eq.assert_called_once_with('common', 'site')
-        self.assertEqual(reply.status_code, 200)
+        self.assertEqual(reply.status_code, 201)
 
     def test_wrong_secret_token(self):
         self.settings.GITLAB_PRODUCER_SECRET_TOKEN = 'expected'
@@ -142,4 +142,4 @@ class GitlabProducerTestCase(JensTestCase):
                               headers={'X-Gitlab-Token': 'expected'},
                               data=json.dumps(_payload))
         mock_eq.assert_called_once_with('common', 'site')
-        self.assertEqual(reply.status_code, 200)
+        self.assertEqual(reply.status_code, 201)
