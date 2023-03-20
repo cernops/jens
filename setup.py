@@ -3,6 +3,12 @@
 from __future__ import absolute_import
 from setuptools import setup
 
+try:
+    with open("requirements.txt", encoding='utf-8') as requirements:
+        INSTALL_REQUIRES = [req.strip() for req in requirements.readlines()]
+except OSError:
+    INSTALL_REQUIRES = None
+
 setup(name='jens',
       version='1.4.0',
       description='Jens is a Puppet modules/hostgroups librarian',
@@ -14,6 +20,7 @@ setup(name='jens',
       author='Nacho Barrientos',
       author_email='nacho.barrientos@cern.ch',
       url='https://github.com/cernops/jens',
+      install_requires=INSTALL_REQUIRES,
       packages=[
           'jens', 'jens.webapps'
       ],
