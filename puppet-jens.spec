@@ -10,10 +10,9 @@ Source: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 
-BuildRequires: systemd-rpm-macros, python3-devel
+BuildRequires: systemd-rpm-macros, python3-devel, epel-rpm-macros
 
-Requires: python3-configobj, git, python3-pyyaml, python3-dirq, python3-GitPython
-Requires: python3, python3-flask
+Requires: git
 Requires(pre): shadow-utils
 
 %description
