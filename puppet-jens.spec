@@ -24,11 +24,11 @@ based on files containing metadata.
 %setup -q
 
 %build
-CFLAGS="%{optflags}" %{__python3} setup.py build
+%py3_build
 
 %install
 %{__rm} -rf %{buildroot}
-%{__python3} setup.py install --skip-build --root %{buildroot}
+%py3_install
 %{__install} -D -p -m 644 conf/main.conf %{buildroot}/%{_sysconfdir}/jens/main.conf
 mkdir -m 755 -p %{buildroot}/%{_mandir}/man1
 %{__install} -D -p -m 644 man/* %{buildroot}/%{_mandir}/man1
