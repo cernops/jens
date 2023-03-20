@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from __future__ import absolute_import
-from distutils.core import setup
+from setuptools import setup
 
 setup(name='jens',
       version='1.3.0',
