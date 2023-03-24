@@ -10,7 +10,7 @@ import shutil
 import fcntl
 import os
 
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 from jens.maintenance import refresh_metadata
 from jens.git_wrapper import clone

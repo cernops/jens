@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 import json
-from mock import patch
+from unittest.mock import patch
 
 from jens.errors import JensMessagingError
 from jens.test.tools import init_repositories

@@ -25,7 +25,7 @@ from jens.test.tools import create_common_event
 
 from jens.test.testcases import JensTestCase
 
-from mock import Mock, patch
+from unittest.mock import Mock, patch
 
 class MessagingTest(JensTestCase):
     def setUp(self):

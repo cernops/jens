@@ -8,7 +8,7 @@
 from __future__ import absolute_import
 import os
 import jens.git_wrapper as git_wrapper
-from mock import patch
+from unittest.mock import patch
 from jens.test.testcases import JensTestCase
 from jens.errors import JensGitError
 from jens.test.tools import *
