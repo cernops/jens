@@ -5,7 +5,7 @@ Release: 1%{?dist}
 
 License: GPLv3
 Group: Applications/System
-URL: http://www.cern.ch/config
+URL: https://github.com/cernops/jens
 Source: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
