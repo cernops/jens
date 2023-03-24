@@ -86,10 +86,14 @@ class MessagingTest(JensTestCase):
         self.assertEqual(0, len(msgs))
 
     def test_fetch_all_messages_queuedir_cannot_be_created(self):
+        if os.getuid() == 0:
+            return
         self.settings.MESSAGING_QUEUEDIR = "/oops"
         self.assertRaises(JensMessagingError, _fetch_all_messages)
 
     def test_purge_queue_queuedir_does_not_exist(self):
+        if os.getuid() == 0:
+            return
         self.settings.MESSAGING_QUEUEDIR = "/oops"
         self.assertRaises(JensMessagingError, purge_queue)
 
