@@ -9,7 +9,7 @@ from __future__ import absolute_import
 import os
 import yaml
 import shutil
-import mock
+from unittest import mock
 
 from jens.messaging import count_pending_hints
 from jens.repos import refresh_repositories
