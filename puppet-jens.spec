@@ -11,6 +11,9 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildArch: noarch
 
 BuildRequires: systemd-rpm-macros, python3-devel, epel-rpm-macros
+# The following requires are for the %check
+BuildRequires: python3-pyyaml, python3-urllib3, python3-configobj
+BuildRequires: python3-dirq, python3-flask, python3-GitPython, git
 
 Requires: git
 Requires(pre): shadow-utils
@@ -49,6 +52,12 @@ install -m 0644 jens-tmpfiles.conf %{buildroot}%{_tmpfilesdir}/%{name}.conf
 mkdir -p %{buildroot}%{_unitdir}
 install -p -m 644 systemd/jens-update.service %{buildroot}%{_unitdir}/jens-update.service
 install -p -m 644 systemd/jens-purge-queue.service %{buildroot}%{_unitdir}/jens-purge-queue.service
+
+%check
+export EMAIL="noreply@cern.ch"
+export GIT_AUTHOR_NAME="RPM build"
+export GIT_COMMITTER_NAME="RPM build"
+%{__python3} -m unittest
 
 %clean
 %{__rm} -rf %{buildroot}
