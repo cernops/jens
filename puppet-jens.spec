@@ -1,6 +1,6 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
-Version: 1.4.0
+Version: 1.4.1
 Release: 1%{?dist}
 
 License: GPLv3
@@ -82,6 +82,12 @@ export GIT_COMMITTER_NAME="RPM build"
 %{_unitdir}/jens-purge-queue.service
 
 %changelog
+* Fri Mar 24 2023 Nacho Barrientos <nacho.barrientos@cern.ch> - 1.4.1-1
+- Switch to Setuptools.
+- Adapt SPEC file so the software builds in EL9.
+- Run unit tests too when the RPM is built.
+- Use built-in unittest.mock instead of mock.
+
 * Mon Mar 13 2023 Nacho Barrientos <nacho.barrientos@cern.ch> - 1.4.0-1
 - Gitlab producer: Return 201 if the hint can be enqueued.
 - Gitlab producer: Return 200 if the hinted repository is not part of the library.

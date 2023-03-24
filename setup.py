@@ -10,7 +10,7 @@ except OSError:
     INSTALL_REQUIRES = None
 
 setup(name='jens',
-      version='1.4.0',
+      version='1.4.1',
       description='Jens is a Puppet modules/hostgroups librarian',
       classifiers=[
           'Programming Language :: Python :: 3',
