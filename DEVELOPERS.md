@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- SPDX-FileCopyrightText: 2014-2023 CERN -->
 # How to run the testsuite
 
 Jens is shipped with a bunch of functional tests which live in

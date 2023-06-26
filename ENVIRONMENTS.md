@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- SPDX-FileCopyrightText: 2014-2023 CERN -->
 ## Disclaimer
 
 This documentation has been based on internal instructions available for CERN

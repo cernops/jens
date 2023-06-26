@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2014-2023 CERN
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 from __future__ import absolute_import
 import json
 from unittest.mock import patch
