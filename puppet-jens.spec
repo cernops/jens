@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2014-2023 CERN
+# SPDX-License-Identifier: GPL-3.0-or-later
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
 Version: 1.4.1

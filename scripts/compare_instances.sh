@@ -1,10 +1,6 @@
 #!/bin/bash
-# Copyright (C) 2023, CERN
-# This software is distributed under the terms of the GNU General Public
-# Licence version 3 (GPL Version 3), copied verbatim in the file "COPYING".
-# In applying this license, CERN does not waive the privileges and immunities
-# granted to it by virtue of its status as Intergovernmental Organization
-# or submit itself to any jurisdiction.
+# SPDX-FileCopyrightText: 2023 CERN
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
 # This script can compare two Jens instances by looking at
 # random environments, random modules and hostgroups. It makes sure

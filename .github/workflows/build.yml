@@ -3,6 +3,18 @@ name: Build
 on: [push]
 
 jobs:
+  license-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install REUSE
+        run: |
+          python -m pip install --upgrade pip
+          pip install reuse
+      - uses: actions/checkout@v2
+      - name: Run REUSE
+        run: |
+          reuse lint
+
   build:
     runs-on: ${{ matrix.os }}
 

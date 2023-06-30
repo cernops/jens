@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- SPDX-FileCopyrightText: 2014-2023 CERN -->
 [![](https://github.com/cernops/jens/workflows/Build/badge.svg)](https://github.com/cernops/jens/actions?query=workflow%3ABuild)
 
 ## What's Jens?
