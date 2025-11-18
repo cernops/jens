@@ -1,7 +1,7 @@
 Summary: Jens is a Puppet modules/hostgroups librarian
 Name: puppet-jens
 Version: 1.4.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 License: GPLv3
 Group: Applications/System
@@ -82,6 +82,9 @@ export GIT_COMMITTER_NAME="RPM build"
 %{_unitdir}/jens-purge-queue.service
 
 %changelog
+* Tue Nov 18 2025 Daniel Juarez <djuarezg@cern.ch> - 1.4.1-3
+- Fix race condition leaving lock files behind after git fetch operations.
+
 * Wed Jun 28 2023 Nacho Barrientos <nacho.barrientos@cern.ch> - 1.4.1-2
 - Rebuild for RHEL9.
 

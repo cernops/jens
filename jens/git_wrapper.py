@@ -61,6 +61,14 @@ def fetch(repository_path, prune=False):
     def fetch_exec(*args, **kwargs):
         repo = git.Repo(repository_path, odbt=git.GitCmdObjectDB)
         repo.remotes.origin.fetch(*args, **kwargs)
+        # You may face that the repo object leaves lock files behind after fetch, so we need to
+        # clean them up with a forced object delete
+        # Ref: https://github.com/gitpython-developers/GitPython/issues/718#issuecomment-360267779
+        # We suspect this is due to git cat-file calls in fetch implementation together with
+        # using GitCmdObjectDB as the object database
+        # Ref: https://gitpython.readthedocs.io/en/stable/tutorial.html#gitcmdobjectdb
+        # Using GitDB seems to fix the issue but we keep using GitCmdObjectDB for consistency
+        repo.__del__()
 
     fetch_exec(name='fetch', args=args, kwargs=kwargs)
 
