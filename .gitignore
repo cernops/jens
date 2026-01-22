@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2014-2023 CERN
+# SPDX-License-Identifier: CC0-1.0
 *.pyc
 *.swp
 build

@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- SPDX-FileCopyrightText: 2014-2023 CERN -->
 ## Building and installation
 
 Use the shipped spec file to create an RPM. The package will install an example

@@ -1,0 +1,16 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: jens
+Upstream-Contact: Nacho Barrientos <nacho.barrientos@cern.ch>
+Source: https://github.com/cernops/jens
+
+Files: examples/*
+Copyright: 2014-2023 CERN
+License: CC0-1.0
+
+Files: .github/*
+Copyright: 2014-2023 CERN
+License: GPL-3.0-or-later
+
+Files: systemd/*
+Copyright: 2014-2023 CERN
+License: GPL-3.0-or-later
