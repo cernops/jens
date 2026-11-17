@@ -17,7 +17,7 @@ from jens.deployment import DeploymentError, prepare, publish
 class DeploymentTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix='jens_deploy_test_')
-        self.addCleanup(self.temporary.cleanup)
+        self.addCleanup(self.cleanup)
         self.base = Path(self.temporary.name)
         self.root = self.base / 'deployments'
         self.code = self.repository('code', {
@@ -41,6 +41,15 @@ mode = ONDEMAND
 [messaging]
 queuedir = %s/do_not_consume
 ''' % (self.envs, self.metadata, self.metadata, self.base))
+
+    def cleanup(self):
+        # Older TemporaryDirectory implementations cannot reliably remove a
+        # sealed tree containing symlinks. Restore only real directory access;
+        # never follow links into another tree during cleanup.
+        for directory, _, _ in os.walk(self.base, followlinks=False):
+            path = Path(directory)
+            path.chmod(path.stat().st_mode | 0o700)
+        self.temporary.cleanup()
 
     def git(self, path, *args):
         return subprocess.check_output(['git', '-C', str(path)] + list(args),
