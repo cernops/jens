@@ -25,7 +25,7 @@ setup(name='jens',
           'jens', 'jens.webapps'
       ],
       scripts=[
-          'bin/jens-update', 'bin/jens-stats',
+          'bin/jens-update', 'bin/jens-stats', 'bin/jens-deploy',
           'bin/jens-gitlab-producer-runner', 'bin/jens-purge-queue',
           'bin/jens-reset', 'bin/jens-gc', 'bin/jens-config'
       ],

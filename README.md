@@ -473,3 +473,8 @@ See COPYING
 
 Jens was named after [M. Jens Vigen](https://twitter.com/jensvigen), CERN's
 librarian.
+
+## Experimental staged deployments
+
+See [DEPLOYMENTS.md](DEPLOYMENTS.md) for the opt-in preparation and publication
+prototype, its isolated tests, and the required Puppet reader coordination.

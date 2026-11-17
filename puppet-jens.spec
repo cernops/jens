@@ -68,7 +68,7 @@ export GIT_COMMITTER_NAME="RPM build"
 
 %files
 %defattr(-,root,root,-)
-%doc README.md ENVIRONMENTS.md examples
+%doc README.md ENVIRONMENTS.md DEPLOYMENTS.md examples
 %{_mandir}/man1/*
 /var/www/jens/*
 %{python3_sitelib}/*
